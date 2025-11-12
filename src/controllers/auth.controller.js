@@ -113,7 +113,7 @@ class AuthController {
 
       if (token) {
         const decoded = this.authService.verifyToken(token);
-        const exp = decoded.exp * 1000; 
+        const exp = decoded.exp * 1000;
         const ttl = Math.floor((exp - Date.now()) / 1000);
         if (ttl > 0) {
           await redisClient.setEx(`bl_${token}`, ttl, "blacklisted");

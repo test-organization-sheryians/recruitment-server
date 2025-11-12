@@ -4,7 +4,8 @@ import { llm } from "../services/ai.service.js";
 export async function answerEvaluator(state) {
   const { questionsData, questions, answers } = state;
 
-  const questionsList = questionsData?.questions || questionsData || questions || [];
+  const questionsList =
+    questionsData?.questions || questionsData || questions || [];
 
   // Validate inputs
   if (!questionsList.length) {
@@ -38,8 +39,13 @@ Evaluate the user's answer based on the question and provide a score and feedbac
 
     try {
       const res = await llm.invoke(evaluationPrompt);
-      const responseText = typeof res === "string" ? res : (res && res.content ? res.content : JSON.stringify(res));
-      
+      const responseText =
+        typeof res === "string"
+          ? res
+          : res && res.content
+          ? res.content
+          : JSON.stringify(res);
+
       const evaluation = JSON.parse(responseText);
       evaluations.push(evaluation);
     } catch (error) {

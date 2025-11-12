@@ -10,7 +10,7 @@ class MongoUserRepository extends IUserRepository {
       const saveUser = await user.save();
       return saveUser;
     } catch (error) {
-      console.error('Error creating user:', error);
+      console.error("Error creating user:", error);
       throw new AppError(`Failed to create user: ${error.message}`, 500, error);
     }
   }
@@ -32,7 +32,7 @@ class MongoUserRepository extends IUserRepository {
         {
           $unwind: {
             path: "$role",
-            preserveNullAndEmptyArrays: false,
+            preserveNullAndEmptyArrays: true,
           },
         },
         {
@@ -97,7 +97,7 @@ class MongoUserRepository extends IUserRepository {
       { $match: { _id: objectId } },
       {
         $lookup: {
-          from: "roles", 
+          from: "roles",
           localField: "roleId",
           foreignField: "_id",
           as: "role",
