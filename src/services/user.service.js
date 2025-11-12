@@ -24,6 +24,8 @@ class UserService {
 
   async register(userData) {
     const cacheKey = `user:email:${userData.email}`;
+    console.log(`cachekey ------>   ${cacheKey}`);
+
     let existingUser = await this.cacheRepository.get(cacheKey);
     if (!existingUser) {
       existingUser = await this.userRepository.findUserByEmail(userData.email);
@@ -34,9 +36,9 @@ class UserService {
 
     const user = await this.userRepository.createUser(userData);
 
-    const userWithRole = await this.userRepository.findUserById(user._id)
-    if(!userWithRole) {
-      throw new AppError("Failed to create user", 500)
+    const userWithRole = await this.userRepository.findUserById(user._id);
+    if (!userWithRole) {
+      throw new AppError("Failed to create user", 500);
     }
 
     await this.cacheRepository.set(
@@ -73,9 +75,13 @@ class UserService {
     );
     // ...........................refresh token........................
 
-    const refreshToken = jwt.sign({ id: userWithRole._id }, config.REFRESH_SECRET, {
-      expiresIn: config.REFRESH_EXPIRES_IN,
-    });
+    const refreshToken = jwt.sign(
+      { id: userWithRole._id },
+      config.REFRESH_SECRET,
+      {
+        expiresIn: config.REFRESH_EXPIRES_IN,
+      }
+    );
     await this.saveRefreshToken(userWithRole._id, refreshToken);
 
     return {
@@ -119,12 +125,20 @@ class UserService {
 
     const userWithRole = await this.userRepository.findUserById(user._id);
 
-    if(!userWithRole) {
-      throw new AppError("Failed to authenticate user", 500)
+    if (!userWithRole) {
+      throw new AppError("Failed to authenticate user", 500);
     }
 
-    await this.cacheRepository.set(`user:id:${userWithRole._id}`, userWithRole, 3600);
-    await this.cacheRepository.set(`user:email:${userWithRole.email}`, userWithRole, 3600);
+    await this.cacheRepository.set(
+      `user:id:${userWithRole._id}`,
+      userWithRole,
+      3600
+    );
+    await this.cacheRepository.set(
+      `user:email:${userWithRole.email}`,
+      userWithRole,
+      3600
+    );
 
     const token = jwt.sign(
       {
@@ -141,9 +155,13 @@ class UserService {
       }
     );
 
-    const refreshToken = jwt.sign({ id: userWithRole._id }, config.REFRESH_SECRET, {
-      expiresIn: config.REFRESH_EXPIRES_IN,
-    });
+    const refreshToken = jwt.sign(
+      { id: userWithRole._id },
+      config.REFRESH_SECRET,
+      {
+        expiresIn: config.REFRESH_EXPIRES_IN,
+      }
+    );
     await this.saveRefreshToken(userWithRole._id, refreshToken);
 
     return {
