@@ -7,14 +7,14 @@ import { authorize } from "../middlewares/role.middleware.js";
 
 const router = express.Router();
 
-router.post("/", authenticateJWT, authorize("skills", "create"), validateRequest(createSkillSchema), skillController.createSkill);
+router.post("/", authenticateJWT, authorize("admin"), validateRequest(createSkillSchema), skillController.createSkill);
 
-router.get("/", authenticateJWT, authorize("skills", "read"), skillController.getAllSkills);
+router.get("/", authenticateJWT, authorize("admin"), skillController.getAllSkills);
 
-router.get("/:id", authenticateJWT, authorize("skills", "read"), skillController.getSkill);
+router.get("/:id", authenticateJWT, authorize("admin"), skillController.getSkill);
 
-router.put("/:id", authenticateJWT, authorize("skills", "update"), validateRequest(updateSkillSchema), skillController.updateSkill);
+router.put("/:id", authenticateJWT, authorize("admin"), validateRequest(updateSkillSchema), skillController.updateSkill);
 
-router.delete("/:id", authenticateJWT, authorize("skills", "delete"), skillController.deleteSkill);
+router.delete("/:id", authenticateJWT, authorize("admin"), skillController.deleteSkill);
 
 export default router;

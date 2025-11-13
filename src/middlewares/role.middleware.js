@@ -7,7 +7,7 @@ export const authorize = (role) => {
   return async (req, res, next) => {
     try {
       const hasPermission = await authService.hasPermission(
-        req.body.userId,
+        req.userId, // changed it to req.userId from req.body.userId as userId is already attached to req thru middleware
         role
       );
       console.log('haspermission',hasPermission);
