@@ -1,10 +1,11 @@
 import JobRole from "../models/jobRole.model.js";
 import { AppError } from "../utils/errors.js";
-import MongoJobApplicationRepository from "../repositories/implementations/mongoJobApplicationRepository.js";
+import MongoApplicationRespository from "../repositories/implementations/mongoJobApplication.js";
+
 
 class JobApplicationService {
   constructor() {
-    this.jobAppRepo = new MongoJobApplicationRepository();
+    this.jobAppRepo = new MongoApplicationRespository();
   }
 
   async applyForJob({ jobId, candidateId, message, resumeFile }) {
