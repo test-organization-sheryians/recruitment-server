@@ -15,7 +15,7 @@ const router = express.Router();
 router.post(
   "/", 
   authenticateJWT, 
-  authorize("jobs", "create"), 
+  authorize("admin"), 
   createJobRoleValidator,
   jobRoleController.createJobRole
 );
@@ -23,7 +23,7 @@ router.post(
 router.get(
   "/", 
   authenticateJWT, 
-  authorize("jobs", "read"), 
+  authorize("admin"), 
   filterJobRolesValidator,
   jobRoleController.getAllJobRoles
 );
@@ -31,7 +31,7 @@ router.get(
 router.get(
   "/:id", 
   authenticateJWT, 
-  authorize("jobs", "read"), 
+  authorize("admin"), 
   jobRoleController.getJobRoleById
 );
 
