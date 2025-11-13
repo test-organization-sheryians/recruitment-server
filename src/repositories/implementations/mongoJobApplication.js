@@ -70,7 +70,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
   async getAllApplications() {
     return await jobAppModel
       .find()
-      .populate("userId", "name email")
+      .populate("candidateId", "name email")
       .populate("jobId", "title");
   }
   async filterApplications(status) {
@@ -79,7 +79,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
 
     return await jobAppModel
       .find(filter)
-      .populate("userId", "name email")
+      .populate("candidateId", "name email")
       .populate("jobId", "title");
   }
 >>>>>>> b2141d8 (feat:implement the all routes and controller)

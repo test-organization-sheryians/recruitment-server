@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import crypto from "crypto";
 
 const jobApplicationSchema = new mongoose.Schema(
 <<<<<<< HEAD
@@ -73,5 +74,15 @@ const jobApplicationSchema = new mongoose.Schema(
 
 // Prevent same user from applying twice for same job
 jobApplicationSchema.index({ jobId: 1, candidateId: 1 }, { unique: true });
+
+// jobApplicationSchema.pre("save", function (next) {
+//   if (!this.duplicateHash) {
+//     const hash = crypto.createHash("sha256");
+//     hash.update(`${this.candidateId}_${this.jobId}`).digest("hex");
+
+//     this.duplicateHash = hash;
+//   }
+//   next();
+// });
 
 export default mongoose.model("JobApplication", jobApplicationSchema);

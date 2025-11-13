@@ -35,7 +35,7 @@ class JobApplicationService {
     return application;
   }
 
-  async updateApplicationStatus(candidateId, status) {
+  async updateApplicationStatus(applicationId, status) {
     return await this.jobAppRepo.updateApplicationStatus(applicationId, status);
   }
 
