@@ -33,6 +33,14 @@ class MongoApplicationRespository extends IJobApplicationRepository {
                                     throw new AppError("Failed to update application status", 500);
                         }
             }
+            async getJobApplication() {
+                        try {
+                                    const jobApplication = await jobAppModel.find();
+                                    return jobApplication;
+                        } catch (error) {
+                                    throw new AppError("Application not found ")
+                        }
+            }
 }
 
 export default MongoApplicationRespository;
