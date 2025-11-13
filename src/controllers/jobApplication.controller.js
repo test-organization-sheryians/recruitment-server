@@ -3,8 +3,6 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { AppError } from "../utils/errors.js";
 
 export const applyForJob = asyncHandler(async (req, res, next) => {
-  return console.log("req  ----> ", req.body);
-
   const { jobId } = req.params;
   const candidateId = req.userId;
   const { message } = req.body;
