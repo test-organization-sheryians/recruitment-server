@@ -9,7 +9,7 @@ const router = express.Router();
 // Apply for a job
 router.post("/:jobId", authenticateJWT, applyForJob);
 
-// Admin can see all aplications
+// Admin can see a ll aplications
 // router.get(
 //   "/",
 //   authenticateJWT,
