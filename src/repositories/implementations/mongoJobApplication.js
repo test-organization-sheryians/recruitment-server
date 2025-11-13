@@ -1,5 +1,5 @@
-import jobAppModel from "../../models/jobCategory.model";
-import { AppError } from "../../utils/errors";
+import jobAppModel from "../../models/jobCategory.model.js";
+import { AppError } from "../../utils/errors.js";
 import IJobApplicationRepository from "../contracts/IJobApplicationRepository.js";
 
 class MongoApplicationRespository extends IJobApplicationRepository {

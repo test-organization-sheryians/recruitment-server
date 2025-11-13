@@ -2,61 +2,31 @@ import JobRole from "../models/jobRole.model.js";
 import { AppError } from "../utils/errors.js";
 import MongoApplicationRespository from "../repositories/implementations/mongoJobApplication.js";
 
-
 class JobApplicationService {
   constructor() {
     this.jobAppRepo = new MongoApplicationRespository();
   }
 
   async applyForJob({ jobId, candidateId, message, resumeFile }) {
-    const job = await JobRole.findById(jobId);
-    if (!job) throw new AppError("Job not found.", 404);
-
-    if (new Date(job.expiry) < new Date()) {
-      throw new AppError("Job has expired.", 400);
+    const isjobExist = this.jobAppRepo.findByUserAndJob(candidateId, jobId);
+    if (!isjobExist) {
+      throw new AppError("Already applied", 409);
     }
-
-    const existingApp = await this.jobAppRepo.findByUserAndJob(
-      candidateId,
-      jobId
-    );
-    if (existingApp) {
-      throw new AppError("You have already applied for this job.", 400);
-    }
-
-    const newApp = await this.jobAppRepo.createJobApplication({
+    const application = await this.jobAppRepo.createJobApplication({
       jobId,
       candidateId,
       message,
-      resumeUrl: resumeFile.path || resumeFile.url,
+      resumeFile,
     });
-
-    return newApp;
+    return application;
   }
 
-  async getAllApplications() {
-    return await this.jobAppRepo.getAllApplications();
-  }
-
-  async updateApplicationStatus(applicationId, status) {
-    const validStatuses = [
-      "applied",
-      "shortlisted",
-      "rejected",
-      "forwarded",
-      "interview",
-      "hired",
-    ];
-
-    if (!validStatuses.includes(status)) {
-      throw new AppError("Invalid status value.", 400);
-    }
-
-    return await this.jobAppRepo.updateApplicationStatus(applicationId, status);
-  }
-
-  async filterApplications(status) {
-    return await this.jobAppRepo.filterApplications(status);
+  async updateApplicationStatus(candidateId, status) {
+    const application = await this.jobAppRepo.updateApplicationStatus(
+      candidateId,
+      status
+    );
+    return application;
   }
 }
 

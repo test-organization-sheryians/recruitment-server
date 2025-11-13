@@ -1,25 +1,20 @@
 import express from "express";
-import uploadResume from "../middlewares/uploadResume";
-import { authorize } from "../middlewares/role.middleware";
-import { authenticateJWT } from "../middlewares/auth.middleware";
+// import uploadResume from "../middlewares/uploadResume.js";
+import { authorize } from "../middlewares/role.middleware.js";
+import { authenticateJWT } from "../middlewares/auth.middleware.js";
+import { applyForJob } from "../controllers/jobApplication.controller.js";
 
-const router = express.Router;
+const router = express.Router();
 
 // Apply for a job
-router.post(
-  "/apply/:jobId",
-  authenticateJWT,
-  authorize,
-  uploadResume.single("resume"),
-  jobApplicationController.applyForJob
-);
+router.post("/:jobId", authenticateJWT, authorize, applyForJob);
 
 // Admin can see all aplications
-router.get(
-  "/",
-  authenticateJWT,
-  authorize("jobApplication", "view"),
-  jobApplicationController.getAllApplications
-);
+// router.get(
+//   "/",
+//   authenticateJWT,
+//   authorize("jobApplication", "view"),
+//   jobApplicationController.getAllApplications
+// );
 
 export default router;

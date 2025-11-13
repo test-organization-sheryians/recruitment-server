@@ -1,8 +1,10 @@
 import jobApplicationService from "../services/jobApplication.service.js";
-import { asyncHandler } from "../utils/asyncHandler";
-import { AppError } from "../utils/errors";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { AppError } from "../utils/errors.js";
 
 export const applyForJob = asyncHandler(async (req, res, next) => {
+  return console.log("req  ----> ", req.body);
+
   const { jobId } = req.params;
   const candidateId = req.userId;
   const { message } = req.body;
@@ -14,6 +16,10 @@ export const applyForJob = asyncHandler(async (req, res, next) => {
     message,
     resumeFile,
   });
+
+  if (!application) {
+    return next(new AppError("Application not found", 404));
+  }
 
   res.status(201).json({
     success: true,

@@ -5,13 +5,14 @@ const authService = new AuthService();
 
 export const authorize = (resource, action) => {
   return async (req, res, next) => {
+    // return console.log("req  ----> ", req.userId);
     try {
       const hasPermission = await authService.hasPermission(
         req.userId,
         resource,
         action
       );
-      console.log('haspermission',hasPermission);
+      console.log("haspermission", hasPermission);
       if (!hasPermission) {
         throw new AppError("Access denied. Insufficient permissions.", 403);
       }
