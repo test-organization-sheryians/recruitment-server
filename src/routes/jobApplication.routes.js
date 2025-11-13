@@ -7,7 +7,7 @@ import { applyForJob } from "../controllers/jobApplication.controller.js";
 const router = express.Router();
 
 // Apply for a job
-router.post("/:jobId", authenticateJWT, authorize, applyForJob);
+router.post("/:jobId", authenticateJWT, applyForJob);
 
 // Admin can see all aplications
 // router.get(

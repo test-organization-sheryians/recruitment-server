@@ -8,8 +8,10 @@ class JobApplicationService {
   }
 
   async applyForJob({ jobId, candidateId, message, resumeFile }) {
-    const isjobExist = this.jobAppRepo.findByUserAndJob(candidateId, jobId);
-    if (!isjobExist) {
+
+    const isjobExist = await this.jobAppRepo.findByUserAndJob(candidateId, jobId);
+
+    if (isjobExist) {
       throw new AppError("Already applied", 409);
     }
     const application = await this.jobAppRepo.createJobApplication({
