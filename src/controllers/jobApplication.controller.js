@@ -2,13 +2,6 @@ import jobApplicationService from "../services/jobApplication.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { AppError } from "../utils/errors.js";
 
-<<<<<<< HEAD
-export const applyForJob = asyncHandler(async (req, res, next) => {
-  const { jobId } = req.params;
-  const candidateId = req.userId;
-  const { message } = req.body;
-  const resumeFile = req.file;
-=======
 class JobApplicationController {
   applyForJob = asyncHandler(async (req, res, next) => {
     // return console.log("USER ID===>", req.userId);
@@ -16,7 +9,6 @@ class JobApplicationController {
     const { jobId } = req.params;
     const candidateId = req.userId;
     const { message, resumeUrl } = req.body;
->>>>>>> b2141d8 (feat:implement the all routes and controller)
 
     if (!resumeUrl) throw new AppError("Resume URL is required", 400);
 

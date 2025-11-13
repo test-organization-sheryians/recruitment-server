@@ -5,17 +5,12 @@ import jobApplicationController from "../controllers/jobApplication.controller.j
 
 const router = express.Router();
 
-// Apply for a job
-<<<<<<< HEAD
-router.post("/:jobId", authenticateJWT, applyForJob);
-=======
 router.post(
   "/:jobId",
   authenticateJWT,
   authorize("jobApplication", "create"),
   jobApplicationController.applyForJob
 );
->>>>>>> b2141d8 (feat:implement the all routes and controller)
 
 router.get(
   "/",
