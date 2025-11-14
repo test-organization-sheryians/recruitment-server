@@ -7,28 +7,34 @@ class JobApplicationService {
     this.jobAppRepo = new MongoApplicationRespository();
   }
 
-  async applyForJob({ jobId, candidateId, message, resumeFile }) {
+  async applyForJob({ jobId, candidateId, message, resumeUrl }) {
+    const job = await JobRole.findById(jobId);
+    if (!job) throw new AppError("Job not found", 404);
 
-    const isjobExist = await this.jobAppRepo.findByUserAndJob(candidateId, jobId);
-
-    if (isjobExist) {
-      throw new AppError("Already applied", 409);
+    if (new Date(job.expiry) < new Date()) {
+      throw new AppError("Job has expired", 400);
     }
+
+    const exists = await this.jobAppRepo.findByUserAndJob(candidateId, jobId);
+    if (exists) throw new AppError("Already applied", 409);
     const application = await this.jobAppRepo.createJobApplication({
       jobId,
       candidateId,
       message,
-      resumeFile,
+      resumeUrl,
     });
     return application;
   }
 
-  async updateApplicationStatus(candidateId, status) {
-    const application = await this.jobAppRepo.updateApplicationStatus(
-      candidateId,
-      status
-    );
-    return application;
+  async updateApplicationStatus(applicationId, status) {
+    return await this.jobAppRepo.updateApplicationStatus(applicationId, status);
+  }
+
+  async getAllApplications() {
+    return await this.jobAppRepo.getAllApplications();
+  }
+  async filterApplications(status) {
+    return await this.jobAppRepo.filterApplications(status);
   }
 }
 
