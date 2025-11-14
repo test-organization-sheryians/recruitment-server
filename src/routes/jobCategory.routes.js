@@ -13,26 +13,26 @@ router.use(authenticateJWT);
 
 router.post(
   "/",
-  authorize("jobs", "create"),
+  authorize("admin"),
   createJobCategoryValidator,
   jobCategoryController.create
-);
+); 
 
-router.get("/", jobCategoryController.list);
+router.get("/", jobCategoryController.list); 
 
-router.get("/:id", jobCategoryController.get);
+router.get("/:id", jobCategoryController.get);  
 
 router.put(
   "/:id",
-  authorize("jobs", "update"),
+  authorize("admin"),
   updateJobCategoryValidator,
   jobCategoryController.update
-);
+); 
 
 router.delete(
   "/:id",
-  authorize("jobs", "delete"),
+  authorize("admin"),
   jobCategoryController.delete
-);
+); 
 
 export default router;

@@ -3,13 +3,12 @@ import { AppError } from "../utils/errors.js";
 
 const authService = new AuthService();
 
-export const authorize = (resource, action) => {
+export const authorize = (role) => {
   return async (req, res, next) => {
     try {
       const hasPermission = await authService.hasPermission(
-        req.userId,
-        resource,
-        action
+        req.userId, // changed it to req.userId from req.body.userId as userId is already attached to req thru middleware
+        role
       );
       console.log('haspermission',hasPermission);
       if (!hasPermission) {
