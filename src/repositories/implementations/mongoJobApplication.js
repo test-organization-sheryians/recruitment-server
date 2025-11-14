@@ -35,32 +35,6 @@ class MongoApplicationRespository extends IJobApplicationRepository {
     }
   }
 
-<<<<<<< HEAD
-            }
-            async updateApplicationStatus(candidateId, status) {
-                        try {
-                                    const updateApplicationStatus = await jobAppModel.findByIdAndUpdate(
-                                                candidateId,
-                                                { status },
-                                                { new: true, runValidators: true }
-                                    );
-                                    if (!updateApplicationStatus) {
-                                                throw new AppError("Application not found", 404);
-                                    }
-                                    return updateApplicationStatus;
-                        } catch (error) {
-                                    throw new AppError("Failed to update application status", 500);
-                        }
-            }
-            async getJobApplication() {
-                        try {
-                                    const jobApplication = await jobAppModel.find();
-                                    return jobApplication;
-                        } catch (error) {
-                                    throw new AppError("Application not found ")
-                        }
-            }
-=======
   async getAllApplications() {
     return await jobAppModel
       .find()
@@ -76,7 +50,6 @@ class MongoApplicationRespository extends IJobApplicationRepository {
       .populate("candidateId", "name email")
       .populate("jobId", "title");
   }
->>>>>>> sumitsharma/JobApplication
 }
 
 export default MongoApplicationRespository;
