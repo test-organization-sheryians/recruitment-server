@@ -3,10 +3,6 @@ class IJobApplicationRepository {
     throw new Error("Method not implemented");
   }
 
-  async getJobApplication() {
-    throw new Error("Method not implemented")
-  }
-
   async findByUserAndJob(userId, jobId) {
     throw new Error("Method not implemented");
   }
@@ -14,7 +10,12 @@ class IJobApplicationRepository {
   async updateApplicationStatus(applicationId, status) {
     throw new Error("Method not implemented");
   }
-
+  async getAllApplications() {
+    throw new Error("Method not implemented");
+  }
+  async filterApplications(status) {
+    throw new Error("Method not implemented");
+  }
 }
 
 export default IJobApplicationRepository;
