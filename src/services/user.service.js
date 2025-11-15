@@ -107,27 +107,31 @@ class UserService {
   }
 
   async login({ email, password }) {
-    const cacheKey = `user:email:${email}`;
-    let cached = await this.cacheRepository.get(cacheKey);
+    console.log(email);
+    // const cacheKey = `user:email:${email}`;
+    // let cached = await this.cacheRepository.get(cacheKey);
 
-    let user;
-    if (cached) {
-      user = JSON.parse(cached); // we have to check this one as sometimes while hitting login it uses json.parse and on some cases it uses user= cached !! 
-      // user = cached
-       // changed this because there the cached was already an json due to which it was getting converted into [object object]
-      // Re-attach comparePassword method
-      user.comparePassword = async (pwd) => bcrypt.compare(pwd, user.password);
-    } else {
-      user = await this.userRepository.findUserByEmail(email);
-      if (!user) throw new AppError("Invalid credentials", 401);
+    // let user;
+    // if (cached) {
+    //   user = JSON.parse(cached); // we have to check this one as sometimes while hitting login it uses json.parse and on some cases it uses user= cached !! 
+    //   // user = cached
+    //    // changed this because there the cached was already an json due to which it was getting converted into [object object]
+    //   // Re-attach comparePassword method
+    //   user.comparePassword = async (pwd) => bcrypt.compare(pwd, user.password);
+    // } else {
+    let user = await this.userRepository.findUserByEmail(email);
+    console.log(user);
+    if (!user) throw new AppError("Invalid credentials", 401);
 
-      const safeUser = this._getSafeUserPayload(user);
-      await this.cacheRepository.set(
-        cacheKey,
-        JSON.stringify({ ...safeUser, password: user.password }),
-        3600
-      );
-    }
+    // const safeUser = this._getSafeUserPayload(user);
+    // await this.cacheRepository.set(
+    //   cacheKey,
+    //   JSON.stringify({ ...safeUser, password: user.password }),
+    //   3600
+    // );
+    // }
+
+    user.comparePassword = async (pwd) => bcrypt.compare(pwd, user.password);
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) throw new AppError("Invalid credentials", 401);
@@ -137,9 +141,9 @@ class UserService {
 
     const safeUser = this._getSafeUserPayload(userWithRole);
 
-    await this.cacheRepository.set(`user:id:${userWithRole._id}`, JSON.stringify(safeUser), 3600);
-    await this.cacheRepository.set(`user:email:${userWithRole.email}`, JSON.stringify(safeUser), 3600);
- 
+    // await this.cacheRepository.set(`user:id:${userWithRole._id}`, JSON.stringify(safeUser), 3600);
+    // await this.cacheRepository.set(`user:email:${userWithRole.email}`, JSON.stringify(safeUser), 3600);
+
     const jwtPayload = { id: userWithRole._id };
     if (userWithRole.role) {
       jwtPayload.role = this._getSafeRole(userWithRole);
