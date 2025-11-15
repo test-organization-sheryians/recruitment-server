@@ -2,14 +2,14 @@ import ExperienceService from "../services/experience.service.js";
 
 class ExperienceController {
   constructor() {
-    this.experienceService = new ExperienceService(); 
+    this.experienceService = new ExperienceService();
   }
 
   // Create experience
-  createExperience = async (req, res) => {
+  createExperience = async (req, res, next) => {
     try {
       const data = req.body;
-      const result = await this.experienceService.addExperience(data); 
+      const result = await this.experienceService.addExperience(data);
 
       res.status(201).json({
         success: true,
@@ -17,56 +17,47 @@ class ExperienceController {
         data: result,
       });
     } catch (error) {
-      res.status(400).json({
-        success: false,
-        error: error.message,
-      });
+      next(error)
     }
   };
 
   // Get all experiences of a candidate
-  getCandidateExperiences = async (req, res) => {
+  getCandidateExperiences = async (req, res, next) => {
     try {
       const { candidateId } = req.params;
 
       const result =
-        await this.experienceService.getCandidateExperiences(candidateId); 
+        await this.experienceService.getCandidateExperiences(candidateId);
 
       res.status(200).json({
         success: true,
         data: result,
       });
     } catch (error) {
-      res.status(400).json({
-        success: false,
-        error: error.message,
-      });
+      next(error)
     }
   };
 
   // Get single experience
-  getSingleExperience = async (req, res) => {
+  getSingleExperience = async (req, res, next) => {
     try {
       const { id } = req.params;
-      const result = await this.experienceService.getSingleExperience(id); 
+      const result = await this.experienceService.getSingleExperience(id);
 
       res.status(200).json({
         success: true,
         data: result,
       });
     } catch (error) {
-      res.status(404).json({
-        success: false,
-        error: error.message,
-      });
+      next(error)
     }
   };
 
   // Update experience
-  updateExperience = async (req, res) => {
+  updateExperience = async (req, res, next) => {
     try {
-      const  candidateId  = req.params.id;
-     
+      const candidateId = req.params.id;
+
       const data = req.body;
 
       const result = await this.experienceService.updateExperience(candidateId, data); // FIXED
@@ -77,15 +68,12 @@ class ExperienceController {
         data: result,
       });
     } catch (error) {
-      res.status(400).json({
-        success: false,
-        error: error.message,
-      });
+      next(error)
     }
   };
 
   // Delete experience
-  deleteExperience = async (req, res) => {
+  deleteExperience = async (req, res, next) => {
     try {
       const { id } = req.params;
 
@@ -96,10 +84,7 @@ class ExperienceController {
         message: "Experience deleted successfully",
       });
     } catch (error) {
-      res.status(404).json({
-        success: false,
-        error: error.message,
-      });
+      next(error)
     }
   };
 }
