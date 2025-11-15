@@ -36,19 +36,80 @@ class MongoApplicationRespository extends IJobApplicationRepository {
   }
 
   async getAllApplications() {
-    return await jobAppModel
-      .find()
-      .populate("candidateId", "name email")
-      .populate("jobId", "title");
+    return await jobAppModel.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "candidateId",
+          foreignField: "_id",
+          as: "candidate",
+        },
+      },
+      { $unwind: "$candidate" },
+      {
+        $lookup: {
+          from: "jobroles",
+          localField: "jobId",
+          foreignField: "_id",
+          as: "job",
+        },
+      },
+      { $unwind: "$job" },
+      {
+        $project: {
+          _id: 1,
+          status: 1,
+          message: 1,
+          resumeUrl: 1,
+          appliedAt: 1,
+          "candidate.firstName": 1,
+          "candidate.lastName": 1,
+          "candidate.email": 1,
+          "job.title": 1,
+          "job.requiredExperience": 1,
+        },
+      },
+    ]);
   }
   async filterApplications(status) {
     const filter = {};
     if (status) filter.status = status;
 
-    return await jobAppModel
-      .find(filter)
-      .populate("candidateId", "name email")
-      .populate("jobId", "title");
+    return await jobAppModel.aggregate([
+      { $match: { status } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "candidateId",
+          foreignField: "_id",
+          as: "candidate",
+        },
+      },
+      { $unwind: "$candidate" },
+      {
+        $lookup: {
+          from: "jobroles",
+          localField: "jobId",
+          foreignField: "_id",
+          as: "job",
+        },
+      },
+      { $unwind: "$job" },
+      {
+        $project: {
+          _id: 1,
+          status: 1,
+          message: 1,
+          resumeUrl: 1,
+          appliedAt: 1,
+          "candidate.firstName": 1,
+          "candidate.lastName": 1,
+          "candidate.email": 1,
+          "job.title": 1,
+          "job.requiredExperience": 1,
+        },
+      },
+    ]);
   }
 }
 
