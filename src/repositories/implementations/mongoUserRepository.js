@@ -32,7 +32,7 @@ class MongoUserRepository extends IUserRepository {
         {
           $unwind: {
             path: "$role",
-            preserveNullAndEmptyArrays: false,
+            preserveNullAndEmptyArrays: true,
           },
         },
         {
@@ -57,17 +57,6 @@ class MongoUserRepository extends IUserRepository {
               _id: "$role._id",
               name: "$role.name",
               description: "$role.description",
-            },
-            permissions: {
-              $map: {
-                input: "$permissions",
-                as: "p",
-                in: {
-                  _id: "$$p._id",
-                  resource: "$$p.resource",
-                  action: "$$p.action",
-                },
-              },
             },
           },
         },
