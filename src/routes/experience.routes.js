@@ -16,7 +16,7 @@ router.get("/:candidateId", expereniceController.getCandidateExperiences)
 router.get("/single/:id", expereniceController.getSingleExperience)
 
 // update experience
-router.put("/:id", expereniceController.updateExperience)
+router.patch("/:id", expereniceController.updateExperience)
 
 // Delete experience
 router.delete("/:id", expereniceController.deleteExperience)

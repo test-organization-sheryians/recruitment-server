@@ -65,10 +65,11 @@ class ExperienceController {
   // Update experience
   updateExperience = async (req, res) => {
     try {
-      const { id } = req.params;
+      const  candidateId  = req.params.id;
+     
       const data = req.body;
 
-      const result = await this.experienceService.updateExperience(id, data); // FIXED
+      const result = await this.experienceService.updateExperience(candidateId, data); // FIXED
 
       res.status(200).json({
         success: true,

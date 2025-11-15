@@ -10,16 +10,16 @@ class MongoExperienceRepository extends IExperienceRepository {
       const experience = await Experience.create(data);
       return experience;
     } catch (error) {
-      throw new AppError("Error creating experience: " + error.message);
+      throw new AppError("Error creating experience: " + error.message,500);
     }
   }
 
-  async getExperiencesByCandidate(candidateId) {
+  async findByCandidateId(candidateId) {
     try {
       return await Experience.find({ candidateId })
         .sort({ startDate: -1 });
     } catch (error) {
-      throw new AppError("Error fetching experiences: " + error.message);
+      throw new AppError("Error fetching experiences: " + error.message,500);
     }
   }
 
@@ -27,7 +27,7 @@ class MongoExperienceRepository extends IExperienceRepository {
     try {
       return await Experience.findById(id);
     } catch (error) {
-      throw new AppError("Error fetching experience by ID: " + error.message);
+      throw new AppError("Error fetching experience by ID: " + error.message,500);
     }
   }
 
@@ -38,7 +38,7 @@ class MongoExperienceRepository extends IExperienceRepository {
       });
       return updated;
     } catch (error) {
-      throw new AppError("Error updating experience: " + error.message);
+      throw new AppError("Error updating experience: " + error.message,500);
     }
   }
 
@@ -46,7 +46,7 @@ class MongoExperienceRepository extends IExperienceRepository {
     try {
       return await Experience.findByIdAndDelete(id);
     } catch (error) {
-      throw new AppError("Error deleting experience: " + error.message);
+      throw new AppError("Error deleting experience: " + error.message,500);
     }
   }
 }

@@ -1,7 +1,7 @@
 import { AppError } from "../../utils/errors.js";
 
 export class IExperienceRepository {
-  create(data) {
+  createExperience(data) {
     throw new AppError("Mehtod not implemented: create");
   }
 
@@ -9,15 +9,15 @@ export class IExperienceRepository {
     throw new AppError("Method not implemented: findByCandidate");
   }
 
-  findById(id) {
+  getExperienceById(id) {
     throw new AppError("Method not implemented: findById");
   }
 
-  updateById(id, data) {
+  updateExperience(id, data) {
     throw new AppError("Method not implemented: updateById");
   }
 
-  deleteById(id) {
+  deleteExperience(id) {
     throw new AppError("Method not implemented: deleteById");
   }
 }
