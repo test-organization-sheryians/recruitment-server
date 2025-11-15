@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 // CREATE Experience Schema
-export const experienceCreateSchema = Joi.object({
+export const experienceCreateValidator = Joi.object({
             candidateId: Joi.string()
                         .required()
                         .pattern(/^[0-9a-fA-F]{24}$/)
@@ -35,7 +35,7 @@ export const experienceCreateSchema = Joi.object({
 
 
 
-export const experienceUpdateSchema = Joi.object({
+export const experienceUpdateValidator = Joi.object({
             candidateId: Joi.string()
                         .pattern(/^[0-9a-fA-F]{24}$/)
                         .messages({
