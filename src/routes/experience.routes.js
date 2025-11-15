@@ -1,6 +1,6 @@
 import express from "express";
 import ExperienceController from "../controllers/experience.controller.js";
-import { experienceCreateValidator, experienceUpdateSchema } from "../middlewares/validators/experience.validator.js";
+import { experienceCreateValidator, experienceUpdateValidator } from "../middlewares/validators/experience.validator.js";
 import validateRequest from "../middlewares/validators/validateRequest.js";
 
 const router = express.Router();
@@ -18,7 +18,7 @@ router.get("/:candidateId", expereniceController.getCandidateExperiences)
 router.get("/single/:id", expereniceController.getSingleExperience)
 
 // update experience
-router.patch("/:id", validateRequest(experienceUpdateSchema), expereniceController.updateExperience)
+router.patch("/:id", validateRequest(experienceUpdateValidator), expereniceController.updateExperience)
 
 // Delete experience
 router.delete("/:id", expereniceController.deleteExperience)
