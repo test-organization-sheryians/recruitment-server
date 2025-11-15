@@ -62,4 +62,4 @@ jobRoleSchema.index({ clientId: 1, title: 1 });
 jobRoleSchema.index({ category: 1, expiry: 1 });
 jobRoleSchema.index({ createdAt: -1 });
 
-export default mongoose.model("JobRole", jobRoleSchema);
+export default mongoose.model("JobRoles", jobRoleSchema);

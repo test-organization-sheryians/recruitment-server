@@ -5,12 +5,12 @@ const jobApplicationSchema = new mongoose.Schema(
   {
     jobId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "JobRole",
+      ref: "JobRoles",
       required: true,
     },
     candidateId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Users",
       required: true,
     },
     resumeUrl: {
@@ -39,7 +39,7 @@ const jobApplicationSchema = new mongoose.Schema(
 );
 
 // Prevent same user from applying twice for same job
-jobApplicationSchema.index({ jobId: 1, candidateId: 1 }, { unique: true });
+jobApplicationSchema.index({ jobId: 1, candidateId: 1 });
 
 // jobApplicationSchema.pre("save", function (next) {
 //   if (!this.duplicateHash) {
@@ -50,5 +50,5 @@ jobApplicationSchema.index({ jobId: 1, candidateId: 1 }, { unique: true });
 //   }
 //   next();
 // });
-
-export default mongoose.model("JobApplication", jobApplicationSchema);
+export default mongoose.model("JobApplication", jobApplicationSchema, "jobapplications");
+// export default mongoose.model("JobApplication", jobApplicationSchema);
