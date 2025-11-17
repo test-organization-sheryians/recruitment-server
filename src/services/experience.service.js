@@ -12,9 +12,6 @@ class ExperienceService {
     if (data.isCurrent) {
       data.endDate = null;
     }
-    // if(!data.company || !data.title || !data.startDate ){
-    //     throw new AppError ("Company, title, and startDate are required")
-    // }
     return await this.experienceRepository.createExperience(data);
   }
 
