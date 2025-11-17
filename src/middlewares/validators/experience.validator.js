@@ -2,13 +2,6 @@ import Joi from "joi";
 
 // CREATE Experience Schema
 export const experienceCreateValidator = Joi.object({
-            candidateId: Joi.string()
-                        .required()
-                        .pattern(/^[0-9a-fA-F]{24}$/)
-                        .messages({
-                                    "string.pattern.base": "candidateId must be a valid MongoDB ObjectId"
-                        }),
-
             company: Joi.string().trim().required(),
             title: Joi.string().trim().required(),
             location: Joi.string().trim().optional(),
