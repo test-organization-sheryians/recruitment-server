@@ -9,7 +9,11 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
       const profile = new CandidateProfile(profileData);
       return await profile.save();
     } catch (error) {
-      throw new AppError(`Failed to create profile: ${error.message}`, 500, error);
+      throw new AppError(
+        `Failed to create profile: ${error.message}`,
+        500,
+        error
+      );
     }
   }
 
@@ -20,14 +24,6 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
 
       const [profile] = await CandidateProfile.aggregate([
         { $match: { userId: new mongoose.Types.ObjectId(userId) } },
-        {
-          $lookup: {
-            from: "skills",
-            localField: "skills",
-            foreignField: "_id",
-            as: "skills",
-          },
-        },
         {
           $lookup: {
             from: "users",
@@ -46,8 +42,7 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
           $project: {
             _id: 1,
             userId: 1,
-            tenantId: 1,
-            // experienceId: 1,
+            experienceId: 1,
             availability: 1,
             linkedinUrl: 1,
             githubUrl: 1,
@@ -55,17 +50,7 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
             highestEducation: 1,
             resumeFile: 1,
             resumeScore: 1,
-            skills: {
-              $map: {
-                input: "$skills",
-                as: "skill",
-                in: {
-                  _id: "$$skill._id",
-                  name: "$$skill.name",
-                  category: "$$skill.category",
-                },
-              },
-            },
+            skills: 1,
             user: {
               _id: "$user._id",
               firstName: "$user.firstName",
@@ -80,7 +65,11 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
       ]);
       return profile || null;
     } catch (error) {
-      throw new AppError(`Failed to find profile: ${error.message}`, 500, error);
+      throw new AppError(
+        `Failed to find profile: ${error.message}`,
+        500,
+        error
+      );
     }
   }
 
@@ -89,17 +78,30 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
       const isValid = mongoose.Types.ObjectId.isValid(id);
       if (!isValid) return null;
 
-      return await CandidateProfile.findById(id).populate("skills", "name category").populate("userId", "firstName lastName email");
+      return await CandidateProfile.findById(id)
+        .populate("skills", "name category")
+        .populate("userId", "firstName lastName email");
     } catch (error) {
-      throw new AppError(`Failed to find profile: ${error.message}`, 500, error);
+      throw new AppError(
+        `Failed to find profile: ${error.message}`,
+        500,
+        error
+      );
     }
   }
 
   async updateProfile(id, profileData) {
     try {
-      return await CandidateProfile.findByIdAndUpdate(id, profileData, { new: true });
+      return await CandidateProfile.findByIdAndUpdate(id, 
+        {$set: profileData},
+        { new: true,}
+      );
     } catch (error) {
-      throw new AppError(`Failed to update profile: ${error.message}`, 500, error);
+      throw new AppError(
+        `Failed to update profile: ${error.message}`,
+        500,
+        error
+      );
     }
   }
 
@@ -107,21 +109,22 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
     try {
       return await CandidateProfile.findByIdAndDelete(id);
     } catch (error) {
-      throw new AppError(`Failed to delete profile: ${error.message}`, 500, error);
+      throw new AppError(
+        `Failed to delete profile: ${error.message}`,
+        500,
+        error
+      );
     }
   }
 
   async addSkills(userId, skillIds) {
     try {
-      const objectIds = skillIds.map(id => new mongoose.Types.ObjectId(id));
+      const objectIds = skillIds.map((id) => new mongoose.Types.ObjectId(id));
       const profile = await CandidateProfile.findOneAndUpdate(
         { userId: new mongoose.Types.ObjectId(userId) },
         { $addToSet: { skills: { $each: objectIds } } },
         { new: true }
       );
-      if (profile) {
-        await profile.populate('skills', 'name category');
-      }
       return profile;
     } catch (error) {
       throw new AppError(`Failed to add skills: ${error.message}`, 500, error);
@@ -135,12 +138,13 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
         { $pull: { skills: new mongoose.Types.ObjectId(skillId) } },
         { new: true }
       );
-      if (profile) {
-        await profile.populate('skills', 'name category');
-      }
       return profile;
     } catch (error) {
-      throw new AppError(`Failed to remove skill: ${error.message}`, 500, error);
+      throw new AppError(
+        `Failed to remove skill: ${error.message}`,
+        500,
+        error
+      );
     }
   }
 
@@ -152,7 +156,11 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
         { new: true }
       );
     } catch (error) {
-      throw new AppError(`Failed to upload resume: ${error.message}`, 500, error);
+      throw new AppError(
+        `Failed to upload resume: ${error.message}`,
+        500,
+        error
+      );
     }
   }
 
@@ -164,7 +172,11 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
         { new: true }
       );
     } catch (error) {
-      throw new AppError(`Failed to delete resume: ${error.message}`, 500, error);
+      throw new AppError(
+        `Failed to delete resume: ${error.message}`,
+        500,
+        error
+      );
     }
   }
 
@@ -176,10 +188,13 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
         { new: true }
       );
     } catch (error) {
-      throw new AppError(`Failed to update availability: ${error.message}`, 500, error);
+      throw new AppError(
+        `Failed to update availability: ${error.message}`,
+        500,
+        error
+      );
     }
   }
-
 }
 
 export default MongoCandidateProfileRepository;

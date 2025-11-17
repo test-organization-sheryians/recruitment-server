@@ -59,8 +59,16 @@ class CandidateProfileService {
   }
 
   async addSkills(userId, skillIds) {
+    // Normalize skillIds to array
+    if (typeof skillIds === "string") {
+      skillIds = [skillIds];
+    }
+
     if (!Array.isArray(skillIds) || skillIds.length === 0) {
-      throw new AppError("skillIds must be a non-empty array", 400);
+      throw new AppError(
+        "skillIds must be a non-empty array or a valid skillId string",
+        400
+      );
     }
 
     for (const skillId of skillIds) {

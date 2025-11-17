@@ -14,7 +14,7 @@ import aiRoutes from './routes/ai.routes.js'
 import { corsOptions } from "./config/corsOptions.js";
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ type: (req) => req.method !== 'DELETE' }));
 app.use(cookieParser());
 app.use(cors(corsOptions));
 

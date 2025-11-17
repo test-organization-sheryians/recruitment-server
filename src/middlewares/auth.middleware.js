@@ -19,7 +19,7 @@ export const authenticateJWT = async (req, res, next) => {
 
     const decoded = authService.verifyToken(token);
     req.userId = decoded.id;
-    req.roleId = decoded.role._id;
+    req.role = decoded.role;
     next();
   } catch (error) {
     next(new AppError("Invalid or expired token.", 401));
