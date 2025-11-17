@@ -13,7 +13,8 @@ const CandidateProfileSchema = new Schema(
     experienceId: {
       type: Schema.Types.ObjectId,
       ref: "Experience",
-      unique: true,
+      // unique: true,
+      // sparse: true,
     },
 
     availability: {
