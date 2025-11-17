@@ -2,14 +2,17 @@ import ExperienceService from "../services/experience.service.js";
 
 class ExperienceController {
   constructor() {
-    this.experienceService = new ExperienceService(); 
+    this.experienceService = new ExperienceService();
   }
 
   // Create experience
   createExperience = async (req, res) => {
     try {
-      const data = req.body;
-      const result = await this.experienceService.addExperience(data); 
+      const experienceData = {
+        ...req.body,
+        candidateId: req.userId
+      }
+      const result = await this.experienceService.addExperience(experienceData);
 
       res.status(201).json({
         success: true,
@@ -30,7 +33,7 @@ class ExperienceController {
       const { candidateId } = req.params;
 
       const result =
-        await this.experienceService.getCandidateExperiences(candidateId); 
+        await this.experienceService.getCandidateExperiences(candidateId);
 
       res.status(200).json({
         success: true,
@@ -48,7 +51,7 @@ class ExperienceController {
   getSingleExperience = async (req, res) => {
     try {
       const { id } = req.params;
-      const result = await this.experienceService.getSingleExperience(id); 
+      const result = await this.experienceService.getSingleExperience(id);
 
       res.status(200).json({
         success: true,
@@ -65,8 +68,8 @@ class ExperienceController {
   // Update experience
   updateExperience = async (req, res) => {
     try {
-      const  candidateId  = req.params.id;
-     
+      const candidateId = req.params.id;
+
       const data = req.body;
 
       const result = await this.experienceService.updateExperience(candidateId, data); // FIXED
