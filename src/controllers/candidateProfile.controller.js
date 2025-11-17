@@ -7,11 +7,11 @@ class CandidateProfileController {
   }
 
   createProfile = async (req, res) => {
-    const profileData = req.body;
-    // Assume tenantId comes from auth middleware or req
-    profileData.tenantId = req.tenantId || profileData.tenantId;
+    const profileData = { ...req.body, userId: req.userId };
 
-    const profile = await this.candidateProfileService.createProfile(profileData);
+    const profile = await this.candidateProfileService.createProfile(
+      profileData
+    );
     res.status(201).json({
       success: true,
       data: profile,
@@ -20,9 +20,9 @@ class CandidateProfileController {
   };
 
   getProfile = async (req, res) => {
-    const { userId } = req.params;
-    const tenantId = req.tenantId;
-    const profile = await this.candidateProfileService.getProfileByUserId(userId, tenantId);
+    const profile = await this.candidateProfileService.getProfileByUserId(
+      req.userId
+    );
     res.status(200).json({
       success: true,
       data: profile,
@@ -30,9 +30,11 @@ class CandidateProfileController {
   };
 
   updateProfile = async (req, res) => {
-    const { userId } = req.params;
     const profileData = req.body;
-    const profile = await this.candidateProfileService.updateProfile(userId, profileData);
+    const profile = await this.candidateProfileService.updateProfile(
+      req.userId,
+      profileData
+    );
     res.status(200).json({
       success: true,
       data: profile,
@@ -41,8 +43,7 @@ class CandidateProfileController {
   };
 
   deleteProfile = async (req, res) => {
-    const { userId } = req.params;
-    await this.candidateProfileService.deleteProfile(userId);
+    await this.candidateProfileService.deleteProfile(req.userId);
     res.status(200).json({
       success: true,
       message: "Profile deleted successfully",
@@ -50,9 +51,11 @@ class CandidateProfileController {
   };
 
   addSkills = async (req, res) => {
-    const { userId } = req.params;
     const { skillIds } = req.body;
-    const profile = await this.candidateProfileService.addSkills(userId, skillIds);
+    const profile = await this.candidateProfileService.addSkills(
+      req.userId,
+      skillIds
+    );
     res.status(200).json({
       success: true,
       data: profile,
@@ -61,8 +64,11 @@ class CandidateProfileController {
   };
 
   removeSkill = async (req, res) => {
-    const { userId, skillId } = req.params;
-    const profile = await this.candidateProfileService.removeSkill(userId, skillId);
+    const { skillId } = req.params;
+    const profile = await this.candidateProfileService.removeSkill(
+      req.userId,
+      skillId
+    );
     res.status(200).json({
       success: true,
       data: profile,
@@ -71,9 +77,12 @@ class CandidateProfileController {
   };
 
   uploadResume = async (req, res) => {
-    const { userId } = req.params;
     const { resumeFile, resumeScore } = req.body;
-    const profile = await this.candidateProfileService.uploadResume(userId, resumeFile, resumeScore);
+    const profile = await this.candidateProfileService.uploadResume(
+      req.userId,
+      resumeFile,
+      resumeScore
+    );
     res.status(200).json({
       success: true,
       data: profile,
@@ -82,8 +91,7 @@ class CandidateProfileController {
   };
 
   deleteResume = async (req, res) => {
-    const { userId } = req.params;
-    const profile = await this.candidateProfileService.deleteResume(userId);
+    const profile = await this.candidateProfileService.deleteResume(req.userId);
     res.status(200).json({
       success: true,
       data: profile,
@@ -92,9 +100,11 @@ class CandidateProfileController {
   };
 
   updateAvailability = async (req, res) => {
-    const { userId } = req.params;
     const { availability } = req.body;
-    const profile = await this.candidateProfileService.updateAvailability(userId, availability);
+    const profile = await this.candidateProfileService.updateAvailability(
+      req.userId,
+      availability
+    );
     res.status(200).json({
       success: true,
       data: profile,
@@ -105,20 +115,24 @@ class CandidateProfileController {
   filterBySkills = async (req, res) => {
     const { skills } = req.query;
     // const tenantId = req.tenantId; // Assume from middleware
-    const skillArray = skills ? skills.split(',').filter(skill => skill.trim() !== '') : [];
+    const skillArray = skills
+      ? skills.split(",").filter((skill) => skill.trim() !== "")
+      : [];
     if (skillArray.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Skills query parameter is required and must contain at least one valid skill",
+        message:
+          "Skills query parameter is required and must contain at least one valid skill",
       });
     }
-    const profiles = await this.candidateProfileService.getProfilesBySkills(skillArray);
+    const profiles = await this.candidateProfileService.getProfilesBySkills(
+      skillArray
+    );
     res.status(200).json({
       success: true,
       data: profiles,
     });
   };
-
 }
 
 export default CandidateProfileController;

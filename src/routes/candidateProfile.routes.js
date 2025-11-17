@@ -1,32 +1,35 @@
 import express from "express";
 import CandidateProfileController from "../controllers/candidateProfile.controller.js";
+import { authenticateJWT } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
 const candidateProfileController = new CandidateProfileController();
 
-router.post("/", candidateProfileController.createProfile);
+router.post("/", authenticateJWT, candidateProfileController.createProfile);
 
-router.get("/:userId", candidateProfileController.getProfile);
+router.get("/", authenticateJWT, candidateProfileController.getProfile);
 
-router.put("/:userId", candidateProfileController.updateProfile);
-router.patch("/:userId", candidateProfileController.updateProfile);
+router.put("/", authenticateJWT, candidateProfileController.updateProfile);
+router.patch("/", authenticateJWT, candidateProfileController.updateProfile);
 
-router.delete("/:userId", candidateProfileController.deleteProfile);
+router.delete("/", authenticateJWT, candidateProfileController.deleteProfile);
 
-router.post("/:userId/skills", candidateProfileController.addSkills);
+router.post("/skills", authenticateJWT, candidateProfileController.addSkills);
 
 router.delete(
-  "/:userId/skills/:skillId",
+  "/skills/:skillId",
+  authenticateJWT,
   candidateProfileController.removeSkill
 );
 
-router.post("/:userId/resume", candidateProfileController.uploadResume);
+router.post("/resume", authenticateJWT, candidateProfileController.uploadResume);
 
-router.delete("/:userId/resume", candidateProfileController.deleteResume);
+router.delete("/resume", authenticateJWT, candidateProfileController.deleteResume);
 
 router.patch(
-  "/:userId/availability",
+  "/availability",
+  authenticateJWT,
   candidateProfileController.updateAvailability
 );
 

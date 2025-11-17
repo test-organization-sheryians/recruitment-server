@@ -13,8 +13,8 @@ const CandidateProfileSchema = new Schema(
     experienceId: {
       type: Schema.Types.ObjectId,
       ref: "Experience",
-      // unique: true,
-      // sparse: true,
+      unique: true,
+      sparse: true,
     },
 
     availability: {
@@ -42,8 +42,7 @@ const CandidateProfileSchema = new Schema(
   }
 );
 
-CandidateProfileSchema.index({ tenantId: 1, userId: 1 }, { unique: true });
-CandidateProfileSchema.index({ tenantId: 1, status: 1 });
+CandidateProfileSchema.index({  userId: 1 }, { unique: true });
 CandidateProfileSchema.index({ resumeScore: -1 });
 CandidateProfileSchema.index({ skills: 1 });
 
