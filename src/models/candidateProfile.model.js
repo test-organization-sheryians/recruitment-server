@@ -44,13 +44,6 @@ const CandidateProfileSchema = new Schema(
 CandidateProfileSchema.index({ userId: 1 }, { unique: true });
 CandidateProfileSchema.index({ resumeScore: -1 });
 CandidateProfileSchema.index({ skills: 1 });
-CandidateProfileSchema.index(
-  { experienceId: 1 },
-  {
-    unique: true,
-    partialFilterExpression: { experienceId: { $exists: true } },
-  }
-);
 
 export const CandidateProfile = mongoose.model(
   "CandidateProfile",
