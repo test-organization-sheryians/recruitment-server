@@ -174,14 +174,6 @@ class CandidateProfileService {
       availability
     );
   }
-
-  // async getProfilesBySkills(skills) {
-  //   if (!skills || !Array.isArray(skills) || skills.length === 0) {
-  //     throw new AppError("Skills array is required", 400);
-  //   }
-
-  //   return await this.candidateProfileRepository.getProfilesBySkills(skills);
-  // }
 }
 
 export default CandidateProfileService;

@@ -57,7 +57,7 @@ class CandidateProfileController {
   });
 
   addSkills = asyncHandler(async (req, res) => {
-    const {userId} = req.params;
+    const { userId } = req.params;
     const skillIds = req.body.skills;
 
     const profile = await this.candidateProfileService.addSkills(
@@ -119,27 +119,6 @@ class CandidateProfileController {
       message: "Availability updated successfully",
     });
   });
-
-  // filterBySkills = asyncHandler(async (req, res) => {
-  //   const { skills } = req.query;
-  //   const skillArray = skills
-  //     ? skills.split(",").filter((skill) => skill.trim() !== "")
-  //     : [];
-  //   if (skillArray.length === 0) {
-  //     return res.status(400).json({
-  //       success: false,
-  //       message:
-  //         "Skills query parameter is required and must contain at least one valid skill",
-  //     });
-  //   }
-  //   const profiles = await this.candidateProfileService.getProfilesBySkills(
-  //     skillArray
-  //   );
-  //   res.status(200).json({
-  //     success: true,
-  //     data: profiles,
-  //   });
-  // });
 }
 
 export default CandidateProfileController;
