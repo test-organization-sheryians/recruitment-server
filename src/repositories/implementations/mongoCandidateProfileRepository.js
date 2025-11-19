@@ -42,6 +42,7 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
           $project: {
             _id: 1,
             userId: 1,
+
             experienceId: 1,
             availability: 1,
             linkedinUrl: 1,
@@ -92,9 +93,10 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
 
   async updateProfile(id, profileData) {
     try {
-      return await CandidateProfile.findByIdAndUpdate(id, 
-        {$set: profileData},
-        { new: true,}
+      return await CandidateProfile.findByIdAndUpdate(
+        id,
+        { $set: profileData },
+        { new: true }
       );
     } catch (error) {
       throw new AppError(
@@ -125,6 +127,7 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
         { $addToSet: { skills: { $each: objectIds } } },
         { new: true }
       );
+
       return profile;
     } catch (error) {
       throw new AppError(`Failed to add skills: ${error.message}`, 500, error);
@@ -138,6 +141,7 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
         { $pull: { skills: new mongoose.Types.ObjectId(skillId) } },
         { new: true }
       );
+
       return profile;
     } catch (error) {
       throw new AppError(

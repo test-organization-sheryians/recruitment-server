@@ -13,7 +13,12 @@ const router = express.Router();
 
 const candidateProfileController = new CandidateProfileController();
 
-router.post("/", authenticateJWT, createProfileValidator, candidateProfileController.createProfile);
+router.post(
+  "/",
+  authenticateJWT,
+  createProfileValidator,
+  candidateProfileController.createProfile
+);
 
 router.get("/get-profile", authenticateJWT, candidateProfileController.getProfile);
 
@@ -22,6 +27,7 @@ router.patch("/update-profile", authenticateJWT, updateProfileValidator, candida
 router.delete("/delete-profile", authenticateJWT, candidateProfileController.deleteProfile);
 
 router.post("/add-skills", authenticateJWT, addSkillsValidator, candidateProfileController.addSkills);
+
 router.delete(
   "/remove-skill/:skillId",
   authenticateJWT,
@@ -29,7 +35,6 @@ router.delete(
 );
 
 router.post("/upload-resume", authenticateJWT, uploadResumeValidator, candidateProfileController.uploadResume);
-
 router.delete("/delete-resume", authenticateJWT, candidateProfileController.deleteResume);
 
 router.patch(
@@ -40,3 +45,4 @@ router.patch(
 );
 
 export default router;
+
