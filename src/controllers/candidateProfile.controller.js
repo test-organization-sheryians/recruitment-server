@@ -6,7 +6,7 @@ class CandidateProfileController {
     this.candidateProfileService = new CandidateProfileService();
   }
 
-  createProfile = async (req, res) => {
+  createProfile = asyncHandler(async (req, res) => {
     const profileData = { ...req.body, userId: req.userId };
 
     const profile = await this.candidateProfileService.createProfile(
@@ -17,9 +17,9 @@ class CandidateProfileController {
       data: profile,
       message: "Profile created successfully",
     });
-  };
+  });
 
-  getProfile = async (req, res) => {
+  getProfile = asyncHandler(async (req, res) => {
     const profile = await this.candidateProfileService.getProfileByUserId(
       req.userId
     );
@@ -27,9 +27,9 @@ class CandidateProfileController {
       success: true,
       data: profile,
     });
-  };
+  });
 
-  updateProfile = async (req, res) => {
+  updateProfile = asyncHandler(async (req, res) => {
     const profileData = req.body;
     const profile = await this.candidateProfileService.updateProfile(
       req.userId,
@@ -40,20 +40,28 @@ class CandidateProfileController {
       data: profile,
       message: "Profile updated successfully",
     });
-  };
+  });
 
-  deleteProfile = async (req, res) => {
+  deleteProfile = asyncHandler(async (req, res) => {
+    const profile = await this.candidateProfileService.getProfileByUserId(
+      req.userId
+    );
+
     await this.candidateProfileService.deleteProfile(req.userId);
+
     res.status(200).json({
       success: true,
+      data: profile,
       message: "Profile deleted successfully",
     });
-  };
+  });
 
-  addSkills = async (req, res) => {
-    const { skillIds } = req.body;
+  addSkills = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+    const skillIds = req.body.skills;
+
     const profile = await this.candidateProfileService.addSkills(
-      req.userId,
+      userId,
       skillIds
     );
     res.status(200).json({
@@ -61,9 +69,9 @@ class CandidateProfileController {
       data: profile,
       message: "Skills added successfully",
     });
-  };
+  });
 
-  removeSkill = async (req, res) => {
+  removeSkill = asyncHandler(async (req, res) => {
     const { skillId } = req.params;
     const profile = await this.candidateProfileService.removeSkill(
       req.userId,
@@ -74,9 +82,9 @@ class CandidateProfileController {
       data: profile,
       message: "Skill removed successfully",
     });
-  };
+  });
 
-  uploadResume = async (req, res) => {
+  uploadResume = asyncHandler(async (req, res) => {
     const { resumeFile, resumeScore } = req.body;
     const profile = await this.candidateProfileService.uploadResume(
       req.userId,
@@ -88,18 +96,18 @@ class CandidateProfileController {
       data: profile,
       message: "Resume uploaded successfully",
     });
-  };
+  });
 
-  deleteResume = async (req, res) => {
+  deleteResume = asyncHandler(async (req, res) => {
     const profile = await this.candidateProfileService.deleteResume(req.userId);
     res.status(200).json({
       success: true,
       data: profile,
       message: "Resume deleted successfully",
     });
-  };
+  });
 
-  updateAvailability = async (req, res) => {
+  updateAvailability = asyncHandler(async (req, res) => {
     const { availability } = req.body;
     const profile = await this.candidateProfileService.updateAvailability(
       req.userId,
@@ -110,29 +118,7 @@ class CandidateProfileController {
       data: profile,
       message: "Availability updated successfully",
     });
-  };
-
-  filterBySkills = async (req, res) => {
-    const { skills } = req.query;
-    // const tenantId = req.tenantId; // Assume from middleware
-    const skillArray = skills
-      ? skills.split(",").filter((skill) => skill.trim() !== "")
-      : [];
-    if (skillArray.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Skills query parameter is required and must contain at least one valid skill",
-      });
-    }
-    const profiles = await this.candidateProfileService.getProfilesBySkills(
-      skillArray
-    );
-    res.status(200).json({
-      success: true,
-      data: profiles,
-    });
-  };
+  });
 }
 
 export default CandidateProfileController;

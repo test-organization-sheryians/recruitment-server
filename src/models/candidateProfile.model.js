@@ -8,7 +8,6 @@ const CandidateProfileSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true,
     },
     experienceId: {
       type: Schema.Types.ObjectId,
