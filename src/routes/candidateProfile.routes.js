@@ -34,7 +34,7 @@ router.post("/:userId/resume", authenticateJWT, uploadResumeValidator, candidate
 router.delete("/:userId/resume", authenticateJWT, candidateProfileController.deleteResume);
 
 router.patch(
-  "/:userId/availability",
+  "/availability",
   authenticateJWT,
   updateAvailabilityValidator,
   candidateProfileController.updateAvailability
