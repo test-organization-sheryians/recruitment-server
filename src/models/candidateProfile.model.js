@@ -42,8 +42,11 @@ const CandidateProfileSchema = new Schema(
   }
 );
 
-CandidateProfileSchema.index({  userId: 1 }, { unique: true });
+CandidateProfileSchema.index({ userId: 1 }, { unique: true });
 CandidateProfileSchema.index({ resumeScore: -1 });
 CandidateProfileSchema.index({ skills: 1 });
 
-export const CandidateProfile = mongoose.model("CandidateProfile", CandidateProfileSchema);
+export const CandidateProfile = mongoose.model(
+  "CandidateProfile",
+  CandidateProfileSchema
+);
