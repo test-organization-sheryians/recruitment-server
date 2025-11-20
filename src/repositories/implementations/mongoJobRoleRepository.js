@@ -55,13 +55,13 @@ class MongoJobRoleRepository extends IJobRoleRepository {
           }
         },
         {
-          $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: false }
+          $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true }
         },
         {
-          $unwind: { path: "$client", preserveNullAndEmptyArrays: false }
+          $unwind: { path: "$client", preserveNullAndEmptyArrays: true }
         },
         {
-          $unwind: { path: "$category", preserveNullAndEmptyArrays: false }
+          $unwind: { path: "$category", preserveNullAndEmptyArrays: true }
         }
       ]);
       
