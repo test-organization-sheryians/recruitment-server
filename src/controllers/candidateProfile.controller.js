@@ -72,10 +72,10 @@ class CandidateProfileController {
   });
 
   removeSkill = asyncHandler(async (req, res) => {
-    const { skillId } = req.params;
+    const { skillName } = req.params;
     const profile = await this.candidateProfileService.removeSkill(
       req.userId,
-      skillId
+      skillName
     );
     res.status(200).json({
       success: true,

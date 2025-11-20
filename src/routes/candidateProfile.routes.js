@@ -29,7 +29,7 @@ router.delete("/delete-profile", authenticateJWT, candidateProfileController.del
 router.post("/add-skills", authenticateJWT, addSkillsValidator, candidateProfileController.addSkills);
 
 router.delete(
-  "/remove-skill/:skillId",
+  "/remove-skill/:skillName",
   authenticateJWT,
   candidateProfileController.removeSkill
 );
