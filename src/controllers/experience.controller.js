@@ -73,7 +73,7 @@ class ExperienceController {
 
       const data = req.body;
 
-      const result = await this.experienceService.updateExperience(candidateId, data); // FIXED
+      const result = await this.experienceService.updateExperience(experienceId, data); // FIXED
 
       res.status(200).json({
         success: true,
