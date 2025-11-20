@@ -13,7 +13,7 @@ router.use(authenticateJWT)
 router.post("/", validateRequest(experienceCreateValidator), expereniceController.createExperience)
 
 // get a single experience by ID
-router.get("/single/:id", expereniceController.getSingleExperience)
+router.get("/:id", expereniceController.getSingleExperience)
 
 
 // get all experience for a candidate
