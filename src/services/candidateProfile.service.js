@@ -1,10 +1,12 @@
 import MongoCandidateProfileRepository from "../repositories/implementations/mongoCandidateProfileRepository.js";
+import MongoSkillRepository from "../repositories/implementations/mongoSkillRepository.js";
 import { AppError } from "../utils/errors.js";
 import mongoose from "mongoose";
 
 class CandidateProfileService {
   constructor() {
     this.candidateProfileRepository = new MongoCandidateProfileRepository();
+    this.skillRepository = new MongoSkillRepository();
   }
 
   async createProfile(profileData) {
@@ -58,26 +60,32 @@ class CandidateProfileService {
     return await this.candidateProfileRepository.deleteProfile(profile._id);
   }
 
-  async addSkills(userId, skillIds) {
-    // Normalize skillIds to array
-    if (typeof skillIds === "string") {
-      skillIds = [skillIds];
+  async addSkills(userId, skillNames) {
+    if (typeof skillNames === "string") {
+      skillNames = [skillNames];
     }
 
-    if (!Array.isArray(skillIds) || skillIds.length === 0) {
+    if (!Array.isArray(skillNames) || skillNames.length === 0) {
       throw new AppError(
-        "skillIds must be a non-empty array or a valid skillId string",
+        "skillNames must be a non-empty array or a valid skillName string",
         400
       );
     }
 
-    for (const skillId of skillIds) {
-      if (
-        typeof skillId !== "string" ||
-        !mongoose.Types.ObjectId.isValid(skillId)
-      ) {
-        throw new AppError(`Invalid skillId: ${skillId}`, 400);
+    for (const skillName of skillNames) {
+      if (typeof skillName !== "string" || skillName.trim().length === 0) {
+        throw new AppError(`Invalid skillName: ${skillName}`, 400);
       }
+    }
+
+    const skillIds = [];
+    for (const skillName of skillNames) {
+      let skill = await this.skillRepository.findSkillByName(skillName.trim());
+      if (!skill) {
+        
+        skill = await this.skillRepository.createSkill({ name: skillName.trim() });
+      }
+      skillIds.push(skill._id.toString());
     }
 
     const profile = await this.candidateProfileRepository.findProfileByUserId(
