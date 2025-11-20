@@ -6,7 +6,6 @@ import roleRoutes from "./routes/role.routes.js";
 import skillRoutes from "./routes/skill.routes.js";
 import permissionRoutes from "./routes/permission.routes.js";
 import jobRoleRoutes from "./routes/jobRole.routes.js";
-
 import candidateProfileRoutes from "./routes/candidateProfile.routes.js";
 import errorHandler from "./middlewares/errorHandler.middleware.js";
 import cookieParser from "cookie-parser";
