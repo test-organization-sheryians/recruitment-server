@@ -92,7 +92,8 @@ class MongoJobRoleRepository extends IJobRoleRepository {
         }
       }
 
-      const [job]= await JobRole.aggregate([
+
+      const jobs = await JobRole.aggregate([
         { $match: matchStage },
         {
           $lookup: {
@@ -132,15 +133,14 @@ class MongoJobRoleRepository extends IJobRoleRepository {
           $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: false }
         },
         {
-          $unwind: { path: "$client", preserveNullAndEmptyArrays: false }
+          $unwind: { path: "$client", preserveNullAndEmptyArrays: true }
         },
         {
           $unwind: { path: "$category", preserveNullAndEmptyArrays: false }
         },
         { $sort: { createdAt: -1 } }
       ]);
-      console.log(job);
-      return job;
+      return jobs;
     } catch (error) {
       throw new AppError("Failed to fetch job roles", 500);
     }
