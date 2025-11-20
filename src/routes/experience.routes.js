@@ -8,23 +8,23 @@ const router = express.Router();
 const expereniceController = new ExperienceController();
 
 
-router.use(authenticateJWT)
+router.use(authenticateJWT);
+
 // create a new experience
-router.post("/", validateRequest(experienceCreateValidator), expereniceController.createExperience)
+router.post("/", validateRequest(experienceCreateValidator), expereniceController.createExperience);
+
+// get all experiences for a candidate
+router.get("/candidate/:candidateId", expereniceController.getCandidateExperiences);
 
 // get a single experience by ID
-router.get("/:id", expereniceController.getSingleExperience)
-
-
-// get all experience for a candidate
-router.get("/:candidateId", expereniceController.getCandidateExperiences)
-
+router.get("/:id", expereniceController.getSingleExperience);
 
 // update experience
-router.patch("/:id", validateRequest(experienceUpdateValidator), expereniceController.updateExperience)
+router.patch("/:id", validateRequest(experienceUpdateValidator), expereniceController.updateExperience);
 
-// Delete experience
-router.delete("/:id", expereniceController.deleteExperience)
+// delete experience
+router.delete("/:id", expereniceController.deleteExperience);
+
 
 
 export default router;
