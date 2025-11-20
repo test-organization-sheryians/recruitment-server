@@ -57,7 +57,7 @@ class CandidateProfileController {
   });
 
   addSkills = asyncHandler(async (req, res) => {
-    const { userId } = req.params;
+    const userId = req.userId;
     const skillIds = req.body.skills;
 
     const profile = await this.candidateProfileService.addSkills(
