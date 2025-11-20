@@ -7,7 +7,7 @@ class ExperienceService {
   }
   async addExperience(data) {
     if (!data.candidateId) {
-      throw new AppError("CandidateId is required ");
+      throw new AppError("CandidateId is required ", 400);
     }
     if (data.isCurrent) {
       data.endDate = null;
@@ -17,30 +17,30 @@ class ExperienceService {
 
   async getCandidateExperiences(candidateId) {
     if (!candidateId) {
-      throw new AppError("candidateId is required");
+      throw new AppError("candidateId is required", 400);
     }
     return await this.experienceRepository.findByCandidateId(
       candidateId
     );
   }
-      async getSingleExperience(id) {
-      if (!id) {
-        throw new AppError("experience id is required");
-      }
-
-      const experience = await this.experienceRepository.getExperienceById(id);
-
-      if (!experience) {
-        throw new AppError("Experience not found");
-      }
-
-      return experience;
+  async getSingleExperience(id) {
+    if (!id) {
+      throw new AppError("experience id is required", 400);
     }
 
+    const experience = await this.experienceRepository.getExperienceById(id);
+
+    if (!experience) {
+      throw new AppError("Experience not found", 404);
+    }
+
+    return experience;
+  }
+
   async updateExperience(experienceId, data) {
-    
+
     if (!experienceId) {
-      throw new AppError("experience id is required");
+      throw new AppError("experience id is required", 400);
     }
     if (data.isCurrent) {
       data.endDate = null;
@@ -51,7 +51,7 @@ class ExperienceService {
     );
 
     if (!updated) {
-      throw new AppError("Failed to update — Experience not found");
+      throw new AppError("Failed to update — Experience not found", 404);
     }
 
     return updated;
@@ -59,7 +59,7 @@ class ExperienceService {
 
   async deleteExperience(experienceId) {
     if (!experienceId) {
-      throw new AppError("experience id is required");
+      throw new AppError("experience id is required", 400);
     }
 
     const deleted = await this.experienceRepository.deleteExperience(
@@ -67,7 +67,7 @@ class ExperienceService {
     );
 
     if (!deleted) {
-      throw new AppError("Failed to delete — Experience not found");
+      throw new AppError("Failed to delete — Experience not found", 404);
     }
 
     return deleted;
