@@ -7,6 +7,7 @@ class ExperienceController {
 
   // Create experience
   createExperience = async (req, res) => {
+
     try {
       const experienceData = {
         ...req.body,
