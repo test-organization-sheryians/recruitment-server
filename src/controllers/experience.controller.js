@@ -69,7 +69,7 @@ class ExperienceController {
   // Update experience
   updateExperience = async (req, res) => {
     try {
-      const candidateId = req.params.id;
+      const experienceId = req.params.id;
 
       const data = req.body;
 
