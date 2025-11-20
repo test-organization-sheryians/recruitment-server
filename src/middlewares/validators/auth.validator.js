@@ -20,6 +20,8 @@ const registerSchema = Joi.object({
     "string.min": "Phone number must be at least 10 digits long",
     "any.required": "Phone number is required",
   }),
+  roleId: Joi.string().optional()
+
 });
 
 const loginSchema = Joi.object({
