@@ -39,6 +39,8 @@ class AuthController {
   register = async (req, res, next) => {
     try {
       const userData = req.body;
+      console.log(userData);
+
       const result = await this.userService.register(userData);
       res.cookie("token", result.token, {
         httpOnly: true,
@@ -113,7 +115,7 @@ class AuthController {
 
       if (token) {
         const decoded = this.authService.verifyToken(token);
-        const exp = decoded.exp * 1000; 
+        const exp = decoded.exp * 1000;
         const ttl = Math.floor((exp - Date.now()) / 1000);
         if (ttl > 0) {
           await redisClient.setEx(`bl_${token}`, ttl, "blacklisted");
