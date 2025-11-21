@@ -29,11 +29,13 @@ const createProfileSchema = Joi.object({
     "number.max": "Resume score cannot exceed 100",
   }),
   skills: Joi.array().items(
-    Joi.string().pattern(objectIdPattern).messages({
-      "string.pattern.base": "Each skill must be a valid ObjectId",
+    Joi.string().min(1).max(100).messages({
+      "string.min": "Each skill name must be at least 1 character long",
+      "string.max": "Each skill name cannot exceed 100 characters",
     })
-  ).optional().messages({
-    "array.base": "Skills must be an array",
+  ).min(1).required().messages({
+    "array.min": "At least one skill is required",
+    "any.required": "Skills are required",
   }),
 });
 
@@ -63,11 +65,13 @@ const updateProfileSchema = Joi.object({
     "number.max": "Resume score cannot exceed 100",
   }),
   skills: Joi.array().items(
-    Joi.string().pattern(objectIdPattern).messages({
-      "string.pattern.base": "Each skill must be a valid ObjectId",
+    Joi.string().min(1).max(100).messages({
+      "string.min": "Each skill name must be at least 1 character long",
+      "string.max": "Each skill name cannot exceed 100 characters",
     })
-  ).optional().messages({
-    "array.base": "Skills must be an array",
+  ).min(1).messages({
+    "array.min": "At least one skill is required",
+    "any.required": "Skills are required",
   }),
 });
 
