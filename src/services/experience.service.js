@@ -19,7 +19,10 @@ class ExperienceService {
     if (!candidateId) {
       throw new AppError("candidateId is required", 400);
     }
-
+    
+    if (candidateId !== userId) {
+      throw new AppError("You are not allowed to view this experience", 401);
+    }
     return await this.experienceRepository.findByCandidateId(
       candidateId
     );
