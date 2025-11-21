@@ -103,7 +103,12 @@ class CandidateProfileService {
       throw new AppError("Profile not found", 404);
     }
 
-    return await this.candidateProfileRepository.deleteProfile(profile._id);
+    const deletedProfile = await this.candidateProfileRepository.deleteProfile(profile._id);
+    if (!deletedProfile) {
+      throw new AppError("Profile not found", 404);
+    }
+
+    return deletedProfile;
   }
 
 async addSkills(userId, skillNames) {

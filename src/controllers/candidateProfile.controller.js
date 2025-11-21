@@ -43,15 +43,10 @@ class CandidateProfileController {
   });
 
   deleteProfile = asyncHandler(async (req, res) => {
-    const profile = await this.candidateProfileService.getProfileByUserId(
-      req.userId
-    );
-
     await this.candidateProfileService.deleteProfile(req.userId);
 
     res.status(200).json({
       success: true,
-      data: profile,
       message: "Profile deleted successfully",
     });
   });
@@ -123,3 +118,4 @@ class CandidateProfileController {
 }
 
 export default CandidateProfileController;
+
