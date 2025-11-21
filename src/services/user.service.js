@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import config from "../config/environment.js";
 import bcrypt from "bcryptjs";
 
-const { JWT_SECRET } = config;
+const { JWT_SECRET, REFRESH_SECRET, REFRESH_EXPIRES_IN } = config;
 
 class UserService {
   constructor() {
@@ -14,7 +14,6 @@ class UserService {
   }
 
   async saveRefreshToken(userId, refreshToken) {
-    // store refresh token in Redis with user id
     await this.cacheRepository.set(
       `refresh:${userId}`,
       refreshToken,
@@ -22,161 +21,168 @@ class UserService {
     );
   }
 
-  async register(userData) {
-    const cacheKey = `user:email:${userData.email}`;
-    console.log(`cachekey ------>   ${cacheKey}`);
+  // Helper: Safe role object for cache & JWT
+  _getSafeRole(user) {
+    return user.role
+      ? {
+          _id: user.role._id,
+          name: user.role.name,
+          description: user.role.description,
+        }
+      : null;
+  }
 
-    let existingUser = await this.cacheRepository.get(cacheKey);
-    if (!existingUser) {
-      existingUser = await this.userRepository.findUserByEmail(userData.email);
-      if (existingUser)
-        await this.cacheRepository.set(cacheKey, existingUser, 3600);
-    }
-    if (existingUser) throw new AppError("Email already exists", 409);
-
-    const user = await this.userRepository.createUser(userData);
-
-    const userWithRole = await this.userRepository.findUserById(user._id);
-    if (!userWithRole) {
-      throw new AppError("Failed to create user", 500);
-    }
-
-    await this.cacheRepository.set(
-      `user:id:${userWithRole._id}`,
-      {
-        _id: userWithRole._id,
-        email: userWithRole.email,
-        role: {
-          _id: userWithRole.role._id,
-          name: userWithRole.role.name,
-          description: userWithRole.role.description,
-        },
-        phoneNumber: userWithRole.phoneNumber,
-        firstName: userWithRole.firstName,
-        lastName: userWithRole.lastName,
-      },
-      3600
-    );
-    await this.cacheRepository.set(cacheKey, user, 3600);
-
-    const token = jwt.sign(
-      {
-        id: userWithRole._id,
-        role: {
-          _id: userWithRole.role._id,
-          name: userWithRole.role.name,
-          description: userWithRole.role.description,
-        },
-      },
-      JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
-    );
-    // ...........................refresh token........................
-
-    const refreshToken = jwt.sign(
-      { id: userWithRole._id },
-      config.REFRESH_SECRET,
-      {
-        expiresIn: config.REFRESH_EXPIRES_IN,
-      }
-    );
-    await this.saveRefreshToken(userWithRole._id, refreshToken);
-
+  // Helper: Safe user payload
+  _getSafeUserPayload(user) {
     return {
-      user: {
-        id: userWithRole._id,
-        email: userWithRole.email,
-        role: {
-          _id: userWithRole.role._id,
-          name: userWithRole.role.name,
-          description: userWithRole.role.description,
-        },
-        firstName: userWithRole.firstName,
-        lastName: userWithRole.lastName,
-        phoneNumber: userWithRole.phoneNumber,
-      },
-      token,
-      refreshToken,
+      _id: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phoneNumber: user.phoneNumber || null,
+      role: this._getSafeRole(user),
     };
   }
 
-  async login({ email, password }) {
+  async register(userData) {
+    console.log(userData, "This is userData");
+
+    const email = userData.email.toLowerCase().trim();
     const cacheKey = `user:email:${email}`;
-    let user = await this.cacheRepository.get(cacheKey);
-    if (user) {
-      user.comparePassword = async function (password) {
-        return bcrypt.compare(password, this.password);
-      };
-    } else {
-      user = await this.userRepository.findUserByEmail(email);
-      console.log(user);
-      if (!user) throw new AppError("Invalid credentials", 401);
-      await this.cacheRepository.set(cacheKey, user, 3600);
+
+    let existingUser = null;
+
+    // 1. Try cache
+    const cached = await this.cacheRepository.get(cacheKey);
+    if (cached) {
+      try {
+        existingUser = JSON.parse(cached);
+      } catch (e) {
+        console.warn("Corrupted cache for email:", email);
+        await this.cacheRepository.del(cacheKey);
+      }
     }
 
-    user.comparePassword = async function (password) {
-      return bcrypt.compare(password, this.password);
+    // 2. If not in cache → check DB
+    if (!existingUser) {
+      existingUser = await this.userRepository.findUserByEmail(email);
+      if (existingUser) {
+        // Cache it as stringified JSON
+        await this.cacheRepository.set(
+          cacheKey,
+          JSON.stringify(existingUser),
+          3600
+        );
+      }
+    }
+
+    // 3. If still exists → reject
+    if (existingUser) {
+      throw new AppError("Email already exists", 409);
+    }
+
+    // 4. Create user
+    const user = await this.userRepository.createUser({
+      ...userData,
+      email,
+    });
+
+    const userWithRole = await this.userRepository.findUserById(user._id);
+    console.log(
+      userWithRole,
+      user._id,
+      "this is fetched user after creatation"
+    );
+    if (!userWithRole) throw new AppError("Failed to fetch created user", 500);
+
+    const safeUser = this._getSafeUserPayload(userWithRole);
+
+    // 5. Cache both ID and email
+    await this.cacheRepository.set(
+      `user:id:${userWithRole._id}`,
+      JSON.stringify(safeUser),
+      3600
+    );
+    await this.cacheRepository.set(
+      cacheKey,
+      JSON.stringify({ ...safeUser, password: user.password }),
+      3600
+    );
+
+    console.log(safeUser, "Register");
+    // 6. JWT + Refresh Token
+    const jwtPayload = {
+      id: safeUser._id,
+      email: safeUser.email,
+      firstName: safeUser.firstName,
+      lastName: safeUser.lastName,
+      role: safeUser?.role?.name,
     };
+
+    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "1h" });
+    const refreshToken = jwt.sign({ id: userWithRole._id }, REFRESH_SECRET, {
+      expiresIn: REFRESH_EXPIRES_IN,
+    });
+
+    await this.saveRefreshToken(userWithRole._id, refreshToken);
+
+    return { user: safeUser, token, refreshToken };
+  }
+
+  async login({ email, password }) {
+    console.log(email);
+    // const cacheKey = `user:email:${email}`;
+    // let cached = await this.cacheRepository.get(cacheKey);
+
+    // let user;
+    // if (cached) {
+    //   user = JSON.parse(cached); // we have to check this one as sometimes while hitting login it uses json.parse and on some cases it uses user= cached !!
+    //   // user = cached
+    //    // changed this because there the cached was already an json due to which it was getting converted into [object object]
+    //   // Re-attach comparePassword method
+    //   user.comparePassword = async (pwd) => bcrypt.compare(pwd, user.password);
+    // } else {
+    let user = await this.userRepository.findUserByEmail(email);
+    if (!user) throw new AppError("Invalid credentials", 401);
+
+    // const safeUser = this._getSafeUserPayload(user);
+    // await this.cacheRepository.set(
+    //   cacheKey,
+    //   JSON.stringify({ ...safeUser, password: user.password }),
+    //   3600
+    // );
+    // }
+
+    user.comparePassword = async (pwd) => bcrypt.compare(pwd, user.password);
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) throw new AppError("Invalid credentials", 401);
 
     const userWithRole = await this.userRepository.findUserById(user._id);
+    if (!userWithRole) throw new AppError("Failed to authenticate user", 500);
 
-    if (!userWithRole) {
-      throw new AppError("Failed to authenticate user", 500);
-    }
+    const safeUser = this._getSafeUserPayload(userWithRole);
 
-    await this.cacheRepository.set(
-      `user:id:${userWithRole._id}`,
-      userWithRole,
-      3600
-    );
-    await this.cacheRepository.set(
-      `user:email:${userWithRole.email}`,
-      userWithRole,
-      3600
-    );
+    // await this.cacheRepository.set(`user:id:${userWithRole._id}`, JSON.stringify(safeUser), 3600);
+    // await this.cacheRepository.set(`user:email:${userWithRole.email}`, JSON.stringify(safeUser), 3600);
 
-    const token = jwt.sign(
-      {
-        id: userWithRole._id,
-        role: {
-          _id: userWithRole.role._id,
-          name: userWithRole.role.name,
-          description: userWithRole.role.description,
-        },
-      },
-      JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
-    );
+    const jwtPayload = {
+      id: safeUser._id,
+      email: safeUser.email,
+      firstName: safeUser.firstName,
+      lastName: safeUser.lastName,
+      role: safeUser?.role?.name,
+    };
+    console.log(jwtPayload, "login");
 
-    const refreshToken = jwt.sign(
-      { id: userWithRole._id },
-      config.REFRESH_SECRET,
-      {
-        expiresIn: config.REFRESH_EXPIRES_IN,
-      }
-    );
+    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "1h" });
+    const refreshToken = jwt.sign({ id: userWithRole._id }, REFRESH_SECRET, {
+      expiresIn: REFRESH_EXPIRES_IN,
+    });
     await this.saveRefreshToken(userWithRole._id, refreshToken);
 
     return {
-      user: {
-        id: userWithRole._id,
-        email: userWithRole.email,
-        role: {
-          id: userWithRole.role._id,
-          name: userWithRole.role.name,
-          description: userWithRole.role.description,
-        },
-        firstName: userWithRole.firstName,
-        lastName: userWithRole.lastName,
-        phoneNumber: userWithRole.phoneNumber,
-      },
+      user: safeUser,
       token,
       refreshToken,
     };
@@ -185,140 +191,123 @@ class UserService {
   async refresh(refreshToken) {
     if (!refreshToken) throw new AppError("Unauthorized", 401);
 
+    let payload;
     try {
-      const payload = jwt.verify(refreshToken, REFRESH_SECRET);
-
-      const stored = await this.cacheRepository.get(`refresh:${payload.id}`);
-      if (!stored || stored !== refreshToken)
-        throw new AppError("Unauthorized", 401);
-
-      const token = jwt.sign(
-        { id: payload.id, role: payload.role },
-        JWT_SECRET,
-        { expiresIn: ACCESS_EXPIRES_IN }
-      );
-
-      // generate new refresh token
-      const newRefreshToken = jwt.sign({ id: payload.id }, REFRESH_SECRET, {
-        expiresIn: REFRESH_EXPIRES_IN,
-      });
-
-      // save new refresh token in cache
-      await this.saveRefreshToken(payload.id, newRefreshToken);
-
-      return { token, refreshToken: newRefreshToken };
+      payload = jwt.verify(refreshToken, REFRESH_SECRET);
     } catch (err) {
       throw new AppError("Invalid refresh token", 401);
     }
+
+    const stored = await this.cacheRepository.get(`refresh:${payload.id}`);
+    if (!stored || stored !== refreshToken) {
+      throw new AppError("Invalid refresh token", 401);
+    }
+
+    const user = await this.userRepository.findUserById(payload.id);
+    if (!user) throw new AppError("User not found", 404);
+
+    const jwtPayload = { id: user._id };
+    if (user.role) {
+      jwtPayload.role = this._getSafeRole(user);
+    }
+
+    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "1h" });
+
+    const newRefreshToken = jwt.sign({ id: user._id }, REFRESH_SECRET, {
+      expiresIn: REFRESH_EXPIRES_IN,
+    });
+
+    await this.saveRefreshToken(user._id, newRefreshToken);
+
+    return { token, refreshToken: newRefreshToken };
   }
 
   async getUser(id) {
     const cacheKey = `user:id:${id}`;
-    let user = await this.cacheRepository.get(cacheKey);
-    if (!user) {
-      user = await this.userRepository.findUserById(id);
-      if (!user) throw new AppError("User not found", 404);
-      await this.cacheRepository.set(cacheKey, user, 3600);
+    const cached = await this.cacheRepository.get(cacheKey);
+
+    if (cached) {
+      return JSON.parse(cached);
     }
-    return user;
+
+    const user = await this.userRepository.findUserById(id);
+    if (!user) throw new AppError("User not found", 404);
+
+    const safeUser = this._getSafeUserPayload(user);
+    await this.cacheRepository.set(cacheKey, JSON.stringify(safeUser), 3600);
+
+    return safeUser;
   }
 
   async updateUser(id, userData) {
-    const { error } = this.updateUserSchema.validate(userData);
-    if (error) throw new AppError(error.message, 400);
-
     const user = await this.userRepository.updateUser(id, userData);
     if (!user) throw new AppError("User not found", 404);
 
+    const safeUser = this._getSafeUserPayload(user);
+
     await this.cacheRepository.set(
       `user:id:${id}`,
-      { id: user._id, email: user.email, role: user.role, name: user.name },
+      JSON.stringify(safeUser),
       3600
     );
 
-    if (userData.email) {
-      await this.cacheRepository.set(`user:email:${user.email}`, user, 3600);
-      if (userData.email !== user.email) {
-        await this.cacheRepository.del(`user:email:${userData.email}`);
-      }
+    if (userData.email && userData.email !== user.email) {
+      await this.cacheRepository.del(`user:email:${userData.email}`);
     }
+    await this.cacheRepository.set(
+      `user:email:${user.email}`,
+      JSON.stringify(safeUser),
+      3600
+    );
 
-    return {
-      id: user._id,
-      email: user.email,
-      role: user.role,
-      name: user.name,
-    };
+    return safeUser;
   }
 
   async updateMe(userId, updates) {
     if (!userId) throw new AppError("Unauthorized", 401);
 
-    const { error, value } = updateMeSchema.validate(updates, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
-    if (error) {
-      throw new AppError(error.details.map((d) => d.message).join(", "), 400);
-    }
-
-    // Persist update
-    const updated = await this.userRepository.updateUser(userId, value);
+    const updated = await this.userRepository.updateUser(userId, updates);
     if (!updated) throw new AppError("User not found", 404);
 
-    // Prepare cache-safe payload
-    const shaped = {
-      id: updated._id,
-      email: updated.email,
-      firstName: updated.firstName,
-      lastName: updated.lastName,
-      phoneNumber: updated.phoneNumber,
-    };
+    const safeUser = this._getSafeUserPayload(updated);
 
-    // Refresh id cache
-    await this.cacheRepository.set(`user:id:${userId}`, shaped, 3600);
-
-    // Refresh email cache
-    // First, fetch previous email from cache or DB to invalidate old key if email changed
-    const previousById = await this.cacheRepository.get(`user:id:${userId}`);
-    const oldEmailKey = previousById?.email
-      ? `user:email:${previousById.email}`
-      : null;
-
-    // Store new email mapping with password for login path optimization if desired
     await this.cacheRepository.set(
-      `user:email:${updated.email}`,
-      { ...shaped, password: updated.password },
+      `user:id:${userId}`,
+      JSON.stringify(safeUser),
       3600
     );
 
-    if (oldEmailKey && previousById.email !== updated.email) {
+    const oldEmailKey = updates.email ? `user:email:${updates.email}` : null;
+
+    await this.cacheRepository.set(
+      `user:email:${updated.email}`,
+      JSON.stringify({ ...safeUser, password: updated.password }),
+      3600
+    );
+
+    if (oldEmailKey && updates.email !== updated.email) {
       await this.cacheRepository.del(oldEmailKey);
     }
 
-    return shaped;
+    return safeUser;
   }
 
   async resetPassword(userId, oldPassword, newPassword) {
-    // 1. Fetch user with hashed password (project only password)
-    const user = await this.userRepository.findUserById(userId);
-    if (!user) {
-      throw new Error("User not found");
-    }
+    const user = await this.userRepository.findUserById(userId, {
+      select: "+password",
+    });
+    if (!user) throw new AppError("User not found", 404);
 
-    // 2. Compare old password with stored hash
     const isMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isMatch) {
-      throw new Error("Old password is incorrect");
-    }
+    if (!isMatch) throw new AppError("Old password is incorrect", 400);
 
-    // 3. Hash new password (use saltRounds=12 for strong security)
     const hashed = await bcrypt.hash(newPassword, 10);
 
-    // 4. Update password and save
     await this.userRepository.updateUser(userId, { password: hashed });
+
     await this.cacheRepository.del(`user:id:${userId}`);
     await this.cacheRepository.del(`user:email:${user.email}`);
+
     return true;
   }
 }

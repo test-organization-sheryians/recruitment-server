@@ -5,47 +5,45 @@ import { authenticateJWT } from "../middlewares/auth.middleware.js";
 import { authorize } from "../middlewares/role.middleware.js";
 const router = express.Router();
 
-// Admin only routes
 router.post(
   "/",
   authenticateJWT,
-  authorize("permissions", "create"),
+  authorize("admin"),
   permissionController.createPermission
 );
 router.get(
   "/",
   authenticateJWT,
-  authorize("permissions", "read"),
+  authorize("admin"),
   permissionController.getAllPermissions
 );
 router.get(
   "/:id",
   authenticateJWT,
-  authorize("permissions", "read"),
+  authorize("admin"),
   permissionController.getPermissionById
 );
 router.put(
   "/:id",
   authenticateJWT,
-  authorize("permissions", "update"),
+  authorize("admin"),
   permissionController.updatePermission
 );
 router.delete(
   "/:id",
   authenticateJWT,
-  authorize("permissions", "delete"),
+  authorize("admin"),
   permissionController.deletePermission
 );
 
 // Get permissions by role
 router.get(
-  "/role/:roleId",
+  "/",
   authenticateJWT,
-  authorize("permissions", "read"),
+  authorize("admin"),
   permissionController.getPermissionsByRole
 );
 
-// Check user permission
 router.get(
   "/check/user",
   authenticateJWT,

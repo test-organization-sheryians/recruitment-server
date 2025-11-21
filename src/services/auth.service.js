@@ -59,9 +59,9 @@ class AuthService {
     }
   }
 
-  async hasPermission(userId, resource, action) {
+  async hasPermission(userId, roleName) {
     try {
-      // CRITICAL: Add ObjectId validation like getUserWithPermissions
+      // 1. Validate userId
       const objectId = mongoose.Types.ObjectId.isValid(userId)
         ? new mongoose.Types.ObjectId(userId)
         : null;
@@ -70,47 +70,46 @@ class AuthService {
         throw new Error("Invalid userId provided");
       }
 
-      const user = await User.findById(objectId).populate("roleId");
-      if (!user) {
-        throw new Error("User not found");
+      // 2. Validate and normalize roleName
+      if (!roleName || typeof roleName !== "string") {
+        throw new Error("Role name is required and must be a string");
       }
-      if (user.roleId?.name === "admin") {
-        return true;
-      }
+      const normalizedRole = roleName.trim().toLowerCase();
 
+      // 3. Aggregate: Match user → lookup role → compare name
       const result = await User.aggregate([
-        { $match: { _id: objectId } }, // Use validated ObjectId
+        { $match: { _id: objectId } },
+
         {
           $lookup: {
-            from: "permissions",
-            let: { roleId: "$roleId" }, // This is correct
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ["$roleId", "$$roleId"] },
-                      { $eq: ["$resource", resource] }, // Make sure these are strings
-                      { $eq: ["$action", action] }, // Make sure these are strings
-                    ],
-                  },
-                },
-              },
-            ],
-            as: "permission",
+            from: "roles",
+            localField: "roleId",
+            foreignField: "_id",
+            as: "role",
           },
         },
+
+        { $unwind: { path: "$role", preserveNullAndEmptyArrays: true } },
+
         {
           $project: {
-            hasPermission: { $gt: [{ $size: "$permission" }, 0] },
+            hasPermission: {
+              $cond: [
+                { $eq: [{ $toLower: "$role.name" }, normalizedRole] },
+                true,
+                false,
+              ],
+            },
           },
         },
       ]);
 
+      console.log(result[0]?.hasPermission);
+
       return result[0]?.hasPermission || false;
     } catch (error) {
-      console.error("Error in hasPermission:", error);
-      throw new Error(`Error checking permission: ${error.message}`);
+      console.error("Error in hasPermission (role check):", error);
+      throw new Error(`Error checking role: ${error.message}`);
     }
   }
 

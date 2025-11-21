@@ -11,34 +11,23 @@ import {
 
 const router = express.Router();
 
-// Main CRUD routes
 router.post(
   "/",
   authenticateJWT,
-  authorize("jobs", "create"),
+
+  authorize("admin"),
   createJobRoleValidator,
   jobRoleController.createJobRole
 );
 
-router.get(
-  "/",
-  authenticateJWT,
-  authorize("jobs", "read"),
-  filterJobRolesValidator,
-  jobRoleController.getAllJobRoles
-);
+router.get("/", filterJobRolesValidator, jobRoleController.getAllJobRoles);
 
-router.get(
-  "/:id",
-  authenticateJWT,
-  authorize("jobs", "read"),
-  jobRoleController.getJobRoleById
-);
+router.get("/:id", jobRoleController.getJobRoleById);
 
 router.put(
   "/:id",
   authenticateJWT,
-  authorize("jobs", "update"),
+  authorize("admin"),
   updateJobRoleValidator,
   jobRoleController.updateJobRole
 );
@@ -46,37 +35,20 @@ router.put(
 router.delete(
   "/:id",
   authenticateJWT,
-  authorize("jobs", "delete"),
+  authorize("admin"),
   jobRoleController.deleteJobRole
 );
-
-// Specialized routes
 router.get(
   "/client/:clientId",
   authenticateJWT,
-  authorize("jobs", "read"),
+  authorize("admin"),
   jobRoleController.getJobRolesByClient
 );
 
-router.get(
-  "/category/:categoryId",
-  authenticateJWT,
-  authorize("jobs", "read"),
-  jobRoleController.getJobRolesByCategory
-);
+router.get("/category/:categoryId", jobRoleController.getJobRolesByCategory);
 
-router.get(
-  "/status/active",
-  authenticateJWT,
-  authorize("jobs", "read"),
-  jobRoleController.getActiveJobRoles
-);
+router.get("/status/active", jobRoleController.getActiveJobRoles);
 
-router.get(
-  "/status/expired",
-  authenticateJWT,
-  authorize("jobs", "read"),
-  jobRoleController.getExpiredJobRoles
-);
+router.get("/status/expired", jobRoleController.getExpiredJobRoles);
 
 export default router;
