@@ -32,9 +32,10 @@ class ExperienceController {
   getCandidateExperiences = async (req, res) => {
     try {
       const { candidateId } = req.params;
+      const userId = req.userId;
 
       const result =
-        await this.experienceService.getCandidateExperiences(candidateId);
+        await this.experienceService.getCandidateExperiences(candidateId, userId);
 
       res.status(200).json({
         success: true,
@@ -52,7 +53,8 @@ class ExperienceController {
   getSingleExperience = async (req, res) => {
     try {
       const { id } = req.params;
-      const result = await this.experienceService.getSingleExperience(id);
+      const userId = req.userId;
+      const result = await this.experienceService.getSingleExperience(id,userId);
 
       res.status(200).json({
         success: true,
@@ -70,10 +72,10 @@ class ExperienceController {
   updateExperience = async (req, res) => {
     try {
       const experienceId = req.params.id;
-
+      const userId = req.userId;
       const data = req.body;
 
-      const result = await this.experienceService.updateExperience(experienceId, data); // FIXED
+      const result = await this.experienceService.updateExperience(experienceId, data, userId); // FIXED
 
       res.status(200).json({
         success: true,
@@ -92,8 +94,9 @@ class ExperienceController {
   deleteExperience = async (req, res) => {
     try {
       const { id } = req.params;
+      const userId = req.userId
 
-      await this.experienceService.deleteExperience(id); // FIXED
+      await this.experienceService.deleteExperience(id, userId); // FIXED
 
       res.status(200).json({
         success: true,
