@@ -73,8 +73,9 @@ const updateProfileSchema = Joi.object({
 
 const addSkillsSchema = Joi.object({
   skills: Joi.array().items(
-    Joi.string().pattern(objectIdPattern).messages({
-      "string.pattern.base": "Each skill must be a valid ObjectId",
+    Joi.string().min(1).max(100).messages({
+      "string.min": "Each skill name must be at least 1 character long",
+      "string.max": "Each skill name cannot exceed 100 characters",
     })
   ).min(1).required().messages({
     "array.min": "At least one skill is required",

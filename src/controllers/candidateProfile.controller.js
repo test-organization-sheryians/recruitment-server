@@ -58,11 +58,12 @@ class CandidateProfileController {
 
   addSkills = asyncHandler(async (req, res) => {
     const userId = req.userId;
-    const skillIds = req.body.skills;
+
+    const skillNames = req.body.skills;
 
     const profile = await this.candidateProfileService.addSkills(
       userId,
-      skillIds
+      skillNames
     );
     res.status(200).json({
       success: true,
@@ -72,10 +73,10 @@ class CandidateProfileController {
   });
 
   removeSkill = asyncHandler(async (req, res) => {
-    const { skillId } = req.params;
+    const { skillName } = req.params;
     const profile = await this.candidateProfileService.removeSkill(
       req.userId,
-      skillId
+      skillName
     );
     res.status(200).json({
       success: true,
