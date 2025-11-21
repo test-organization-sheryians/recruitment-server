@@ -17,13 +17,101 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
     }
   }
 
+  // async findProfileByUserId(userId) {
+  //   try {
+  //     if (!mongoose.Types.ObjectId.isValid(userId)) return null;
+
+  //     const objectId = new mongoose.Types.ObjectId(userId);
+
+  //     const [profile] = await CandidateProfile.aggregate([
+  //       {
+  //         $match: { userId: objectId },
+  //       },
+
+  //       {
+  //         $lookup: {
+  //           from: "users",
+  //           localField: "userId",
+  //           foreignField: "_id",
+  //           as: "user",
+  //         },
+  //       },
+  //       { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+
+  //       {
+  //         $lookup: {
+  //           from: "skills",
+  //           localField: "skills",
+  //           foreignField: "_id",
+  //           as: "skillDetails",
+  //         },
+  //       },
+
+  //       {
+  //         $project: {
+  //           _id: 1,
+  //           userId: 1,
+  //           availability: 1,
+  //           linkedinUrl: 1,
+  //           githubUrl: 1,
+  //           portfolioUrl: 1,
+  //           highestEducation: 1,
+  //           resumeFile: 1,
+  //           resumeScore: 1,
+  //           createdAt: 1,
+  //           updatedAt: 1,
+
+  //           user: {
+  //             _id: "$user._id",
+  //             firstName: "$user.firstName",
+  //             lastName: "$user.lastName",
+  //             email: "$user.email",
+  //           },
+
+  //           skills: {
+  //             $map: {
+  //               input: "$skillDetails",
+  //               as: "skill",
+  //               in: {
+  //                 _id: "$$skill._id",
+  //                 name: "$$skill.name",
+  //               },
+  //             },
+  //           },
+  //         },
+  //       },
+  //     ]);
+
+  //     return profile || null;
+  //   } catch (error) {
+  //     throw new AppError(
+  //       `Failed to find profile: ${error.message}`,
+  //       500,
+  //       error
+  //     );
+  //   }
+  // }
   async findProfileByUserId(userId) {
     try {
-      const isValid = mongoose.Types.ObjectId.isValid(userId);
-      if (!isValid) return null;
+      if (!mongoose.Types.ObjectId.isValid(userId)) return null;
 
       const [profile] = await CandidateProfile.aggregate([
-        { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+        {
+          $match: { userId: new mongoose.Types.ObjectId(userId) },
+        },
+
+        {
+          $addFields: {
+            skills: {
+              $map: {
+                input: "$skills",
+                as: "skill",
+                in: { $toObjectId: "$$skill" },
+              },
+            },
+          },
+        },
+
         {
           $lookup: {
             from: "users",
@@ -38,12 +126,20 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
             preserveNullAndEmptyArrays: true,
           },
         },
+
+        {
+          $lookup: {
+            from: "skills",
+            localField: "skills",
+            foreignField: "_id",
+            as: "skillDetails",
+          },
+        },
+
         {
           $project: {
             _id: 1,
             userId: 1,
-
-            experienceId: 1,
             availability: 1,
             linkedinUrl: 1,
             githubUrl: 1,
@@ -51,19 +147,30 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
             highestEducation: 1,
             resumeFile: 1,
             resumeScore: 1,
-            skills: 1,
+            createdAt: 1,
+            updatedAt: 1,
+
             user: {
               _id: "$user._id",
               firstName: "$user.firstName",
               lastName: "$user.lastName",
               email: "$user.email",
             },
-            createdAt: 1,
-            updatedAt: 1,
+
+            skills: {
+              $map: {
+                input: "$skillDetails",
+                as: "skill",
+                in: {
+                  _id: "$$skill._id",
+                  name: "$$skill.name",
+                },
+              },
+            },
           },
         },
-        { $limit: 1 },
       ]);
+
       return profile || null;
     } catch (error) {
       throw new AppError(
