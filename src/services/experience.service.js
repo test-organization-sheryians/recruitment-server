@@ -57,14 +57,23 @@ class ExperienceService {
     return updated;
   }
 
-  async deleteExperience(experienceId) {
+  async deleteExperience(experienceId, userId) {
     if (!experienceId) {
       throw new AppError("experience id is required", 400);
     }
 
+    const user = await this.experienceRepository.getExperienceById(experienceId);
+ 
+    if (userId !== user.candidateId.toString()) {
+      throw new AppError("You are not allowed to delete", 401);
+    }
+
+
     const deleted = await this.experienceRepository.deleteExperience(
       experienceId
     );
+
+    console.log(deleted)
 
     if (!deleted) {
       throw new AppError("Failed to delete — Experience not found", 404);
