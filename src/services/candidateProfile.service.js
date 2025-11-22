@@ -1,30 +1,57 @@
 import MongoCandidateProfileRepository from "../repositories/implementations/mongoCandidateProfileRepository.js";
+import MongoSkillRepository from "../repositories/implementations/mongoSkillRepository.js";
 import { AppError } from "../utils/errors.js";
 import mongoose from "mongoose";
 
 class CandidateProfileService {
   constructor() {
     this.candidateProfileRepository = new MongoCandidateProfileRepository();
+    this.skillRepository = new MongoSkillRepository();
   }
 
   async createProfile(profileData) {
-    const existingProfile =
-      await this.candidateProfileRepository.findProfileByUserId(
-        profileData.userId
-      );
-    if (existingProfile) {
-      throw new AppError("Profile already exists for this user", 409);
-    }
+  const existingProfile =
+    await this.candidateProfileRepository.findProfileByUserId(profileData.userId);
 
-    return await this.candidateProfileRepository.createProfile(profileData);
+  if (existingProfile) {
+    throw new AppError("Profile already exists for this user", 409);
   }
+
+  if (profileData.skills && Array.isArray(profileData.skills)) {
+    const trimmedSkillNames = profileData.skills
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0);
+
+    if (trimmedSkillNames.length > 0) {
+      const skillIds = [];
+
+      for (const skillName of trimmedSkillNames) {
+        let skill = await this.skillRepository.findSkillByName(skillName);
+
+        if (!skill) {
+          skill = await this.skillRepository.createSkill({ name: skillName });
+        }
+
+        skillIds.push(skill._id);
+      }
+
+      profileData.skills = skillIds;
+    } else {
+      delete profileData.skills;
+    }
+  }
+
+  await this.candidateProfileRepository.createProfile(profileData);
+
+  return await this.candidateProfileRepository.findProfileByUserId(profileData.userId);
+}
+
 
   async getProfileByUserId(userId) {
     let profile = await this.candidateProfileRepository.findProfileByUserId(
       userId
     );
     if (!profile) {
-      // Create a default profile if not found
       const profileData = { userId };
       profile = await this.candidateProfileRepository.createProfile(
         profileData
@@ -34,18 +61,39 @@ class CandidateProfileService {
   }
 
   async updateProfile(userId, profileData) {
-    const profile = await this.candidateProfileRepository.findProfileByUserId(
-      userId
-    );
-    if (!profile) {
-      throw new AppError("Profile not found", 404);
-    }
+  const profile = await this.candidateProfileRepository.findProfileByUserId(userId);
+  if (!profile) throw new AppError("Profile not found", 404);
 
-    return await this.candidateProfileRepository.updateProfile(
-      profile._id,
-      profileData
-    );
+  if (profileData.skills && Array.isArray(profileData.skills)) {
+    const trimmedSkillNames = profileData.skills
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0);
+
+    if (trimmedSkillNames.length > 0) {
+      const skillIds = [];
+
+      for (const skillName of trimmedSkillNames) {
+        let skill = await this.skillRepository.findSkillByName(skillName);
+
+        if (!skill) {
+          skill = await this.skillRepository.createSkill({ name: skillName });
+        }
+
+        skillIds.push(skill._id);
+      }
+
+      profileData.skills = skillIds;
+    } else {
+      delete profileData.skills;
+    }
   }
+
+
+  await this.candidateProfileRepository.updateProfile(profile._id, profileData);
+
+  return await this.candidateProfileRepository.findProfileByUserId(userId);
+}
+
 
   async deleteProfile(userId) {
     const profile = await this.candidateProfileRepository.findProfileByUserId(
@@ -55,70 +103,97 @@ class CandidateProfileService {
       throw new AppError("Profile not found", 404);
     }
 
-    return await this.candidateProfileRepository.deleteProfile(profile._id);
-  }
-
-  async addSkills(userId, skillIds) {
-    // Normalize skillIds to array
-    if (typeof skillIds === "string") {
-      skillIds = [skillIds];
-    }
-
-    if (!Array.isArray(skillIds) || skillIds.length === 0) {
-      throw new AppError(
-        "skillIds must be a non-empty array or a valid skillId string",
-        400
-      );
-    }
-
-    for (const skillId of skillIds) {
-      if (
-        typeof skillId !== "string" ||
-        !mongoose.Types.ObjectId.isValid(skillId)
-      ) {
-        throw new AppError(`Invalid skillId: ${skillId}`, 400);
-      }
-    }
-
-    const profile = await this.candidateProfileRepository.findProfileByUserId(
-      userId
-    );
-    if (!profile) {
+    const deletedProfile = await this.candidateProfileRepository.deleteProfile(profile._id);
+    if (!deletedProfile) {
       throw new AppError("Profile not found", 404);
     }
 
-    const existingSkillIds = profile.skills.map((skill) =>
-      skill._id.toString()
-    );
-    const duplicates = skillIds.filter((skillId) =>
-      existingSkillIds.includes(skillId)
-    );
-    if (duplicates.length > 0) {
-      throw new AppError(`Skills already added: ${duplicates.join(", ")}`, 400);
-    }
-
-    await this.candidateProfileRepository.addSkills(userId, skillIds);
-    return await this.candidateProfileRepository.findProfileByUserId(userId);
+    return deletedProfile;
   }
 
-  async removeSkill(userId, skillId) {
-    if (
-      typeof skillId !== "string" ||
-      !mongoose.Types.ObjectId.isValid(skillId)
-    ) {
-      throw new AppError("Invalid skillId", 400);
-    }
-
-    const profile = await this.candidateProfileRepository.findProfileByUserId(
-      userId
-    );
-    if (!profile) {
-      throw new AppError("Profile not found", 404);
-    }
-
-    await this.candidateProfileRepository.removeSkill(userId, skillId);
-    return await this.candidateProfileRepository.findProfileByUserId(userId);
+async addSkills(userId, skillNames) {
+  if (typeof skillNames === "string") {
+    skillNames = [skillNames];
   }
+
+  if (!Array.isArray(skillNames) || skillNames.length === 0) {
+    throw new AppError(
+      "skillNames must be a non-empty array or a valid skillName string",
+      400
+    );
+  }
+
+  const trimmedSkillNames = skillNames
+    .map((name) => name.trim())
+    .filter((name) => name.length > 0);
+
+  if (trimmedSkillNames.length === 0) {
+    throw new AppError("No valid skill names provided", 400);
+  }
+
+  const skillIds = [];
+  for (const skillName of trimmedSkillNames) {
+    let skill = await this.skillRepository.findSkillByName(skillName);
+
+    if (!skill) {
+      skill = await this.skillRepository.createSkill({ name: skillName });
+    }
+
+    skillIds.push(skill._id.toString());
+  }
+
+  const profile = await this.candidateProfileRepository.findProfileByUserId(userId);
+  if (!profile) {
+    throw new AppError("Profile not found", 404);
+  }
+
+  // AFTER aggregation pipeline → skills = ["React", "Node"]
+  const existingSkillNames = profile.skills.map((s) => s.toLowerCase());
+
+  const duplicates = trimmedSkillNames.filter((name) =>
+    existingSkillNames.includes(name.toLowerCase())
+  );
+
+  if (duplicates.length > 0) {
+    throw new AppError(`Skills already added: ${duplicates.join(", ")}`, 400);
+  }
+
+  await this.candidateProfileRepository.addSkills(userId, skillIds);
+  return await this.candidateProfileRepository.findProfileByUserId(userId);
+}
+
+
+
+  async removeSkill(userId, skillName) {
+  if (typeof skillName !== "string" || skillName.trim().length === 0) {
+    throw new AppError("Invalid skill name", 400);
+  }
+
+  const trimmedSkillName = skillName.trim();
+
+  const skill = await this.skillRepository.findSkillByName(trimmedSkillName);
+  if (!skill) {
+    throw new AppError("Skill not found", 404);
+  }
+
+  const profile = await this.candidateProfileRepository.findProfileByUserId(userId);
+  if (!profile) {
+    throw new AppError("Profile not found", 404);
+  }
+
+  const skillExists = profile.skills.some(
+    (s) => s.toLowerCase() === trimmedSkillName.toLowerCase()
+  );
+
+  if (!skillExists) {
+    throw new AppError("Skill not found in profile", 404);
+  }
+
+  await this.candidateProfileRepository.removeSkill(userId, skill._id.toString());
+
+  return await this.candidateProfileRepository.findProfileByUserId(userId);
+}
+
 
   async uploadResume(userId, resumeFile, resumeScore) {
     const profile = await this.candidateProfileRepository.findProfileByUserId(

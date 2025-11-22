@@ -29,6 +29,8 @@ export const authenticateJWT = async (req, res, next) => {
     next();
   } catch (error) {
     next(new AppError("Invalid or expired token.", 401));
-    // next(error);
+    
   }
 };
+
+
