@@ -2,14 +2,13 @@ import jobAppModel from "../../models/jobApplication.model.js";
 import { AppError } from "../../utils/errors.js";
 import IJobApplicationRepository from "../contracts/IJobApplicationRepository.js";
 
-class MongoApplicationRespository extends IJobApplicationRepository { 
-
+class MongoApplicationRespository extends IJobApplicationRepository {
   async createJobApplication(jobAppData) {
     try {
       // Check for duplicate application
       const existing = await jobAppModel.findOne({
         candidateId: jobAppData.candidateId,
-        jobId: jobAppData.jobId
+        jobId: jobAppData.jobId,
       });
 
       if (existing) {
@@ -20,7 +19,6 @@ class MongoApplicationRespository extends IJobApplicationRepository {
       const newApplication = await jobAppModel.create(jobAppData);
 
       return newApplication;
-
     } catch (error) {
       console.log("DB Error:", error);
       throw error;
@@ -44,7 +42,6 @@ class MongoApplicationRespository extends IJobApplicationRepository {
       }
 
       return updated;
-
     } catch (error) {
       throw new AppError("Failed to update application status", 500);
     }
