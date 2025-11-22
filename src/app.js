@@ -10,6 +10,7 @@ import candidateProfileRoutes from "./routes/candidateProfile.routes.js";
 import errorHandler from './middlewares/errorHandler.middleware.js';
 import cookieParser from "cookie-parser";
 import jobCategoryRoutes from "./routes/jobCategory.routes.js";
+import expereniceRoutes from "./routes/experience.routes.js";
 import aiRoutes from './routes/ai.routes.js'
 import { corsOptions } from "./config/corsOptions.js";
 const app = express();
@@ -21,11 +22,12 @@ app.use(cors(corsOptions));
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/roles", roleRoutes);
-app.use("/api/permissions",permissionRoutes);
-app.use("/api/jobs",jobRoleRoutes);
+app.use("/api/permissions", permissionRoutes);
+app.use("/api/jobs", jobRoleRoutes);
 app.use("/api/job-categories", jobCategoryRoutes);
 app.use("/api/skills", skillRoutes);
 app.use("/api/ai", aiRoutes)
+app.use("/api/experience", expereniceRoutes);
 app.use('/api/candidate-profile', candidateProfileRoutes);
 
 app.use(errorHandler);
