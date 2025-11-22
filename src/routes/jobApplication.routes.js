@@ -6,7 +6,7 @@ import jobApplicationController from "../controllers/jobApplication.controller.j
 const router = express.Router();
 
 router.post(
-  "/:jobId",
+  "/",
   authenticateJWT,
   authorize("jobApplication", "create"),
   jobApplicationController.applyForJob
