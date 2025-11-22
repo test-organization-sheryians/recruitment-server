@@ -10,6 +10,7 @@ router.post(
   authorize("jobApplication", "create"),
   jobApplicationController.applyForJob
 );
+
 router.get(
   "/",
   authenticateJWT,
