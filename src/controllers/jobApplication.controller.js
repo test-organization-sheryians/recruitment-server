@@ -17,7 +17,7 @@ class JobApplicationController {
         if (!resumeUrl) throw new AppError("Resume URL is required", 400);
 
         const application = await jobApplicationService.applyForJob({
-            jobId,      
+            jobId,
             candidateId,
             message,
             resumeUrl,
