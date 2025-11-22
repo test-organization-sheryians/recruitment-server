@@ -43,26 +43,22 @@ class CandidateProfileController {
   });
 
   deleteProfile = asyncHandler(async (req, res) => {
-    const profile = await this.candidateProfileService.getProfileByUserId(
-      req.userId
-    );
-
     await this.candidateProfileService.deleteProfile(req.userId);
 
     res.status(200).json({
       success: true,
-      data: profile,
       message: "Profile deleted successfully",
     });
   });
 
   addSkills = asyncHandler(async (req, res) => {
     const userId = req.userId;
-    const skillIds = req.body.skills;
+
+    const skillNames = req.body.skills;
 
     const profile = await this.candidateProfileService.addSkills(
       userId,
-      skillIds
+      skillNames
     );
     res.status(200).json({
       success: true,
@@ -72,10 +68,10 @@ class CandidateProfileController {
   });
 
   removeSkill = asyncHandler(async (req, res) => {
-    const { skillId } = req.params;
+    const { skillName } = req.params;
     const profile = await this.candidateProfileService.removeSkill(
       req.userId,
-      skillId
+      skillName
     );
     res.status(200).json({
       success: true,
@@ -122,3 +118,4 @@ class CandidateProfileController {
 }
 
 export default CandidateProfileController;
+
