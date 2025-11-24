@@ -5,7 +5,8 @@ import { AppError } from "../utils/errors.js";
 class JobApplicationController {
     
     applyForJob = asyncHandler(async (req, res, next) => {
-        const { jobId, candidateId, message, resumeUrl } = req.body;
+        const { jobId, message, resumeUrl } = req.body;
+        const  candidateId  = req.userId;
         
         if (!resumeUrl) throw new AppError("Resume URL is required", 400);
 
