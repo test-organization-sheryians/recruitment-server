@@ -50,7 +50,13 @@ export const applyForJobSchema = Joi.object({
 // 2. Validator for PATCH /:status (updateApplicationStatus)
 // This validates the data sent in the request body when updating status.
 // ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+// 2. Validator for PATCH /:id - Validates Request Body (Status Update)
+// ----------------------------------------------------------------------
 export const updateApplicationStatusSchema = Joi.object({
+    // NEW: Application ID is now expected in the request body
+    applicationId: validateObjectId.label('Application ID'), 
+
     status: Joi.string()
         .valid(...validStatuses) // Must be one of the defined enum values
         .required()
@@ -65,6 +71,7 @@ export const updateApplicationStatusSchema = Joi.object({
         .max(500)
         .allow(null, '')
 });
+
 
 // ----------------------------------------------------------------------
 // 3. Validator for ObjectId in URL params (e.g., job application ID in future routes)
