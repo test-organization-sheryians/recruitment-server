@@ -16,6 +16,10 @@ router.delete("/:id", authenticateJWT, authorize("admin"), permissionController.
 router.get("/", authenticateJWT, authorize("admin"), permissionController.getPermissionsByRole);
 
 // Check user permission
-router.get("/check/user", authenticateJWT, permissionController.checkPermission);
+router.get(
+  "/check/user",
+  authenticateJWT,
+  permissionController.checkPermission
+);
 
 export default router;

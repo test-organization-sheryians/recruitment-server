@@ -10,7 +10,7 @@ class MongoUserRepository extends IUserRepository {
       const saveUser = await user.save();
       return saveUser;
     } catch (error) {
-      console.error('Error creating user:', error);
+      console.error("Error creating user:", error);
       throw new AppError(`Failed to create user: ${error.message}`, 500, error);
     }
   }

@@ -1,7 +1,7 @@
 import express from "express";
-import cors from "cors"
-import userRoutes from './routes/user.routes.js'
-import authRoutes from './routes/auth.routes.js'
+import cors from "cors";
+import userRoutes from "./routes/user.routes.js";
+import authRoutes from "./routes/auth.routes.js";
 import roleRoutes from "./routes/role.routes.js";
 import skillRoutes from "./routes/skill.routes.js";
 import permissionRoutes from "./routes/permission.routes.js";
@@ -13,6 +13,7 @@ import jobCategoryRoutes from "./routes/jobCategory.routes.js";
 import expereniceRoutes from "./routes/experience.routes.js";
 import aiRoutes from './routes/ai.routes.js'
 import { corsOptions } from "./config/corsOptions.js";
+import jobapply from "./routes/jobApplication.routes.js";
 const app = express();
 
 app.use(express.json());
@@ -25,6 +26,7 @@ app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
 app.use("/api/jobs", jobRoleRoutes);
 app.use("/api/job-categories", jobCategoryRoutes);
+app.use("/api/job-apply", jobapply);
 app.use("/api/skills", skillRoutes);
 app.use("/api/ai", aiRoutes)
 app.use("/api/experience", expereniceRoutes);
