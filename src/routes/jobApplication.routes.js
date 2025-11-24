@@ -8,28 +8,28 @@ const router = express.Router();
 router.post(
   "/",
   authenticateJWT,
-  authorize("jobApplication", "create"),
+ 
   jobApplicationController.applyForJob
 );
 
 router.get(
   "/",
   authenticateJWT,
-  authorize("jobApplication", "view"),
+ authorize("admin") , 
   jobApplicationController.getAllApplications
 );
 
 router.patch(
-  "/:applicationId/status",
+  "/:status",
   authenticateJWT,
-  authorize("jobApplication", "update"),
+authorize("admin") , 
   jobApplicationController.updateApplicationStatus
 );
 
 router.get(
   "/filter/:status",
   authenticateJWT,
-  authorize("jobApplication", "view"),
+ authorize("admin") , 
   jobApplicationController.filterApplications
 );
 

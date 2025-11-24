@@ -6,7 +6,7 @@ import { authorize } from "../middlewares/role.middleware.js";
 import {
   createJobRoleValidator,
   updateJobRoleValidator,
-  filterJobRolesValidator,
+  filterJobRolesValidator
 } from "../middlewares/validators/jobRole.validator.js";
 
 const router = express.Router();
@@ -15,30 +15,26 @@ const router = express.Router();
 router.post(
   "/",
   authenticateJWT,
-  authorize("jobs", "create"),
+  authorize("admin"),
   createJobRoleValidator,
   jobRoleController.createJobRole
 );
 
 router.get(
   "/",
-  authenticateJWT,
-  authorize("jobs", "read"),
   filterJobRolesValidator,
   jobRoleController.getAllJobRoles
 );
 
 router.get(
   "/:id",
-  authenticateJWT,
-  authorize("jobs", "read"),
   jobRoleController.getJobRoleById
 );
 
 router.put(
   "/:id",
   authenticateJWT,
-  authorize("jobs", "update"),
+  authorize("admin"),
   updateJobRoleValidator,
   jobRoleController.updateJobRole
 );
@@ -46,7 +42,7 @@ router.put(
 router.delete(
   "/:id",
   authenticateJWT,
-  authorize("jobs", "delete"),
+  authorize("admin"),
   jobRoleController.deleteJobRole
 );
 
@@ -54,29 +50,23 @@ router.delete(
 router.get(
   "/client/:clientId",
   authenticateJWT,
-  authorize("jobs", "read"),
+  authorize("admin"),
   jobRoleController.getJobRolesByClient
 );
 
 router.get(
   "/category/:categoryId",
-  authenticateJWT,
-  authorize("jobs", "read"),
   jobRoleController.getJobRolesByCategory
 );
 
 router.get(
   "/status/active",
-  authenticateJWT,
-  authorize("jobs", "read"),
   jobRoleController.getActiveJobRoles
 );
 
 router.get(
   "/status/expired",
-  authenticateJWT,
-  authorize("jobs", "read"),
   jobRoleController.getExpiredJobRoles
-);
+); // it won't work , as response is not what we expect  ,there is some missing error handling case/edge cases to handle , while fetching expired roles
 
 export default router;

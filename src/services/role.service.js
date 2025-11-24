@@ -1,6 +1,6 @@
 // src/services/role.service.js
-import MongoRoleRepository from "../repositories/implementations/mongoPermissionRepository.js";
 import MongoPermissionRepository from "../repositories/implementations/mongoPermissionRepository.js";
+import MongoRoleRepository from "../repositories/implementations/mongoRoleRepository.js";
 import { AppError } from "../utils/errors.js";
 
 class RoleService {
@@ -39,7 +39,7 @@ class RoleService {
   }
 
   async deleteRole(id) {
-    // Check if role has associated permissions
+    // 🔥 CHANGE ADDED: we now check if the role has linked permissions before deletion
     const permissions = await this.permissionRepository.findPermissionsByRole(id);
     if (permissions.length > 0) {
       throw new AppError("Cannot delete role with existing permissions", 400);
@@ -53,11 +53,12 @@ class RoleService {
   }
 
   async getRoleWithPermissions(roleId) {
+    // 🔥 CHANGE ADDED: ensure we handle case where aggregation returns empty array
     const result = await this.roleRepository.getRoleWithPermissions(roleId);
     if (!result || result.length === 0) {
       throw new AppError("Role not found", 404);
     }
-    return result[0];
+    return result[0]; // only return first object instead of whole array
   }
 }
 

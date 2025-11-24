@@ -6,44 +6,14 @@ import { authorize } from "../middlewares/role.middleware.js";
 const router = express.Router();
 
 // Admin only routes
-router.post(
-  "/",
-  authenticateJWT,
-  authorize("permissions", "create"),
-  permissionController.createPermission
-);
-router.get(
-  "/",
-  authenticateJWT,
-  authorize("permissions", "read"),
-  permissionController.getAllPermissions
-);
-router.get(
-  "/:id",
-  authenticateJWT,
-  authorize("permissions", "read"),
-  permissionController.getPermissionById
-);
-router.put(
-  "/:id",
-  authenticateJWT,
-  authorize("permissions", "update"),
-  permissionController.updatePermission
-);
-router.delete(
-  "/:id",
-  authenticateJWT,
-  authorize("permissions", "delete"),
-  permissionController.deletePermission
-);
+router.post("/", authenticateJWT, authorize("admin"), permissionController.createPermission);
+router.get("/", authenticateJWT, authorize("admin"), permissionController.getAllPermissions); 
+router.get("/:id", authenticateJWT, authorize("admin"), permissionController.getPermissionById);
+router.put("/:id", authenticateJWT, authorize("admin"), permissionController.updatePermission); 
+router.delete("/:id", authenticateJWT, authorize("admin"), permissionController.deletePermission);
 
 // Get permissions by role
-router.get(
-  "/role/:roleId",
-  authenticateJWT,
-  authorize("permissions", "read"),
-  permissionController.getPermissionsByRole
-);
+router.get("/", authenticateJWT, authorize("admin"), permissionController.getPermissionsByRole);
 
 // Check user permission
 router.get(

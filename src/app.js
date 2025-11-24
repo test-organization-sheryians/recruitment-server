@@ -6,10 +6,12 @@ import roleRoutes from "./routes/role.routes.js";
 import skillRoutes from "./routes/skill.routes.js";
 import permissionRoutes from "./routes/permission.routes.js";
 import jobRoleRoutes from "./routes/jobRole.routes.js";
-import errorHandler from "./middlewares/errorHandler.middleware.js";
+import candidateProfileRoutes from "./routes/candidateProfile.routes.js";
+import errorHandler from './middlewares/errorHandler.middleware.js';
 import cookieParser from "cookie-parser";
 import jobCategoryRoutes from "./routes/jobCategory.routes.js";
-import aiRoutes from "./routes/ai.routes.js";
+import expereniceRoutes from "./routes/experience.routes.js";
+import aiRoutes from './routes/ai.routes.js'
 import { corsOptions } from "./config/corsOptions.js";
 import jobapply from "./routes/jobApplication.routes.js";
 const app = express();
@@ -26,8 +28,13 @@ app.use("/api/jobs", jobRoleRoutes);
 app.use("/api/job-categories", jobCategoryRoutes);
 app.use("/api/job-apply", jobapply);
 app.use("/api/skills", skillRoutes);
-app.use("/api/ai", aiRoutes);
+app.use("/api/ai", aiRoutes)
+app.use("/api/experience", expereniceRoutes);
+app.use('/api/candidate-profile', candidateProfileRoutes);
 
 app.use(errorHandler);
 
 export default app;
+
+
+

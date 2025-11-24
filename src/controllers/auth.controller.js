@@ -39,6 +39,8 @@ class AuthController {
   register = async (req, res, next) => {
     try {
       const userData = req.body;
+      console.log(userData);
+
       const result = await this.userService.register(userData);
       res.cookie("token", result.token, {
         httpOnly: true,

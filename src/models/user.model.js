@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
     trim: true,
+    index:true
   },
   phoneNumber: {
     type: String,
@@ -18,7 +19,6 @@ const userSchema = new mongoose.Schema({
   roleId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Role",
-    required: true,
     index: true
   },
   firstName: {
