@@ -14,3 +14,4 @@ router.post("/questionset", uploadPDF, generateQuestion);
 router.post("/evaluateset", evaluateAnswers);
 
 export default router;
+// resume se name and details hatana h
