@@ -17,14 +17,24 @@ class JobApplicationService {
 
     const exists = await this.jobAppRepo.findByUserAndJob(candidateId, jobId);
     if (exists) throw new AppError("Already applied for this job", 409);
+
+
     const application = await this.jobAppRepo.createJobApplication({
       jobId,
       candidateId,
       message,
       resumeUrl,
     });
-    return application;
+console.log( "application >>> " , application)
+    return {
+      success: true,
+      message: "Application submitted successfully!",
+      application, 
+    };
   }
+
+
+
 
   async getAllApplications() {
     return await this.jobAppRepo.getAllApplications();
