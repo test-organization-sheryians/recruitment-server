@@ -4,6 +4,7 @@ import { AppError } from "../utils/errors.js";
 import jwt from "jsonwebtoken";
 import config from "../config/environment.js";
 import bcrypt from "bcryptjs";
+import verifyGoogleIdToken from "../utils/verifyGoogleToken.js";
 
 const { JWT_SECRET, REFRESH_SECRET, REFRESH_EXPIRES_IN } = config;
 
@@ -25,10 +26,10 @@ class UserService {
   _getSafeRole(user) {
     return user.role
       ? {
-          _id: user.role._id,
-          name: user.role.name,
-          description: user.role.description,
-        }
+        _id: user.role._id,
+        name: user.role.name,
+        description: user.role.description,
+      }
       : null;
   }
 
@@ -153,6 +154,10 @@ class UserService {
     //   3600
     // );
     // }
+    if (!user.isPasswordSet) {
+      throw new AppError("You signed up with Google. Please continue with Google or set a password.", 400);
+    }
+
 
     user.comparePassword = async (pwd) => bcrypt.compare(pwd, user.password);
 
@@ -174,7 +179,7 @@ class UserService {
       lastName: safeUser.lastName,
       role: safeUser?.role?.name,
     };
-        console.log(jwtPayload , "login")
+    console.log(jwtPayload, "login")
 
     const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "1h" });
     const refreshToken = jwt.sign({ id: userWithRole._id }, REFRESH_SECRET, {
@@ -310,6 +315,55 @@ class UserService {
     await this.cacheRepository.del(`user:email:${user.email}`);
 
     return true;
+  }
+
+
+  async googleLogin({ idToken }) {
+    if (!idToken) {
+      throw new AppError("id token is required", 400);
+    }
+
+    const payload = await verifyGoogleIdToken(idToken);
+
+    const { email, sub: googleId, email_verified } = payload;
+
+    if (!email) {
+      throw new AppError("Google account has no email", 400);
+    }
+
+    if (!email_verified) {
+      throw new AppError("Google email is not verified", 400);
+    }
+
+    let firstName = null;
+    let lastName = null;
+
+    if (payload.name) {
+      const parts = payload.name.trim().split(" ");
+      firstName = parts[0] || null;
+      lastName = parts.slice(1).join(" ") || null;
+    } else {
+      // fallback when Google doesn't return name
+      firstName = email.split("@")[0];  // name from email username
+      lastName = null;
+    }
+
+
+    // Find or create
+    const user = await this.userRepository.findOrCreateGoogleUser({
+      email,
+      firstName,
+      lastName,
+      googleId
+    });
+
+    // const { token, refreshToken } = this.generateTokensForUser(user);
+
+    const token = jwt.sign({ userId: user._id }, config.JWT_SECRET, { expiresIn: "24h" });
+    const refreshToken = jwt.sign({ userId: user._id }, config.REFRESH_EXPIRES_IN, { expiresIn: config.REFRESH_EXPIRES_IN });
+
+
+    return { user, token, refreshToken };
   }
 }
 

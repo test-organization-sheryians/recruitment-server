@@ -2,6 +2,8 @@ import UserService from "../services/user.service.js";
 import { AppError } from "../utils/errors.js";
 import AuthService from "../services/auth.service.js";
 import { redisClient } from "../config/redis.js";
+import { buildAuthResponse } from "../utils/buildAuthResponse.js";
+
 
 class AuthController {
   constructor() {
@@ -167,6 +169,36 @@ class AuthController {
       next(error);
     }
   };
+
+  googleLogin = async (req, res, next) => {
+    try {
+      const { idToken } = req.body;
+
+      const { user, token, refreshToken } =
+        await this.userService.googleLogin({ idToken });
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 60 * 60 * 1000,
+      });
+
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      const response = buildAuthResponse(user, token, refreshToken);
+
+      return res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
 }
 
 export default new AuthController();

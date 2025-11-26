@@ -55,6 +55,12 @@ const validate = (schema) => (req, res, next) => {
   next();
 };
 
+export const googleLoginSchema = Joi.object({
+  idToken: Joi.string().required()
+});
+
+
 export const registerValidator = validate(registerSchema);
 export const loginValidator = validate(loginSchema);
 export const resetPasswordValidator = validate(resetPasswordSchema);
+export const googleLoginValidator = validate(googleLoginSchema)

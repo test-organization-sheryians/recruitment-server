@@ -14,6 +14,10 @@ class IUserRepository {
   async updateUser(id, userData) {
     throw new Error("Method not implemented");
   }
+
+  async findOrCreateGoogleUser({ email, firstName, lastName, googleId }) {
+    throw new Error("Method not implemented");
+  }
 }
 
 export default IUserRepository;

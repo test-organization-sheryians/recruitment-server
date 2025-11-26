@@ -72,63 +72,63 @@ class MongoUserRepository extends IUserRepository {
     }
   }
 
-async findUserById(id) {
-  const isValid = mongoose.Types.ObjectId.isValid(id);
+  async findUserById(id) {
+    const isValid = mongoose.Types.ObjectId.isValid(id);
 
-  if (!isValid) {
-    console.log("ERROR: Invalid ObjectId format:", id);
-    return null;
-  }
+    if (!isValid) {
+      console.log("ERROR: Invalid ObjectId format:", id);
+      return null;
+    }
 
-  const objectId = new mongoose.Types.ObjectId(id);
+    const objectId = new mongoose.Types.ObjectId(id);
 
-  const [user] = await User.aggregate([
-    { $match: { _id: objectId } },
+    const [user] = await User.aggregate([
+      { $match: { _id: objectId } },
 
-    {
-      $lookup: {
-        from: "roles",
-        localField: "roleId",
-        foreignField: "_id",
-        as: "role",
-      },
-    },
-
-    {
-      $unwind: {
-        path: "$role",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-
-    {
-      $project: {
-        _id: 1,
-        email: 1,
-        password: 1,
-        firstName: 1,
-        lastName: 1,
-        phoneNumber: 1,
-        googleId: 1,
-        role: {
-          $cond: [
-            { $ifNull: ["$role", false] },
-            {
-              _id: "$role._id",
-              name: "$role.name",
-              description: "$role.description",
-            },
-            null,
-          ],
+      {
+        $lookup: {
+          from: "roles",
+          localField: "roleId",
+          foreignField: "_id",
+          as: "role",
         },
       },
-    },
 
-    { $limit: 1 },
-  ]);
+      {
+        $unwind: {
+          path: "$role",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
-  return user || null;
-}
+      {
+        $project: {
+          _id: 1,
+          email: 1,
+          password: 1,
+          firstName: 1,
+          lastName: 1,
+          phoneNumber: 1,
+          googleId: 1,
+          role: {
+            $cond: [
+              { $ifNull: ["$role", false] },
+              {
+                _id: "$role._id",
+                name: "$role.name",
+                description: "$role.description",
+              },
+              null,
+            ],
+          },
+        },
+      },
+
+      { $limit: 1 },
+    ]);
+
+    return user || null;
+  }
 
   async updateUser(id, userData) {
     try {
@@ -137,6 +137,27 @@ async findUserById(id) {
       throw new AppError("Failed to update user", 500, error);
     }
   }
+
+
+  async findOrCreateGoogleUser({ email, firstName, lastName, googleId }) {
+    let user = await this.findUserByEmail(email);
+
+    if (!user) {
+      user = await this.createUser({
+        email,
+        firstName,
+        lastName,
+        googleId,
+        isPasswordSet: false
+      });
+    } else if (!user.googleId) {
+      user.googleId = googleId;
+      await user.save();
+    }
+
+    return user;
+  }
 }
+
 
 export default MongoUserRepository;
