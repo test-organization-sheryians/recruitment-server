@@ -365,6 +365,26 @@ class UserService {
 
     return { user, token, refreshToken };
   }
+
+  async setPassword(userId, password) {
+    if (!password) {
+      throw new AppError("Password is required", 400);
+    }
+
+    const user = await this.userRepository.findUserById(userId);
+    if (!user) {
+      throw new AppError("User not found", 404)
+    }
+
+    if (user.isPasswordSet) {
+      throw new AppError("Password already set. Use change password instead.", 400);
+    }
+    user.password = password; 
+    user.isPasswordSet = true;
+    await user.save();
+
+    return user;
+  }
 }
 
 export default UserService;
