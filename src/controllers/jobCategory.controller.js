@@ -18,7 +18,8 @@ class JobCategoryController {
 
   list = async (req, res, next) => {
     try {
-      const categories = await this.jobCategoryService.listCategories();
+      const {page, limit} = req.query;
+      const categories = await this.jobCategoryService.listCategories(page,limit);
       return res.json({
         success: true,
         data: categories,

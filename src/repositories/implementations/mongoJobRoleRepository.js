@@ -2,6 +2,7 @@ import IJobRoleRepository from "../contracts/IJobRoleRepository.js";
 import JobRole from "../../models/jobRole.model.js";
 import { AppError } from "../../utils/errors.js";
 import mongoose from "mongoose";
+import { paginateAggregation } from "../../utils/paginateAggregation.js";
 
 class MongoJobRoleRepository extends IJobRoleRepository {
   async createJobRole(jobRoleData) {
@@ -71,7 +72,8 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     }
   }
 
-  async findAllJobRoles(filter = {}) {
+  async findAllJobRoles(filter = {}, page,limit) {
+   
 
     try {
       const matchStage = {};
@@ -95,7 +97,8 @@ class MongoJobRoleRepository extends IJobRoleRepository {
 
       console.log("this is matchStage " , matchStage)
 
-      const jobs= await JobRole.aggregate([
+      // const jobs= await JobRole.aggregate();
+      const pipeline = [
         { $match: matchStage },
         {
           $lookup: {
@@ -141,8 +144,9 @@ class MongoJobRoleRepository extends IJobRoleRepository {
           $unwind: { path: "$category", preserveNullAndEmptyArrays: true }
         },
         { $sort: { createdAt: -1 } }
-      ]);
-      console.log(jobs);
+      ]
+      
+      const jobs = paginateAggregation({model:JobRole, pipeline, page, limit})
       return jobs;
     } catch (error) {
       throw new AppError("Failed to fetch job roles", 500);
@@ -171,9 +175,10 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     }
   }
 
-  async findJobRolesByClient(clientId) {
+  async findJobRolesByClient(clientId, page, limit) {
     try {
-      return await JobRole.aggregate([
+
+      const pipeline = [
         { $match: { clientId: new mongoose.Types.ObjectId(clientId) } },
         {
           $lookup: {
@@ -195,7 +200,11 @@ class MongoJobRoleRepository extends IJobRoleRepository {
           $unwind: { path: "$category", preserveNullAndEmptyArrays: false }
         },
         { $sort: { createdAt: -1 } }
-      ]);
+      ]
+      // return await JobRole.aggregate();
+
+      const result = paginateAggregation({model:JobRole, pipeline, page, limit})
+      return result;
     } catch (error) {
       throw new AppError("Failed to fetch client job roles", 500);
     }

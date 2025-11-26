@@ -30,8 +30,9 @@ class JobRoleService {
   }
 
   async getAllJobRoles(filter = {}) {
+   console.log(filter.page)
     
-    return await this.jobRoleRepository.findAllJobRoles(filter);
+    return await this.jobRoleRepository.findAllJobRoles(filter,filter.page, filter.limit);
   }
 
   async getJobRoleById(id) {
@@ -89,8 +90,8 @@ class JobRoleService {
     return jobRole;
   }
 
-  async getJobRolesByClient(clientId) {
-    return await this.jobRoleRepository.findJobRolesByClient(clientId);
+  async getJobRolesByClient(clientId, page, limit) {
+    return await this.jobRoleRepository.findJobRolesByClient(clientId, page,limit);
   }
 
   async getJobRolesByCategory(categoryId) {

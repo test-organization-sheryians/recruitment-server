@@ -1,5 +1,6 @@
 import IJobCategoryRepository from "../contracts/IJobCategoryRepository.js";
 import JobCategory from "../../models/jobCategory.model.js";
+import { paginateAggregation } from "../../utils/paginateAggregation.js";
 
 class MongoJobCategoryRepository extends IJobCategoryRepository {
   async create(categoryData) {
@@ -22,8 +23,12 @@ class MongoJobCategoryRepository extends IJobCategoryRepository {
     return await JobCategory.findOne({ name });
   }
 
-  async findAll() {
-    return await JobCategory.find().sort({ name: 1 });
+  async findAll(page,limit) {
+    // return await JobCategory.find().sort({ name: 1 });
+    const pipeline=[];
+
+    return await  paginateAggregation({model:JobCategory,pipeline,page,limit})
+
   }
 
   async updateById(id, updateData) {

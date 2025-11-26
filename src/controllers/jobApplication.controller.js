@@ -24,7 +24,8 @@ class JobApplicationController {
     });
 
     getAllApplications = asyncHandler(async (req, res) => {
-        const applications = await jobApplicationService.getAllApplications();
+        const { page = 1, limit = 10 } = req.query;
+        const applications = await jobApplicationService.getAllApplications(page, limit);
         
         res.status(200).json({
             success: true,

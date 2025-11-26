@@ -26,8 +26,8 @@ class JobApplicationService {
     return application;
   }
 
-  async getAllApplications() {
-    return await this.jobAppRepo.getAllApplications();
+  async getAllApplications(page, limit) {
+    return await this.jobAppRepo.getAllApplications(page, limit);
   }
 
   async updateApplicationStatus(applicationId, status) {

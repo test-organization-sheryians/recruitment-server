@@ -2,6 +2,7 @@ import jobAppModel from "../../models/jobApplication.model.js";
 import { AppError } from "../../utils/errors.js";
 import IJobApplicationRepository from "../contracts/IJobApplicationRepository.js";
 import mongoose from "mongoose";
+import { paginateAggregation } from "../../utils/paginateAggregation.js";
 
 class MongoApplicationRespository extends IJobApplicationRepository {
 
@@ -102,47 +103,52 @@ async createJobApplication(jobAppData) {
   }
 
  
-  async getAllApplications() {
-    return await jobAppModel.aggregate([
-      {
-        $lookup: {
-          from: "users",
-          localField: "candidateId",
-          foreignField: "_id",
-          as: "candidateDetails"
-        }
-      },
-      { $unwind: "$candidateDetails" },
-
-      {
-        $lookup: {
-          from: "jobroles",
-          localField: "jobId",
-          foreignField: "_id",
-          as: "jobDetails"
-        }
-      },
-      { $unwind: "$jobDetails" },
-
-      {
-        $project: {
-          _id: 1,
-          resumeUrl: 1,
-          coverletter: 1,
-          status: 1,
-          createdAt: 1,
-
-          "candidateDetails.firstName": 1,
-          "candidateDetails.lastName": 1,
-          "candidateDetails.email": 1,
-
-          "jobDetails.title": 1,
-          "jobDetails.description": 1,
-          "jobDetails.requiredExperience": 1
-        }
+  async getAllApplications(page, limit) {
+  const pipeline = [
+    {
+      $lookup: {
+        from: "users",
+        localField: "candidateId",
+        foreignField: "_id",
+        as: "candidateDetails"
       }
-    ]);
-  }
+    },
+    { $unwind: "$candidateDetails" },
+
+    {
+      $lookup: {
+        from: "jobroles",
+        localField: "jobId",
+        foreignField: "_id",
+        as: "jobDetails"
+      }
+    },
+    { $unwind: "$jobDetails" },
+
+    {
+      $project: {
+        _id: 1,
+        resumeUrl: 1,
+        coverletter: 1,
+        status: 1,
+        createdAt: 1,
+        "candidateDetails.firstName": 1,
+        "candidateDetails.lastName": 1,
+        "candidateDetails.email": 1,
+        "jobDetails.title": 1,
+        "jobDetails.description": 1,
+        "jobDetails.requiredExperience": 1
+      }
+    }
+  ];
+
+  return await paginateAggregation({
+    model: jobAppModel,
+    pipeline,
+    page,
+    limit
+  });
+}
 
 
   async filterApplications(status) {

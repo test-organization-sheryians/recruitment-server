@@ -95,6 +95,8 @@ const filterJobRolesSchema = Joi.object({
   expiry: Joi.string().valid('active', 'expired').messages({
     "any.only": "Expiry filter must be either 'active' or 'expired'",
   }),
+    page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(100).default(10)
 });
 
 const validate = (schema) => (req, res, next) => {
