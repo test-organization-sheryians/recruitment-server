@@ -23,6 +23,8 @@ class JobApplicationService {
       message,
       resumeUrl,
     });
+
+    console.log(application , "this is created job application")
     return application;
   }
 
