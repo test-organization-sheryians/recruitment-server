@@ -98,17 +98,17 @@ class JobRoleService {
     return await this.jobRoleRepository.findJobRolesByCategory(categoryId,page,limit);
   }
 
-  async getActiveJobRoles() {
+  async getActiveJobRoles( page, limit) {
     const currentDate = new Date();
     return await this.jobRoleRepository.findAllJobRoles({
       expiry: 'active'
-    });
+    },page,limit);
   }
 
-  async getExpiredJobRoles() {
+  async getExpiredJobRoles( page, limit) {
     return await this.jobRoleRepository.findAllJobRoles({
       expiry: 'expired'
-    });
+    },page,limit);
   }
 }
 
