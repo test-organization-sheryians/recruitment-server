@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "concurrently \"node src/server.js\" \"node src/workers/emailWorker.js\"",
+    "start": "concurrently \"node server.js\" \"node src/workers/emailWorker.js\"",
     "dev": "concurrently \"nodemon src/server.js\" \"nodemon src/workers/emailWorker.js\"",
     "worker": "node src/workers/emailWorker.js",
     "worker:dev": "nodemon src/workers/emailWorker.js",
