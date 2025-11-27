@@ -90,9 +90,11 @@ class JobRoleController {
   };
 
   getJobRolesByCategory = async (req, res, next) => {
+    const {page, limit }= req.query;
     try {
-      const jobRoles = await this.jobRoleService.getJobRolesByCategory(req.params.categoryId);
-      res.status(200).json({ 
+      const jobRoles = await this.jobRoleService.getJobRolesByCategory(req.params.categoryId,page,limit);
+      console.log(req.params.categoryId,page,limit);  
+      res.status(200).json({
         success: true, 
         count: jobRoles.length,
         data: jobRoles 

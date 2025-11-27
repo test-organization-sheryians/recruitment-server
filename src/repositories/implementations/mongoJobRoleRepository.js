@@ -177,7 +177,6 @@ class MongoJobRoleRepository extends IJobRoleRepository {
 
   async findJobRolesByClient(clientId, page, limit) {
     try {
-
       const pipeline = [
         { $match: { clientId: new mongoose.Types.ObjectId(clientId) } },
         {
@@ -210,9 +209,9 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     }
   }
 
-  async findJobRolesByCategory(categoryId) {
+  async findJobRolesByCategory(categoryId,page, limit) {
     try {
-      return await JobRole.aggregate([
+      const pipeline = [
         { $match: { category: new mongoose.Types.ObjectId(categoryId) } },
         {
           $lookup: {
@@ -234,8 +233,11 @@ class MongoJobRoleRepository extends IJobRoleRepository {
         {
           $unwind: { path: "$client", preserveNullAndEmptyArrays: false }
         },
-        { $sort: { createdAt: -1 } }
-      ]);
+        { $sort: { createdAt: -1 } }]
+      
+      const result = paginateAggregation({model: JobRole,pipeline,page,limit})
+      
+      return result;
     } catch (error) {
       throw new AppError("Failed to fetch category job roles", 500);
     }
