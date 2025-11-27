@@ -10,7 +10,7 @@ const router = Router();
 
 router.use(authenticateJWT);
 
-router.post("/questionset", uploadPDF, generateQuestion);
+router.post("/questionset",  generateQuestion);
 router.post("/evaluateset", evaluateAnswers);
 
 export default router;

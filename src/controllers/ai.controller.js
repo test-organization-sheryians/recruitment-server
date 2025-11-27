@@ -7,42 +7,24 @@ const pdfParse = async (buffer) => {
 
 export async function generateQuestion(req, res) {
     try {
-        let profileData;
-
-        if (req.file) {
-            if (req.file.mimetype !== 'application/pdf') {
-                return res.status(400).json({
-                    success: false,
-                    error: "File must be a PDF"
-                });
-            }
-
-            const pdfBuffer = req.file.buffer;
-            const data = await pdfParse(pdfBuffer);
-            const extractedText = data.text.replace(/\s+/g, ' ').trim();
-
-            profileData = {
-                resumeText: extractedText,
-                source: 'pdf',
-                metadata: {
-                    pageCount: data.numpages,
-                    pdfInfo: data.info
-                }
-            };
-        } else if (req.body) {
-            profileData = req.body;
-        } else {
+        // Only parsed text is accepted now
+        if (!req.body || !req.body.resumeText) {
             return res.status(400).json({
                 success: false,
-                error: "Either provide a PDF file or JSON profile data"
+                error: "resumeText is required in request body"
             });
         }
 
-        const result = await graph.invoke({
-            profile: profileData
-        }, { startNode: "QuestionGenerator" });
+        const profileData = {
+            resumeText: req.body.resumeText,
+            source: 'text'
+        };
         
-        // Check if more information is required
+        const result = await graph.invoke(
+            { profile: profileData },
+            { startNode: "QuestionGenerator" }
+        );
+
         if (result.requiresMoreInfo) {
             return res.status(400).json({
                 success: false,
@@ -50,29 +32,15 @@ export async function generateQuestion(req, res) {
                 message: result.message || "More information is required to generate relevant questions."
             });
         }
-        
-        const response = {
+
+
+        res.json({
             success: true,
             questions: result.questionsData || result
-        };
-
-        if (req.file) {
-            response.source = 'pdf';
-            response.text = profileData.resumeText;
-            response.pageCount = profileData.metadata.pageCount;
-        }
-
-        res.json(response);
+        });
 
     } catch (err) {
         console.error('Error in generateQuestion:', err);
-
-        if (err.message.includes('PDF')) {
-            return res.status(400).json({
-                success: false,
-                error: "Invalid PDF file"
-            });
-        }
 
         res.status(500).json({
             success: false,
@@ -81,6 +49,7 @@ export async function generateQuestion(req, res) {
         });
     }
 }
+
 
 export async function evaluateAnswers(req, res) {
     try {
