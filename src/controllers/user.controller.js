@@ -3,14 +3,20 @@ import UserService from "../services/user.service.js";
 class UserController {
   constructor() {
     this.userService = new UserService();
+
+   
     this.getMe = this.getMe.bind(this);
     this.updateMe = this.updateMe.bind(this);
+    this.getAllUsers = this.getAllUsers.bind(this); 
+    this.deleteUser = this.deleteUser.bind(this); 
   }
 
+  
   async getMe(req, res, next) {
     try {
       const userId = req.userId;
       const user = await this.userService.getUser(userId);
+       console.log( " user >> " ,user)
 
       return res.status(200).json({
         success: true,
@@ -32,6 +38,7 @@ class UserController {
     }
   }
 
+  
   async updateMe(req, res, next) {
     try {
       const userId = req.userId;
@@ -52,6 +59,40 @@ class UserController {
       next(err);
     }
   }
+
+
+  async getAllUsers(req, res, next) {
+    try {
+      const users = await this.userService.getAllUsers();
+
+      return res.status(200).json({
+        success: true,
+        data: users,
+        message: "Users fetched successfully",
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+  async deleteUser(req, res, next) {
+  try {
+    const userId = req.params.id;
+
+    console.log("Deleting user:", userId); // ✅ log userId
+
+    const deleted = await this.userService.deleteUser(userId);
+
+    console.log("Deleted user:", deleted); // ✅ log result
+    return res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (err) {
+    console.error("Delete user error:", err); // ✅ log full error
+    return res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
+}
+
 }
 
 export default new UserController();

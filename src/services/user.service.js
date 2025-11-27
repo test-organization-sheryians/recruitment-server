@@ -4,6 +4,7 @@ import { AppError } from "../utils/errors.js";
 import jwt from "jsonwebtoken";
 import config from "../config/environment.js";
 import bcrypt from "bcryptjs";
+import User from "../models/user.model.js";
 
 const { JWT_SECRET, REFRESH_SECRET, REFRESH_EXPIRES_IN } = config;
 
@@ -240,6 +241,11 @@ class UserService {
     return safeUser;
   }
 
+  async getAllUsers() {
+  const users = await this.userRepository.findAllUsers();
+  return users;
+}
+
   async updateUser(id, userData) {
     const user = await this.userRepository.updateUser(id, userData);
     if (!user) throw new AppError("User not found", 404);
@@ -291,6 +297,10 @@ class UserService {
     }
 
     return safeUser;
+  }
+
+   async deleteUser(userId) {
+    return User.findByIdAndDelete(userId);
   }
 
   async resetPassword(userId, oldPassword, newPassword) {

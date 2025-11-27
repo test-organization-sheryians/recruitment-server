@@ -72,6 +72,47 @@ class MongoUserRepository extends IUserRepository {
     }
   }
 
+async findAllUsers() {
+  try {
+    const users = await User.aggregate([
+      {
+        $lookup: {
+          from: "roles",
+          localField: "roleId",
+          foreignField: "_id",
+          as: "role",
+        },
+      },
+      {
+        $unwind: {
+          path: "$role",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          email: 1,
+          firstName: 1,
+          lastName: 1,
+          phoneNumber: 1,
+          googleId: 1,
+          role: {
+            _id: "$role._id",
+            name: "$role.name",
+            description: "$role.description",
+          },
+        },
+      },
+    ]);
+
+    return users;
+  } catch (error) {
+    throw new AppError("Failed to fetch all users with roles", 500, error);
+  }
+}
+
+
 async findUserById(id) {
   const isValid = mongoose.Types.ObjectId.isValid(id);
 
