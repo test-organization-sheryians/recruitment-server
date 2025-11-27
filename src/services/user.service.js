@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import config from "../config/environment.js";
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
+import { json } from "express";
 
 const { JWT_SECRET, REFRESH_SECRET, REFRESH_EXPIRES_IN } = config;
 
@@ -321,6 +322,33 @@ class UserService {
 
     return true;
   }
+
+async updateUserRole(userId, newRole) {
+  const updatedUser = await this.userRepository.updateUser(userId, {
+    role: newRole,
+  });
+
+  if (!updatedUser) {
+    throw new AppError("User not found", 404);
+  }
+
+  const safeUser = this._getSafeUserPayload(updatedUser);
+
+  await this.cacheRepository.set(
+    `user:id:${userId}`,
+    JSON.stringify(safeUser),
+    3600
+  );
+
+  await this.cacheRepository.set(
+    `user:email:${updatedUser.email}`,
+    JSON.stringify(safeUser),
+    3600
+  );
+
+  return safeUser;
+}
+
 }
 
 export default UserService;
