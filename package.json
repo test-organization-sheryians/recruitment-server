@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
-"scripts": {
-  "start": "concurrently \"node src/server.js\" \"node src/workers/emailWorker.js\"",
-  "dev": "concurrently \"nodemon src/server.js\" \"nodemon src/workers/emailWorker.js\"",
-  "worker": "node src/workers/emailWorker.js",
-  "worker:dev": "nodemon src/workers/emailWorker.js",
-  "dev:all": "npm run dev",
-  "start:all": "npm run start" 
-},
+  "scripts": {
+    "start": "concurrently \"node src/server.js\" \"node src/workers/emailWorker.js\"",
+    "dev": "concurrently \"nodemon src/server.js\" \"nodemon src/workers/emailWorker.js\"",
+    "worker": "node src/workers/emailWorker.js",
+    "worker:dev": "nodemon src/workers/emailWorker.js",
+    "dev:all": "npm run dev",
+    "start:all": "npm run start"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -21,6 +21,7 @@
     "bcryptjs": "^3.0.2",
     "bullmq": "^5.64.1",
     "cloudinary": "^1.41.3",
+    "concurrently": "^9.2.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
