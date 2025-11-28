@@ -55,13 +55,13 @@ class MongoJobRoleRepository extends IJobRoleRepository {
           }
         },
         {
-          $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: false }
+          $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true }
         },
         {
-          $unwind: { path: "$client", preserveNullAndEmptyArrays: false }
+          $unwind: { path: "$client", preserveNullAndEmptyArrays: true }
         },
         {
-          $unwind: { path: "$category", preserveNullAndEmptyArrays: false }
+          $unwind: { path: "$category", preserveNullAndEmptyArrays: true }
         }
       ]);
       
@@ -72,6 +72,7 @@ class MongoJobRoleRepository extends IJobRoleRepository {
   }
 
   async findAllJobRoles(filter = {}) {
+
     try {
       const matchStage = {};
       if (filter.clientId) {
@@ -92,7 +93,9 @@ class MongoJobRoleRepository extends IJobRoleRepository {
         }
       }
 
-      const [job]= await JobRole.aggregate([
+      console.log("this is matchStage " , matchStage)
+
+      const jobs= await JobRole.aggregate([
         { $match: matchStage },
         {
           $lookup: {
@@ -129,18 +132,18 @@ class MongoJobRoleRepository extends IJobRoleRepository {
           }
         },
         {
-          $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: false }
+          $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true }
         },
         {
-          $unwind: { path: "$client", preserveNullAndEmptyArrays: false }
+          $unwind: { path: "$client", preserveNullAndEmptyArrays: true }
         },
         {
-          $unwind: { path: "$category", preserveNullAndEmptyArrays: false }
+          $unwind: { path: "$category", preserveNullAndEmptyArrays: true }
         },
         { $sort: { createdAt: -1 } }
       ]);
-      console.log(job);
-      return job;
+      console.log(jobs);
+      return jobs;
     } catch (error) {
       throw new AppError("Failed to fetch job roles", 500);
     }
