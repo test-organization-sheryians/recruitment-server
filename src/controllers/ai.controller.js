@@ -7,6 +7,7 @@ import extractResumePrompt from '../lib/prompt/extractFile.js';
 const pdfParse = async (buffer) => {
     const { default: pdf } = await import('pdf-parse/lib/pdf-parse.js');
     return pdf(buffer);
+  
 };
 
 export async function generateQuestion(req, res) {

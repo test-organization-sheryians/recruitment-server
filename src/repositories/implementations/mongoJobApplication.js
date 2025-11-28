@@ -6,35 +6,16 @@ import mongoose from "mongoose";
 class MongoApplicationRespository extends IJobApplicationRepository {
 
  
-async createJobApplication(jobAppData) {
+ async createJobApplication(jobAppData) {
   try {
- 
-    const existing = await jobAppModel.findOne({
-      candidateId: jobAppData.candidateId,
-      jobId: jobAppData.jobId
-    });
-
-    if (existing) {
-      throw new AppError("Already applied", 409);
-    }
-
-    // Create application
-    await jobAppModel.create(jobAppData);
-
-    // Only return message
-    return {
-      success: true,
-      message: "Application submitted successfully!"
-    };
-
+    const jobApplication = new jobAppModel(jobAppData);
+    const savedApplication = await jobApplication.save();
+    return savedApplication;
   } catch (error) {
-    if (error.code === 11000) {
-      throw new AppError("Already applied", 409);
-    }
-    throw new AppError("Failed to create job application", 500);
+    console.error("Error creating job application:", error);
+    throw new AppError(`Failed to create job application: ${error.message}`, 500, error);
   }
 }
-
  
   async findByUserAndJob(candidateId, jobId) {
     const result = await jobAppModel.aggregate([
