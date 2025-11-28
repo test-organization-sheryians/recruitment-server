@@ -1,15 +1,9 @@
-/**
- * Universal Aggregation Pagination Utility
- * Works with any MongoDB model & aggregation pipeline
- */
-
-export const  paginateAggregation = async ({
+export const paginateAggregation = async ({
   model,
   pipeline = [],
   page = 1,
-  limit = 10
+  limit = 10,
 }) => {
-
   page = parseInt(page);
   limit = parseInt(limit);
 
@@ -22,15 +16,10 @@ export const  paginateAggregation = async ({
     ...pipeline,
     {
       $facet: {
-        data: [
-          { $skip: skip },
-          { $limit: limit }
-        ],
-        totalCount: [
-          { $count: "count" }
-        ]
-      }
-    }
+        data: [{ $skip: skip }, { $limit: limit }],
+        totalCount: [{ $count: "count" }],
+      },
+    },
   ];
 
   const result = await model.aggregate(finalPipeline);
@@ -44,7 +33,7 @@ export const  paginateAggregation = async ({
       totalRecords,
       currentPage: page,
       totalPages: Math.ceil(totalRecords / limit),
-      limit
-    }
+      limit,
+    },
   };
 };
