@@ -119,7 +119,6 @@ class UserService {
       role: safeUser?.role?.name,
     };
 
-
     const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "1h" });
     const refreshToken = jwt.sign({ id: userWithRole._id }, REFRESH_SECRET, {
       expiresIn: REFRESH_EXPIRES_IN,
@@ -174,7 +173,7 @@ class UserService {
       lastName: safeUser.lastName,
       role: safeUser?.role?.name,
     };
-        console.log(jwtPayload , "login")
+    console.log(jwtPayload, "login");
 
     const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "1h" });
     const refreshToken = jwt.sign({ id: userWithRole._id }, REFRESH_SECRET, {
