@@ -3,28 +3,30 @@ import { llm } from "../services/ai.service.js";
 import { safeParseLLMJSON, normalizeQuestionsArray } from "../lib/cleanCode.js";
 
 export async function questionGenerator(state) {
-  const profile = state.profile;
+  const profile = state.profile; // now resumeText only from frontend
 
   const fullPrompt = `${JSON.stringify(prompt)}
 
 CANDIDATE PROFILE DATA:
 ${JSON.stringify(profile, null, 2)}
 
-Based on the above candidate profile, first validate if you have sufficient information, then generate exactly 6 programming questions following the specified format and rules.`;
+Based on the above candidate profile, first validate if you have sufficient information, 
+then generate exactly 6 programming questions following the specified rules.`;
 
+  // LLM CALL
   const res = await llm.invoke(fullPrompt);
 
   const text =
     typeof res === "string"
       ? res
-      : res && res.content
+      : res?.content
       ? res.content
       : JSON.stringify(res);
 
   try {
     const parsed = safeParseLLMJSON(text);
 
-    // Check if the response indicates more information is required
+    // Case: LLM says not enough info
     if (parsed.requiresMoreInfo) {
       return {
         requiresMoreInfo: true,
@@ -35,7 +37,7 @@ Based on the above candidate profile, first validate if you have sufficient info
       };
     }
 
-    // If we have questions, normalize them
+    // Case: LLM returned proper JSON with questions
     if (parsed.questions) {
       const questionsData = normalizeQuestionsArray(parsed);
 
@@ -45,13 +47,13 @@ Based on the above candidate profile, first validate if you have sufficient info
         );
       }
 
-      console.log("Parsed questions OK. count=", questionsData.length);
       return { questionsData, requiresMoreInfo: false };
     }
 
-    // Fallback: try to normalize anyway in case the format is different
+    // Fallback if the format is off: Try normalization
     const questionsData = normalizeQuestionsArray(parsed);
     return { questionsData, requiresMoreInfo: false };
+
   } catch (err) {
     console.error("Failed to parse LLM response as JSON:", err);
     throw err;
