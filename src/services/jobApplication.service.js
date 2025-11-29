@@ -3,7 +3,6 @@ import { AppError } from "../utils/errors.js";
 import MongoApplicationRespository from "../repositories/implementations/mongoJobApplication.js";
 import MongoCandidateProfileRepository from "../repositories/implementations/mongoCandidateProfileRepository.js";
 import MongoJobRoleRepository from "../repositories/implementations/mongoJobRoleRepository.js";
-import { emailQueue } from "../queues/emailQueue.js";
 
 class JobApplicationService {
   constructor() {

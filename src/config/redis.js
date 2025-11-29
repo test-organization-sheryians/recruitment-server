@@ -30,3 +30,7 @@ export async function connectRedis() {
 }
 
 export const redisClient = client;
+
+
+
+
