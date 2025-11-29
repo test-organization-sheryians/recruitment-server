@@ -29,35 +29,7 @@ class JobApplicationService {
       message,
       resumeUrl,
     });
-
-    const candidateDetails = await this.candidateRepo.findProfileByUserId(
-      candidateId
-    );
-    const jobDetails = await this.jobRoleReop.findJobRoleById(jobId);
-
-    emailQueue
-      .add(
-        "welcome-candidate",
-        {
-          to: candidateDetails?.user?.email,
-          name: candidateDetails?.user?.firstName,
-          jobTitle: jobDetails.title,
-          appliedAt: application.createdAt,
-          applicationId: application._id,
-        },
-        {
-          jobId: `welcome-${application._id}`,
-        }
-      )
-      .catch((err) => {
-        logger.error("Failed to queue welcome email:", err);
-      });
-
-    return {
-      success: true,
-      message: "Application submitted successfully!",
-      application,
-    };
+    return application;
   }
 
 
