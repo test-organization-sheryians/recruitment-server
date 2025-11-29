@@ -16,7 +16,7 @@ router.post("/login",
    loginValidator, 
    authController.login);
 router.post("/refresh", authController.refreshTokenController);
-
+router.post("/update" , authController.updateUser) ; 
 router.post("/logout", authController.logout);
 
 router.put(

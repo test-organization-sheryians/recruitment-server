@@ -4,12 +4,14 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "concurrently \"node server.js\" \"node src/workers/emailWorker.js\"",
-    "dev": "concurrently \"nodemon src/server.js\" \"nodemon src/workers/emailWorker.js\"",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+
     "worker": "node src/workers/emailWorker.js",
     "worker:dev": "nodemon src/workers/emailWorker.js",
-    "dev:all": "npm run dev",
-    "start:all": "npm run start"
+
+    "dev:all": "concurrently \"npm run dev\" \"npm run worker:dev\"",
+    "start:all": "concurrently \"npm run start\" \"npm run worker\" --names \"API,WORKER\" --prefix-colors \"blue,green\""
   },
   "keywords": [],
   "author": "",

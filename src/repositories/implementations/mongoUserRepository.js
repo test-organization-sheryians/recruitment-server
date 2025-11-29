@@ -53,6 +53,7 @@ class MongoUserRepository extends IUserRepository {
             phoneNumber: 1,
             password: 1,
             googleId: 1,
+            isVerified:1,
             role: {
               _id: "$role._id",
               name: "$role.name",
@@ -62,6 +63,7 @@ class MongoUserRepository extends IUserRepository {
         },
         { $limit: 1 },
       ]);
+      console.log(user , "this is from the UserRepo")
       return user || null;
     } catch (error) {
       throw new AppError(
@@ -110,6 +112,7 @@ async findUserById(id) {
         lastName: 1,
         phoneNumber: 1,
         googleId: 1,
+        isVerified:1,
         role: {
           $cond: [
             { $ifNull: ["$role", false] },
