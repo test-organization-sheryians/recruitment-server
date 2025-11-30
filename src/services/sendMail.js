@@ -21,10 +21,11 @@ transporter.verify((error) => {
 });
 
 export async function sendWelcomeEmail(data) {
+
   try {
     const info = await transporter.sendMail({
       from: 'anshur9608837@gmail.com',
-      to: 'muskansinha803101@gmail.com',
+      to: data.to,
       subject: `We received your application for ${data.jobTitle}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; border-radius: 10px;">

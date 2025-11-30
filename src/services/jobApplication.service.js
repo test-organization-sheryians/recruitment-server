@@ -3,7 +3,8 @@ import { AppError } from "../utils/errors.js";
 import MongoApplicationRespository from "../repositories/implementations/mongoJobApplication.js";
 import MongoCandidateProfileRepository from "../repositories/implementations/mongoCandidateProfileRepository.js";
 import MongoJobRoleRepository from "../repositories/implementations/mongoJobRoleRepository.js";
-import { emailQueue } from "../queues/emailQueue.js";
+import { sendWelcomeEmail } from "./sendMail.js";
+import logger from "../utils/logger.js";
 
 class JobApplicationService {
   constructor() {
@@ -13,6 +14,13 @@ class JobApplicationService {
   }
 
   async applyForJob({ jobId, candidateId, message, resumeUrl }) {
+    const candidateDetails = await this.candidateRepo.findProfileByUserId(
+      candidateId
+    );
+    
+    if (!candidateDetails) {
+       throw new AppError("Please create your profile first", 401);
+    }
     const job = await JobRole.findById(jobId);
     if (!job) throw new AppError("Job not found", 404);
 
@@ -30,28 +38,26 @@ class JobApplicationService {
       resumeUrl,
     });
 
-    const candidateDetails = await this.candidateRepo.findProfileByUserId(
-      candidateId
-    );
+    // const candidateDetails = await this.candidateRepo.findProfileByUserId(
+    //   candidateId
+    // );
     const jobDetails = await this.jobRoleReop.findJobRoleById(jobId);
-
-    emailQueue
-      .add(
-        "welcome-candidate",
-        {
-          to: candidateDetails?.user?.email,
-          name: candidateDetails?.user?.firstName,
-          jobTitle: jobDetails.title,
-          appliedAt: application.createdAt,
-          applicationId: application._id,
-        },
-        {
-          jobId: `welcome-${application._id}`,
-        }
-      )
-      .catch((err) => {
-        logger.error("Failed to queue welcome email:", err);
-      });
+      console.log(candidateDetails , "this is candidate details ")
+   try {
+  await sendWelcomeEmail({
+    to: candidateDetails?.user?.email,
+    name: candidateDetails?.user?.firstName,
+    jobTitle: jobDetails.title,
+    appliedAt: application.createdAt,
+    applicationId: application._id,
+  });
+} catch (error) {
+  // Fail silently — don't break the application flow
+  logger.warn("Welcome email failed but application was created successfully", {
+    email: candidateDetails?.user?.email,
+    applicationId: application._id,
+  });
+}
 
     return {
       success: true,
