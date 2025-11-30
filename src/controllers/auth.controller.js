@@ -96,8 +96,9 @@ class AuthController {
 
   updateUser = async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const id = req.query.id ; 
       const userData = req.body;
+      console.log(id , userData , "this is from Update user")
       const user = await this.userService.updateUser(id, userData);
       res.status(200).json({ success: true, data: user });
     } catch (error) {
@@ -105,6 +106,7 @@ class AuthController {
     }
   };
 
+  
   logout = async (req, res, next) => {
     try {
       const token =
