@@ -63,7 +63,7 @@ export async function sendWelcomeEmail(data) {
 
 
 export async function sendVerificationEmail(user) {
-  const verificationLink = `http://localhost:3000/user-verification/${user.id}`;
+  const verificationLink = `https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app//user-verification/${user.id}`;
 
   try {
     const info = await transporter.sendMail({
