@@ -1,13 +1,16 @@
+// src/workers/emailWorker.js
 import { Worker } from 'bullmq';
+import connection from '../config/config/bullmq-connection.js';
 import logger from '../utils/logger.js';
-import bullmqRedis from '../config/bullmq-redis.js';
 import { sendVerificationEmail, sendWelcomeEmail } from '../services/sendMail.js';
+
+// NO QueueScheduler needed anymore in BullMQ v5+
+// BullMQ auto-handles delayed jobs, retries, etc. when Worker starts
 
 const worker = new Worker(
   'email',
   async (job) => {
     logger.info(`Processing job ${job.id} - ${job.name}`);
-    console.log('JOB DATA:', job.data); // This will now show!
 
     try {
       if (job.name === 'welcome-candidate') {
@@ -19,21 +22,16 @@ const worker = new Worker(
       }
     } catch (error) {
       logger.error(`Job ${job.id} failed`, error);
-      throw error; // Let BullMQ handle retry
+      throw error; 
     }
   },
   {
-    connection: bullmqRedis,
+    connection,
     concurrency: 5,
   }
 );
 
-worker.on('completed', (job) => {
-  logger.info(`Job ${job.id} completed successfully`);
-});
+worker.on('completed', (job) => logger.info(`Job ${job.id} completed`));
+worker.on('failed', (job, err) => logger.error(`Job ${job?.id} failed: ${err.message}`));
 
-worker.on('failed', (job, err) => {
-  logger.error(`Job ${job?.id} failed: ${err.message}`);
-});
-
-logger.info('Email worker started and waiting for jobs...');
+logger.info('BullMQ Email Worker started — ready for jobs!');
