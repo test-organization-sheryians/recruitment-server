@@ -16,8 +16,11 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.943.0",
+    "@aws-sdk/s3-request-presigner": "^3.943.0",
     "@langchain/groq": "^0.2.4",
     "@langchain/langgraph": "^0.4.9",
+    "aws-sdk": "^2.1692.0",
     "bcryptjs": "^3.0.2",
     "bullmq": "^5.65.1",
     "cloudinary": "^1.41.3",
