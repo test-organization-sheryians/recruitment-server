@@ -95,7 +95,7 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
     try {
       return await CandidateProfile.findByIdAndUpdate(
         id,
-        { $set: profileData },
+        { $addToSet: { skills: { $each: profileData.skills } } },
         { new: true }
       );
     } catch (error) {
