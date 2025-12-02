@@ -32,7 +32,7 @@
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.11",
     "pdf-parse": "^1.1.1",
-    "redis": "^5.8.2",
+    "redis": "^5.10.0",
     "resend": "^6.5.2",
     "winston": "^3.17.0"
   },
