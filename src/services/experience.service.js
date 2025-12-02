@@ -36,7 +36,6 @@ class ExperienceService {
     if (experience.candidateId.toString() !== userId) {
       throw new AppError("you are not allowed", 401);
     }
-    console.log(id)
     if (!experience) {
       throw new AppError("Experience not found", 404);
     }

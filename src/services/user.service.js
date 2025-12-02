@@ -6,6 +6,9 @@ import config from "../config/environment.js";
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import { json } from "express";
+import { sendVerificationEmail } from "./sendMail.js";
+import logger from "../utils/logger.js";
+import { emailQueue } from "../queues/emailQueue.js";
 
 const { JWT_SECRET, REFRESH_SECRET, REFRESH_EXPIRES_IN } = config;
 
@@ -43,6 +46,7 @@ class UserService {
       lastName: user.lastName,
       phoneNumber: user.phoneNumber || null,
       role: this._getSafeRole(user),
+      isVerified: user.isVerified,
     };
   }
 
@@ -55,15 +59,7 @@ class UserService {
     let existingUser = null;
 
     // 1. Try cache
-    const cached = await this.cacheRepository.get(cacheKey);
-    if (cached) {
-      try {
-        existingUser = JSON.parse(cached);
-      } catch (e) {
-        console.warn("Corrupted cache for email:", email);
-        await this.cacheRepository.del(cacheKey);
-      }
-    }
+    /// will implement leter
 
     // 2. If not in cache → check DB
     if (!existingUser) {
@@ -78,6 +74,8 @@ class UserService {
       }
     }
 
+    console.log(existingUser, "existuser");
+
     // 3. If still exists → reject
     if (existingUser) {
       throw new AppError("Email already exists", 409);
@@ -90,11 +88,7 @@ class UserService {
     });
 
     const userWithRole = await this.userRepository.findUserById(user._id);
-    console.log(
-      userWithRole,
-      user._id,
-      "this is fetched user after creatation"
-    );
+
     if (!userWithRole) throw new AppError("Failed to fetch created user", 500);
 
     const safeUser = this._getSafeUserPayload(userWithRole);
@@ -111,16 +105,65 @@ class UserService {
       3600
     );
 
-    console.log(safeUser, "Register");
-    // 6. JWT + Refresh Token
     const jwtPayload = {
       id: safeUser._id,
       email: safeUser.email,
       firstName: safeUser.firstName,
       lastName: safeUser.lastName,
       role: safeUser?.role?.name,
+      isVerified: safeUser?.isVerified,
     };
 
+    // try {
+    //   await sendVerificationEmail({
+    //     id: safeUser._id,
+    //     email: safeUser.email,
+    //     name: safeUser.firstName,
+    //   });
+    //   console.log(`Verification email sent to ${safeUser.email}`);
+    //   logger?.info(`Verification email sent to ${safeUser.email}`);
+    // } catch (error) {
+    //   console.log(
+    //     `Failed to send verification email to ${safeUser.email}`,
+    //     error
+    //   );
+    //   logger?.error(
+    //     `Failed to send verification email to ${safeUser.email}`,
+    //     error
+    //   );
+    //   // Optional: don't fail registration if email fails (common in dev/staging)
+    //   // Or throw if you want strict delivery
+    //   // throw new AppError("Failed to send verification email", 500);
+    // }
+
+    // Adding into the queue for sending verification mail 
+    try {
+      emailQueue.add(
+        "verification-mail",
+        {
+          id: safeUser._id,
+          email: safeUser.email,
+          name: safeUser.firstName,
+        },
+        {
+          attempts: 3,
+          backoff: {
+            type: "exponential",
+            delay: 5000,
+          },
+          removeOnComplete: true,
+          removeOnFail: false,
+        }
+      );
+      logger.info(
+        `Welcome email job queued for ${safeUser?.email}`
+      );
+    } catch (error) {
+      logger.warn("Failed to queue Verification email", {
+        email: safeUser.email,
+        error: error.message,
+      });
+    }
 
     const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "1h" });
     const refreshToken = jwt.sign({ id: userWithRole._id }, REFRESH_SECRET, {
@@ -128,7 +171,7 @@ class UserService {
     });
 
     await this.saveRefreshToken(userWithRole._id, refreshToken);
-
+    console.log(safeUser, token, refreshToken);
     return { user: safeUser, token, refreshToken };
   }
 
@@ -146,6 +189,7 @@ class UserService {
     //   user.comparePassword = async (pwd) => bcrypt.compare(pwd, user.password);
     // } else {
     let user = await this.userRepository.findUserByEmail(email);
+    console.log(user);
     if (!user) throw new AppError("Invalid credentials", 401);
 
     // const safeUser = this._getSafeUserPayload(user);
@@ -175,8 +219,8 @@ class UserService {
       firstName: safeUser.firstName,
       lastName: safeUser.lastName,
       role: safeUser?.role?.name,
+      isVerified: safeUser?.isVerified,
     };
-        console.log(jwtPayload , "login")
 
     const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "1h" });
     const refreshToken = jwt.sign({ id: userWithRole._id }, REFRESH_SECRET, {
@@ -238,7 +282,6 @@ class UserService {
 
     const safeUser = this._getSafeUserPayload(user);
     await this.cacheRepository.set(cacheKey, JSON.stringify(safeUser), 3600);
-
     return safeUser;
   }
 
@@ -250,9 +293,7 @@ class UserService {
   async updateUser(id, userData) {
     const user = await this.userRepository.updateUser(id, userData);
     if (!user) throw new AppError("User not found", 404);
-
     const safeUser = this._getSafeUserPayload(user);
-
     await this.cacheRepository.set(
       `user:id:${id}`,
       JSON.stringify(safeUser),

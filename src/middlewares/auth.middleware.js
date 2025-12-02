@@ -8,29 +8,30 @@ export const authenticateJWT = async (req, res, next) => {
   try {
     const token =
       req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
-    console.log("token ----> ", token);
-
     if (!token) {
       throw new AppError("Access denied. No token provided.", 401);
     }
 
     const isBlacklisted = await redisClient.get(`bl_${token}`);
-    console.log("redis ----> ", redisClient);
-
+  
     if (isBlacklisted) {
       throw new AppError("Token has been logged out.", 401);
     }
-
+    
     const decoded = authService.verifyToken(token);
-    console.log("decodec--->", decoded);
-
+    console.log(decoded)
+    if( !decoded.isVerified || decoded.isVerified===false) {
+       throw new AppError("User is not verified", 401);
+    } 
     req.userId = decoded.id;
     req.role = decoded.role;
     next();
   } catch (error) {
-    next(new AppError("Invalid or expired token.", 401));
-    
+    console.log(error)
+    next(new AppError(error ||"Invalid or expired token.", 401));
   }
 };
+
+
 
 

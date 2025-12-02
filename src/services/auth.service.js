@@ -4,18 +4,19 @@ import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 import config from "../config/environment.js";
 
-
-
 class AuthService {
+
   async getUserWithPermissions(userId) {
-    try {
-      const objectId = mongoose.Types.ObjectId.isValid(userId) 
+  try {
+    const objectId = mongoose.Types.ObjectId.isValid(userId)
       ? new mongoose.Types.ObjectId(userId)
       : null;
-      
+
     if (!objectId) {
-      throw new Error('Invalid userId provided');
+      throw new Error("Invalid userId provided");
     }
+    
+    // The full aggregation pipeline to link User -> Role -> Permissions
     const user = await User.aggregate([
       { $match: { _id: objectId } },
       {
@@ -23,17 +24,18 @@ class AuthService {
           from: "roles",
           localField: "roleId",
           foreignField: "_id",
-          as: "role"
-        }
+          as: "role",
+        },
       },
-      { $unwind: "$role" },
+      // Note: $unwind without preserveNullAndEmptyArrays means user must have a valid role link
+      { $unwind: "$role" }, 
       {
         $lookup: {
           from: "permissions",
           localField: "role._id",
           foreignField: "roleId",
-          as: "permissions"
-        }
+          as: "permissions",
+        },
       },
       {
         $project: {
@@ -47,20 +49,24 @@ class AuthService {
               as: "perm",
               in: {
                 resource: "$$perm.resource",
-                action: "$$perm.action"
-              }
-            }
-          }
-        }
-      }
+                action: "$$perm.action",
+              },
+            },
+          },
+        },
+      },
     ]);
 
-     return user[0];
-  
-    } catch (error) {
-      throw new Error('Error fetching user with permissions');
-    }
+    // 🌟 DEBUGGING LINE ADDED 🌟
+    console.log("Aggregate Result for User with Permissions:", JSON.stringify(user, null, 2)); 
+
+    return user[0];
+  } catch (error) {
+    // Log the original error for debugging purposes
+    console.error('Error in getUserWithPermissions during aggregation:', error); 
+    throw new Error("Error fetching user with permissions");
   }
+}
 
 async hasPermission(userId, roleName) {
   try {
@@ -120,7 +126,9 @@ async hasPermission(userId, roleName) {
   
 
   generateToken(userId, roleId) {
-    return jwt.sign({ userId, roleId }, config.JWT_SECRET, { expiresIn: "24h" });
+    return jwt.sign({ userId, roleId }, config.JWT_SECRET, {
+      expiresIn: "24h",
+    });
   }
 
   verifyToken(token) {

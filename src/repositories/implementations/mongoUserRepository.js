@@ -10,7 +10,7 @@ class MongoUserRepository extends IUserRepository {
       const saveUser = await user.save();
       return saveUser;
     } catch (error) {
-      console.error('Error creating user:', error);
+      console.error("Error creating user:", error);
       throw new AppError(`Failed to create user: ${error.message}`, 500, error);
     }
   }
@@ -53,6 +53,7 @@ class MongoUserRepository extends IUserRepository {
             phoneNumber: 1,
             password: 1,
             googleId: 1,
+            isVerified:1,
             role: {
               _id: "$role._id",
               name: "$role.name",
@@ -62,6 +63,7 @@ class MongoUserRepository extends IUserRepository {
         },
         { $limit: 1 },
       ]);
+      console.log(user , "this is from the UserRepo")
       return user || null;
     } catch (error) {
       throw new AppError(
@@ -151,6 +153,7 @@ async findUserById(id) {
         lastName: 1,
         phoneNumber: 1,
         googleId: 1,
+        isVerified:1,
         role: {
           $cond: [
             { $ifNull: ["$role", false] },

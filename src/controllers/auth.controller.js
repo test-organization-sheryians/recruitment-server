@@ -9,6 +9,16 @@ class AuthController {
     this.authService = new AuthService();
   }
 
+  get cookieOptions() {
+    const isProd = process.env.NODE_ENV === "production";
+    return {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      path: "/",
+    };
+  }
+
   refreshTokenController = async (req, res, next) => {
     try {
       const refreshToken = req.cookies.refreshToken;
@@ -17,16 +27,12 @@ class AuthController {
       const tokens = await this.userService.refresh(refreshToken);
 
       res.cookie("token", tokens.accessToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        ...this.cookieOptions,
         maxAge: 15 * 60 * 1000,
       });
 
       res.cookie("refreshToken", tokens.refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        ...this.cookieOptions,
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
@@ -39,20 +45,15 @@ class AuthController {
   register = async (req, res, next) => {
     try {
       const userData = req.body;
-      console.log(userData);
-
       const result = await this.userService.register(userData);
+
       res.cookie("token", result.token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        ...this.cookieOptions,
         maxAge: 60 * 60 * 1000,
       });
 
       res.cookie("refreshToken", result.refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        ...this.cookieOptions,
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
@@ -66,17 +67,14 @@ class AuthController {
     try {
       const { email, password } = req.body;
       const result = await this.userService.login({ email, password });
+
       res.cookie("token", result.token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        ...this.cookieOptions,
         maxAge: 60 * 60 * 1000,
       });
 
       res.cookie("refreshToken", result.refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        ...this.cookieOptions,
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
@@ -98,8 +96,9 @@ class AuthController {
 
   updateUser = async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const id = req.query.id ; 
       const userData = req.body;
+      console.log(id , userData , "this is from Update user")
       const user = await this.userService.updateUser(id, userData);
       res.status(200).json({ success: true, data: user });
     } catch (error) {
@@ -107,6 +106,7 @@ class AuthController {
     }
   };
 
+  
   logout = async (req, res, next) => {
     try {
       const token =
@@ -122,11 +122,8 @@ class AuthController {
         }
       }
 
-      res.clearCookie("token", {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-      });
+      res.clearCookie("token", this.cookieOptions);
+      res.clearCookie("refreshToken", this.cookieOptions);
 
       res
         .status(200)
@@ -139,13 +136,12 @@ class AuthController {
   resetPassword = async (req, res, next) => {
     try {
       const { oldPassword, newPassword } = req.body;
-
       const userId = req.userId;
+
       if (!userId) {
-        return res.status(401).json({
-          success: false,
-          message: "Unauthorized",
-        });
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
       }
 
       const result = await this.userService.resetPassword(
@@ -155,7 +151,7 @@ class AuthController {
       );
 
       if (result) {
-        return res.status(200).json({
+        res.status(200).json({
           success: true,
           message: "Password updated successfully",
         });
