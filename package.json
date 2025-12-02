@@ -19,6 +19,7 @@
     "@langchain/groq": "^0.2.4",
     "@langchain/langgraph": "^0.4.9",
     "bcryptjs": "^3.0.2",
+    "bullmq": "^5.65.1",
     "cloudinary": "^1.41.3",
     "concurrently": "^9.2.1",
     "cookie-parser": "^1.4.7",
