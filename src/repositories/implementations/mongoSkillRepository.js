@@ -28,8 +28,13 @@ class MongoSkillRepository extends ISkillRepository {
   }
 
   async findSkillByName(name) {
+    const isId = mongoose.Types.ObjectId.isValid(name);
     try {
-      return await Skill.findOne({ name: name.toLowerCase().trim() }).lean();
+      return await Skill.findOne(
+        isId
+          ? { _id: name }
+          : { name }
+      ).lean();
     } catch (error) {
       throw new AppError("Failed to find skill", 500);
     }
