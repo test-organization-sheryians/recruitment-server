@@ -15,6 +15,8 @@ import aiRoutes from './routes/ai.routes.js'
 import { corsOptions } from "./config/corsOptions.js";
 import jobapply from "./routes/jobApplication.routes.js";
 import jobApplicationModel from "./models/jobApplication.model.js";
+import { authenticateJWT } from "./middlewares/auth.middleware.js";
+import awsRouter from './routes/aws.route.js'
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
@@ -25,10 +27,13 @@ app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
 app.use("/api/jobs", jobRoleRoutes);
 app.use("/api/job-categories", jobCategoryRoutes);
-app.use("/api/job-apply", jobapply);
+app.use("/api/job-apply",   jobapply);
 app.use("/api/skills", skillRoutes);
 app.use("/api/ai", aiRoutes)
 app.use("/api/experience", expereniceRoutes);
 app.use('/api/candidate-profile', candidateProfileRoutes);
+app.use('/api/aws' , awsRouter)
 app.use(errorHandler);
 export default app;
+
+
