@@ -60,24 +60,46 @@ class UserController {
     }
   }
 
-  async updateUserRole(req, res, next) {
-    try {
-      const { id } = req.params;
-      const { role } = req.body;
+async updateUserRole(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { roleId } = req.body;
 
-      if (!role) {
-        return res.status(400).json({ message: "Role is required" });
-      }
-
-      const updatedUser = await this.userService.updateUserRole(id, role);
-      return res.status(200).json({
-        message: "User role updated successfully",
-        user: updatedUser,
-      });
-    } catch (error) {
-      next(error);
+    if (!roleId) {
+      return res.status(400).json({ message: "Role is required" });
     }
+
+    // Update the user's role via service
+    const updatedUser = await this.userService.updateUserRole(id, roleId);
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Map the role from populated data
+    const safeUser = {
+      _id: updatedUser._id,
+      email: updatedUser.email,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+      phoneNumber: updatedUser.phoneNumber,
+      isVerified: updatedUser.isVerified,
+      role: updatedUser.role
+        ? { _id: updatedUser.role._id, name: updatedUser.role.name }
+        : null, // role will be null if not set
+    };
+
+    return res.status(200).json({
+      message: "User role updated successfully",
+      user: safeUser,
+    });
+  } catch (error) {
+    next(error);
   }
+}
+
+
+
   async getAllUsers(req, res, next) {
     try {
       const users = await this.userService.getAllUsers();

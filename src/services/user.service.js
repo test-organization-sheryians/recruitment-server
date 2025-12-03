@@ -364,17 +364,32 @@ class UserService {
     return true;
   }
 
-async updateUserRole(userId, newRole) {
-  const updatedUser = await this.userRepository.updateUser(userId, {
-    role: newRole,
-  });
+async updateUserRole(userId, newRoleId) {
+  // 1️⃣ Update the role
+  await this.userRepository.updateUser(userId, { roleId: newRoleId });
+
+  // 2️⃣ Fetch updated user with populated roleId
+  const updatedUser = await this.userRepository.findUserById(userId, true); 
+  // Pass `true` to populate roleId in repository
 
   if (!updatedUser) {
     throw new AppError("User not found", 404);
   }
 
-  const safeUser = this._getSafeUserPayload(updatedUser);
+  // 3️⃣ Create safe payload including role
+  const safeUser = {
+    _id: updatedUser._id,
+    email: updatedUser.email,
+    firstName: updatedUser.firstName,
+    lastName: updatedUser.lastName,
+    phoneNumber: updatedUser.phoneNumber,
+    isVerified: updatedUser.isVerified,
+    role: updatedUser.roleId
+      ? { _id: updatedUser.roleId._id, name: updatedUser.roleId.name }
+      : null,
+  };
 
+  // 4️⃣ Update cache
   await this.cacheRepository.set(
     `user:id:${userId}`,
     JSON.stringify(safeUser),
@@ -389,6 +404,9 @@ async updateUserRole(userId, newRole) {
 
   return safeUser;
 }
+
+
+
 
 }
 
