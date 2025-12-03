@@ -13,11 +13,11 @@ const TestsSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    createdBy:{
-       type:mongoose.Schema.Types.ObjectId,
-       ref:'Users',
-       required:true
-    } , 
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+      required: true,
+    },
     category: {
       type: String,
       required: true,
@@ -34,10 +34,10 @@ const TestsSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    prompt:{
-      type:String ,
-      required:true
-    }
+    prompt: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );

@@ -1,5 +1,5 @@
 class IAttempts {
-     async createTestAttempt(attemptData) {
+  async createTestAttempt(attemptData) {
     throw new Error("Method not implemented");
   }
 
@@ -12,4 +12,4 @@ class IAttempts {
   }
 }
 
-export default IAttempts ; 
+export default IAttempts;

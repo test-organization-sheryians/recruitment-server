@@ -30,25 +30,25 @@ class MongoEnrollmentsRespository extends IEnrollment {
 
   async findEnrollmentsByUser(email) {
     try {
-         const [enrollments] = await TestEnrollments.aggregate([
-              {
-                 $match:{email:email }
-              } , 
-              {
-                 $lookup:{
-                      from:"tests",
-                      localField:"testId",
-                      foreignField:"_id",
-                      as:"tests"
-                 }
-              },
-              {
-                 $unwind:{path:"$tests" , preserveNullAndEmptyArrays:true}
-              }
-         ]) ; 
+      const [enrollments] = await TestEnrollments.aggregate([
+        {
+          $match: { email: email },
+        },
+        {
+          $lookup: {
+            from: "tests",
+            localField: "testId",
+            foreignField: "_id",
+            as: "tests",
+          },
+        },
+        {
+          $unwind: { path: "$tests", preserveNullAndEmptyArrays: true },
+        },
+      ]);
 
-         console.log(enrollments)
-      return enrollments 
+      console.log(enrollments);
+      return enrollments;
     } catch (error) {
       throw new AppError(
         `Failed to find user enrollments: ${error.message}`,
