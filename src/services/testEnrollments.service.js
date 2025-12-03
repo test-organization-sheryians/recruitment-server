@@ -1,5 +1,4 @@
 import MongoEnrollmentsRespository from "../repositories/implementations/mongoEnrollmentsRepository.js";
-import MongoTestRepository from "../repositories/implementations/mongoTestsRepository";
 
 class TestEnrollmentService {
   constructor() {
@@ -7,10 +6,8 @@ class TestEnrollmentService {
   }
 
   async enrollUser(testId, email) {
-    const existingEnrollment = await this.testEnrollmentRepository.findEnrollment(
-      testId,
-      email
-    );
+    const existingEnrollment =
+      await this.testEnrollmentRepository.findEnrollment(testId, email);
     if (existingEnrollment) {
       return existingEnrollment;
     }

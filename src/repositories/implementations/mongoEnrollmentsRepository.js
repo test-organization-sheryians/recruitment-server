@@ -1,4 +1,4 @@
-import TestEnrollments from "../../models/TestEnrollments";
+import TestEnrollments from "../../models/TestEnrollments.js";
 import { AppError } from "../../utils/errors.js";
 import IEnrollment from "../contracts/IEnrollment.js";
 
