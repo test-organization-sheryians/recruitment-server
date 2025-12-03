@@ -20,7 +20,9 @@ class TestService {
 
   async findAllPublishedTests() {
     const tests = await this.testRepository.findAllPublishedTests();
-    if (!tests || tests.length >= 0) throw new AppError("Tests not found", 404);
+    if (!tests || tests.length === 0) {
+      throw new AppError("Tests not found", 404);
+    }
     return tests;
   }
 

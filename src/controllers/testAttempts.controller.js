@@ -3,6 +3,10 @@ import TestAttemptsService from "../services/testAttempts.service.js";
 class TestAttemptsController {
   constructor() {
     this.testAttemptsService = new TestAttemptsService();
+
+    this.startTest = this.startTest.bind(this);
+    this.submitTest = this.submitTest.bind(this);
+    this.getUserAttempts = this.getUserAttempts.bind(this);
   }
 
   async startTest(req, res, next) {
@@ -12,10 +16,7 @@ class TestAttemptsController {
 
       const attempt = await this.testAttemptsService.startTest(testId, email);
 
-      res.status(201).json({
-        success: true,
-        data: attempt,
-      });
+      return res.status(201).json({ success: true, data: attempt });
     } catch (error) {
       next(error);
     }
@@ -23,18 +24,15 @@ class TestAttemptsController {
 
   async submitTest(req, res, next) {
     try {
-      const { attemptId } = req.params;
-      const updateData = req.body;
+      const attemptId = req.params.attemptId;
+      const testResults = req.body;
 
-      const updatedAttempt = await this.testAttemptsService.updateAttempt(
+      const updatedAttempt = await this.testAttemptsService.submitTest(
         attemptId,
-        updateData
+        testResults
       );
 
-      res.status(200).json({
-        success: true,
-        data: updatedAttempt,
-      });
+      return res.status(200).json({ success: true, data: updatedAttempt });
     } catch (error) {
       next(error);
     }
@@ -42,18 +40,16 @@ class TestAttemptsController {
 
   async getUserAttempts(req, res, next) {
     try {
-      const { testId } = req.params;
+      const testId = req.params.testId;
       const email = req.user.email;
 
-      const attempts = await this.testAttemptsService.getUserAttempts(
-        testId,
-        email
-      );
+      const attempts =
+        await this.testAttemptsService.testAttemptsRepogitory.findAttemptsByUser(
+          testId,
+          email
+        );
 
-      res.status(200).json({
-        success: true,
-        data: attempts,
-      });
+      return res.status(200).json({ success: true, data: attempts });
     } catch (error) {
       next(error);
     }

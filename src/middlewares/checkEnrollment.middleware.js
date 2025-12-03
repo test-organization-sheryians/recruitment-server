@@ -6,11 +6,14 @@ const enrollmentRepo = new MongoEnrollmentsRespository();
 export const checkEnrollment = async (req, res, next) => {
   try {
     const testId = req.body.testId || req.params.testId;
-    const email = req.user.email;
-
+    if (!testId && req.method === "GET") {
+      return next();
+    }
     if (!testId) {
       throw new AppError("Test ID is required.", 400);
     }
+
+    const email = req.user.email;
 
     const enrollment = await enrollmentRepo.findEnrollment(testId, email);
 

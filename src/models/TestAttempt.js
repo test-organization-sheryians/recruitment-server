@@ -8,8 +8,7 @@ const TestAttemptSchema = new mongoose.Schema(
       required: true,
     },
     email: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Users",
+      type: String,
       required: true,
     },
 

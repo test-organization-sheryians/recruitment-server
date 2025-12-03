@@ -25,6 +25,13 @@ export const authenticateJWT = async (req, res, next) => {
     }
     req.userId = decoded.id;
     req.role = decoded.role;
+
+    req.user = {
+      _id: decoded.id,
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role,
+    };
     next();
   } catch (error) {
     console.log(error);

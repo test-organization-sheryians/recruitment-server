@@ -4,12 +4,21 @@ import { authenticateJWT } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/", authenticateJWT, testController.createTest);
+router.post(
+  "/",
+  authenticateJWT,
+  testController.createTest.bind(testController)
+);
+router.get(
+  "/published/all",
+  testController.getPublishedTests.bind(testController)
+);
+router.get("/:testId", testController.getTest.bind(testController));
 
-router.get("/published/all", testController.getPublishedTests);
-
-router.get("/:testId", testController.getTest);
-
-router.patch("/:testId", authenticateJWT, testController.updateTest);
+router.patch(
+  "/:testId",
+  authenticateJWT,
+  testController.updateTest.bind(testController)
+);
 
 export default router;

@@ -24,7 +24,6 @@ router.patch(
 router.get(
   "/user/:testId",
   authenticateJWT,
-  checkEnrollment,
   testAttemptsController.getUserAttempts
 );
 

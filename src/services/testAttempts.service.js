@@ -11,7 +11,6 @@ class TestAttemptsService {
   }
 
   async startTest(testId, email) {
-    /// we are not checking the enrollment because we will create middleware for this to  use
     const attemptData = {
       testId,
       email,
@@ -21,6 +20,7 @@ class TestAttemptsService {
       status: "Started",
       answers: [],
     };
+
     const newAttempt = await this.testAttemptsRepogitory.createTestAttempt(
       attemptData
     );
@@ -30,16 +30,18 @@ class TestAttemptsService {
     return newAttempt;
   }
 
-  async submitTest(testId, testResults) {
-    const test = await this.testRepository.getTestById(testId);
+  async submitTest(attemptId, testResults) {
+    const test = await this.testRepository.findTestById(testResults.testId);
     if (!test) {
       throw new AppError("Test not found", 404);
     }
-    const submitedTest = await this.testAttemptsRepogitory.updateTestAttempt(
-      testId,
+
+    const updatedAttempt = await this.testAttemptsRepogitory.updateTestAttempt(
+      attemptId,
       testResults
     );
-    return submitedTest;
+
+    return updatedAttempt;
   }
 }
 

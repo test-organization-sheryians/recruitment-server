@@ -1,8 +1,11 @@
 import TestEnrollmentService from "../services/testEnrollments.service.js";
 
-class EnrollmentController {
+class TestEnrollmentController {
   constructor() {
     this.enrollmentService = new TestEnrollmentService();
+
+    this.enrollUser = this.enrollUser.bind(this);
+    this.getAssignedTests = this.getAssignedTests.bind(this);
   }
 
   async enrollUser(req, res, next) {
@@ -22,7 +25,7 @@ class EnrollmentController {
 
   async getAssignedTests(req, res, next) {
     try {
-      const { email } = req.params;
+      const email = req.params.email;
 
       const assignedTests = await this.enrollmentService.getAssignedTests(
         email
@@ -38,4 +41,4 @@ class EnrollmentController {
   }
 }
 
-export default new EnrollmentController();
+export default new TestEnrollmentController();

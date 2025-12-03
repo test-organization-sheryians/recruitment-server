@@ -25,13 +25,13 @@ const testEnrollmentsSchema = joi.object({
 const testAttemptSchema = joi.object({
   testId: objectId.required(),
 
-  email: joi.string().trim().email().required(),
+  email: joi.string().email().required(),
 
   score: joi.number().min(0).required(),
 
-  percentage: joi.number().min(0).max(100).optional(),
+  percentage: joi.number().min(0).max(100),
 
-  isPassed: joi.boolean().optional(),
+  isPassed: joi.boolean().default(false),
 
   status: joi
     .string()
@@ -42,9 +42,9 @@ const testAttemptSchema = joi.object({
 
   endTime: joi.date().optional(),
 
-  durationTaken: joi.number().min(0).optional(),
+  durationTaken: joi.number().optional(),
 
-  answers: joi.array().items(joi.object().unknown(true)).required(),
+  answers: joi.array().items(joi.any()).required(),
 });
 
 export { testSchema, testAttemptSchema, testEnrollmentsSchema };

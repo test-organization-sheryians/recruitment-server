@@ -1,9 +1,10 @@
+import mongoose from "mongoose";
 import TestAttempts from "../../models/TestAttempt.js";
 import { AppError } from "../../utils/errors.js";
 import IAttempts from "../contracts/IAttempts.js";
 
 class MongoTestAttampsRepository extends IAttempts {
-      async createTestAttempt(attemptData) {
+  async createTestAttempt(attemptData) {
     try {
       const newAttempt = new TestAttempts(attemptData);
       return await newAttempt.save();
@@ -29,7 +30,7 @@ class MongoTestAttampsRepository extends IAttempts {
       );
     }
   }
-  
+
   async updateTestAttempt(id, updateData) {
     try {
       if (!mongoose.Types.ObjectId.isValid(id)) return null;
@@ -38,7 +39,11 @@ class MongoTestAttampsRepository extends IAttempts {
         runValidators: true,
       }).lean();
     } catch (error) {
-      throw new AppError(`Failed to update test attempt: ${error.message}`, 500, error);
+      throw new AppError(
+        `Failed to update test attempt: ${error.message}`,
+        500,
+        error
+      );
     }
   }
 }

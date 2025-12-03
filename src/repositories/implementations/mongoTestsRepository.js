@@ -15,33 +15,49 @@ class MongoTestRepository extends ItestsRepository {
 
   async findTestById(id) {
     try {
-      const objectId = new mongoose.Types.ObjectId(id);
       if (!mongoose.Types.ObjectId.isValid(id)) return null;
-      const [tests] = await Tests.aggregate([
-        {
-          $match: { id: objectId },
-        },
+      const objectId = new mongoose.Types.ObjectId(id);
+
+      const [test] = await Tests.aggregate([
+        { $match: { _id: objectId } },
+
         {
           $lookup: {
-            from: "testEnrollments",
+            from: "testenrollments",
             localField: "_id",
             foreignField: "testId",
-            as: "enrollment",
+            as: "enrollments",
           },
         },
-        { $unwind: "$enrollment", preserveNullAndEmptyArrays: true },
+
         {
           $lookup: {
             from: "users",
-            localField: "Enrollments.email",
-            foreignField: "email",
-            as: "enrolledUser",
+            let: { emails: "$enrollments.email" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $in: ["$email", { $ifNull: ["$$emails", []] }] },
+                },
+              },
+              { $project: { password: 0, __v: 0 } },
+            ],
+            as: "enrolledUsers",
           },
         },
-        { $unwind: "$enrolledUser", preserveNullAndEmptyArrays: true },
+        {
+          $addFields: {
+            enrolledCount: { $size: "$enrollments" },
+          },
+        },
+        {
+          $project: {
+            __v: 0,
+          },
+        },
       ]);
-      console.log(tests);
-      return tests;
+
+      return test || null;
     } catch (error) {
       throw new AppError(`Failed to find test: ${error.message}`, 500, error);
     }
