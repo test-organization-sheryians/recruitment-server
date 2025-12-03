@@ -4,8 +4,11 @@ import { AppError } from "../utils/errors.js";
 import jwt from "jsonwebtoken";
 import config from "../config/environment.js";
 import bcrypt from "bcryptjs";
+import User from "../models/user.model.js";
+import { json } from "express";
 import { sendVerificationEmail } from "./sendMail.js";
 import logger from "../utils/logger.js";
+import { emailQueue } from "../queues/emailQueue.js";
 
 const { JWT_SECRET, REFRESH_SECRET, REFRESH_EXPIRES_IN } = config;
 
@@ -111,28 +114,64 @@ class UserService {
       isVerified: safeUser?.isVerified,
     };
 
+    // try {
+    //   await sendVerificationEmail({
+    //     id: safeUser._id,
+    //     email: safeUser.email,
+    //     name: safeUser.firstName,
+    //   });
+    //   console.log(`Verification email sent to ${safeUser.email}`);
+    //   logger?.info(`Verification email sent to ${safeUser.email}`);
+    // } catch (error) {
+    //   console.log(
+    //     `Failed to send verification email to ${safeUser.email}`,
+    //     error
+    //   );
+    //   logger?.error(
+    //     `Failed to send verification email to ${safeUser.email}`,
+    //     error
+    //   );
+    //   // Optional: don't fail registration if email fails (common in dev/staging)
+    //   // Or throw if you want strict delivery
+    //   // throw new AppError("Failed to send verification email", 500);
+    // }
+
+    // Adding into the queue for sending verification mail 
     try {
-    await sendVerificationEmail({
-      id: safeUser._id,
-      email: safeUser.email,
-      name: safeUser.firstName,
-    });
-    console.log(`Verification email sent to ${safeUser.email}`)
-    logger?.info(`Verification email sent to ${safeUser.email}`);
-  } catch (error) {
-    console.log(`Failed to send verification email to ${safeUser.email}`, error)
-    logger?.error(`Failed to send verification email to ${safeUser.email}`, error);
-    // Optional: don't fail registration if email fails (common in dev/staging)
-    // Or throw if you want strict delivery
-    // throw new AppError("Failed to send verification email", 500);
-  }
+      emailQueue.add(
+        "verification-mail",
+        {
+          id: safeUser._id,
+          email: safeUser.email,
+          name: safeUser.firstName,
+        },
+        {
+          attempts: 3,
+          backoff: {
+            type: "exponential",
+            delay: 5000,
+          },
+          removeOnComplete: true,
+          removeOnFail: false,
+        }
+      );
+      logger.info(
+        `Welcome email job queued for ${safeUser?.email}`
+      );
+    } catch (error) {
+      logger.warn("Failed to queue Verification email", {
+        email: safeUser.email,
+        error: error.message,
+      });
+    }
+
     const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "1h" });
     const refreshToken = jwt.sign({ id: userWithRole._id }, REFRESH_SECRET, {
       expiresIn: REFRESH_EXPIRES_IN,
     });
 
     await this.saveRefreshToken(userWithRole._id, refreshToken);
-    console.log( safeUser, token, refreshToken)
+    console.log(safeUser, token, refreshToken);
     return { user: safeUser, token, refreshToken };
   }
 
@@ -246,6 +285,11 @@ class UserService {
     return safeUser;
   }
 
+  async getAllUsers() {
+  const users = await this.userRepository.findAllUsers();
+  return users;
+}
+
   async updateUser(id, userData) {
     const user = await this.userRepository.updateUser(id, userData);
     if (!user) throw new AppError("User not found", 404);
@@ -297,6 +341,10 @@ class UserService {
     return safeUser;
   }
 
+   async deleteUser(userId) {
+    return User.findByIdAndDelete(userId);
+  }
+
   async resetPassword(userId, oldPassword, newPassword) {
     const user = await this.userRepository.findUserById(userId, {
       select: "+password",
@@ -315,9 +363,51 @@ class UserService {
 
     return true;
   }
+
+async updateUserRole(userId, newRoleId) {
+  // 1️⃣ Update the role
+  await this.userRepository.updateUser(userId, { roleId: newRoleId });
+
+  // 2️⃣ Fetch updated user with populated roleId
+  const updatedUser = await this.userRepository.findUserById(userId, true); 
+  // Pass `true` to populate roleId in repository
+
+  if (!updatedUser) {
+    throw new AppError("User not found", 404);
+  }
+
+  // 3️⃣ Create safe payload including role
+  const safeUser = {
+    _id: updatedUser._id,
+    email: updatedUser.email,
+    firstName: updatedUser.firstName,
+    lastName: updatedUser.lastName,
+    phoneNumber: updatedUser.phoneNumber,
+    isVerified: updatedUser.isVerified,
+    role: updatedUser.roleId
+      ? { _id: updatedUser.roleId._id, name: updatedUser.roleId.name }
+      : null,
+  };
+
+  // 4️⃣ Update cache
+  await this.cacheRepository.set(
+    `user:id:${userId}`,
+    JSON.stringify(safeUser),
+    3600
+  );
+
+  await this.cacheRepository.set(
+    `user:email:${updatedUser.email}`,
+    JSON.stringify(safeUser),
+    3600
+  );
+
+  return safeUser;
+}
+
+
+
+
 }
 
 export default UserService;
-
-
-
