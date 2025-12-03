@@ -143,6 +143,7 @@ async findUserById(id) {
       firstName: 1,
       lastName: 1,
       phoneNumber: 1,
+      isVerified:1 ,
       role: {
         $cond: [
           { $ifNull: ["$role", false] },
