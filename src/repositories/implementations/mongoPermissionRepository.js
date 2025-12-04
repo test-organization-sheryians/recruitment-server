@@ -5,19 +5,14 @@ import { AppError } from "../../utils/errors.js";
 import mongoose from "mongoose";
 
 class MongoPermissionRepository extends IPermissionRepository {
- async createPermission(permissionData) {
-  try {
-    console.log("Permission data before save:", permissionData);
-    const permission = new Permission(permissionData);
-    const saved = await permission.save();
-    console.log("Permission saved:", saved);
-    return saved;
-  } catch (error) {
-    console.error("Original Mongoose error:", error); // ← important
-    throw new AppError("Failed to create permission", 500);
+  async createPermission(permissionData) {
+    try {
+      const permission = new Permission(permissionData);
+      return await permission.save();
+    } catch (error) {
+      throw new AppError("Failed to create permission", 500);
+    }
   }
-}
-
 
   async findPermissionById(id) {
     try {

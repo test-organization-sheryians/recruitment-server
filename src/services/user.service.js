@@ -4,8 +4,6 @@ import { AppError } from "../utils/errors.js";
 import jwt from "jsonwebtoken";
 import config from "../config/environment.js";
 import bcrypt from "bcryptjs";
-import User from "../models/user.model.js";
-import { json } from "express";
 import { sendVerificationEmail } from "./sendMail.js";
 import logger from "../utils/logger.js";
 import { emailQueue } from "../queues/emailQueue.js";
@@ -285,11 +283,6 @@ class UserService {
     return safeUser;
   }
 
-  async getAllUsers() {
-  const users = await this.userRepository.findAllUsers();
-  return users;
-}
-
   async updateUser(id, userData) {
     const user = await this.userRepository.updateUser(id, userData);
     if (!user) throw new AppError("User not found", 404);
@@ -341,10 +334,6 @@ class UserService {
     return safeUser;
   }
 
-   async deleteUser(userId) {
-    return User.findByIdAndDelete(userId);
-  }
-
   async resetPassword(userId, oldPassword, newPassword) {
     const user = await this.userRepository.findUserById(userId, {
       select: "+password",
@@ -363,51 +352,6 @@ class UserService {
 
     return true;
   }
-
-async updateUserRole(userId, newRoleId) {
-  // 1️⃣ Update the role
-  await this.userRepository.updateUser(userId, { roleId: newRoleId });
-
-  // 2️⃣ Fetch updated user with populated roleId
-  const updatedUser = await this.userRepository.findUserById(userId, true); 
-  // Pass `true` to populate roleId in repository
-
-  if (!updatedUser) {
-    throw new AppError("User not found", 404);
-  }
-
-  // 3️⃣ Create safe payload including role
-  const safeUser = {
-    _id: updatedUser._id,
-    email: updatedUser.email,
-    firstName: updatedUser.firstName,
-    lastName: updatedUser.lastName,
-    phoneNumber: updatedUser.phoneNumber,
-    isVerified: updatedUser.isVerified,
-    role: updatedUser.roleId
-      ? { _id: updatedUser.roleId._id, name: updatedUser.roleId.name }
-      : null,
-  };
-
-  // 4️⃣ Update cache
-  await this.cacheRepository.set(
-    `user:id:${userId}`,
-    JSON.stringify(safeUser),
-    3600
-  );
-
-  await this.cacheRepository.set(
-    `user:email:${updatedUser.email}`,
-    JSON.stringify(safeUser),
-    3600
-  );
-
-  return safeUser;
-}
-
-
-
-
 }
 
 export default UserService;

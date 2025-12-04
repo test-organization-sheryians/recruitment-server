@@ -7,11 +7,8 @@ import { authorize } from "../middlewares/role.middleware.js";
 const router = express.Router();
 
 // Admin only routes
-// router.post("/",authenticateJWT ,  authorize("admin") ,  roleController.createRole);
-router.post("/", roleController.createRole);
-
+router.post("/",authenticateJWT ,  authorize("admin") ,  roleController.createRole);
 router.get("/", authenticateJWT, authorize("admin"), roleController.getAllRoles);
-
 router.get("/:id", authenticateJWT, authorize("admin"), roleController.getRoleById);
 router.put("/:id", authenticateJWT, authorize("admin"), roleController.updateRole);
 router.delete("/:id", authenticateJWT, authorize("admin"), roleController.deleteRole);

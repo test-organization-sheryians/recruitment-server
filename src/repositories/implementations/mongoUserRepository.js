@@ -74,47 +74,6 @@ class MongoUserRepository extends IUserRepository {
     }
   }
 
-async findAllUsers() {
-  try {
-    const users = await User.aggregate([
-      {
-        $lookup: {
-          from: "roles",
-          localField: "roleId",
-          foreignField: "_id",
-          as: "role",
-        },
-      },
-      {
-        $unwind: {
-          path: "$role",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          email: 1,
-          firstName: 1,
-          lastName: 1,
-          phoneNumber: 1,
-          googleId: 1,
-          role: {
-            _id: "$role._id",
-            name: "$role.name",
-            description: "$role.description",
-          },
-        },
-      },
-    ]);
-
-    return users;
-  } catch (error) {
-    throw new AppError("Failed to fetch all users with roles", 500, error);
-  }
-}
-
-
 async findUserById(id) {
   const isValid = mongoose.Types.ObjectId.isValid(id);
 
@@ -126,51 +85,60 @@ async findUserById(id) {
   const objectId = new mongoose.Types.ObjectId(id);
 
   const [user] = await User.aggregate([
-  { $match: { _id: objectId } },
-  {
-    $lookup: {
-      from: "roles",
-      localField: "roleId",
-      foreignField: "_id",
-      as: "role",
-    },
-  },
-  { $unwind: { path: "$role", preserveNullAndEmptyArrays: true } },
-  {
-    $project: {
-      _id: 1,
-      email: 1,
-      firstName: 1,
-      lastName: 1,
-      phoneNumber: 1,
-      isVerified:1 ,
-      role: {
-        $cond: [
-          { $ifNull: ["$role", false] },
-          { _id: "$role._id", name: "$role.name" },
-          null,
-        ],
+    { $match: { _id: objectId } },
+
+    {
+      $lookup: {
+        from: "roles",
+        localField: "roleId",
+        foreignField: "_id",
+        as: "role",
       },
     },
-  },
-  { $limit: 1 },
-]);
 
+    {
+      $unwind: {
+        path: "$role",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+
+    {
+      $project: {
+        _id: 1,
+        email: 1,
+        password: 1,
+        firstName: 1,
+        lastName: 1,
+        phoneNumber: 1,
+        googleId: 1,
+        isVerified:1,
+        role: {
+          $cond: [
+            { $ifNull: ["$role", false] },
+            {
+              _id: "$role._id",
+              name: "$role.name",
+              description: "$role.description",
+            },
+            null,
+          ],
+        },
+      },
+    },
+
+    { $limit: 1 },
+  ]);
 
   return user || null;
 }
 
-   async updateUser(userId, updateObj) {
-    return await User.findByIdAndUpdate(userId, updateObj, { new: true });
-  }
-
-  // Get user by ID, optionally populate role
-  async getUserById(userId, populateRole = false) {
-    let query = User.findById(userId);
-    if (populateRole) {
-      query = query.populate("roleId"); // populate role reference
+  async updateUser(id, userData) {
+    try {
+      return await User.findByIdAndUpdate(id, userData, { new: true });
+    } catch (error) {
+      throw new AppError("Failed to update user", 500, error);
     }
-    return await query;
   }
 }
 
