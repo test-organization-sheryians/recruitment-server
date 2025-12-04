@@ -26,8 +26,9 @@ const CandidateProfileSchema = new Schema(
     portfolioUrl: String,
 
     highestEducation: { type: String },
-    resumeFile: { type: String },
-    resumeScore: { type: Number },
+    // resumeFile: { type: String },
+    // resumeScore: { type: Number },
+    resumeUrl: { type: String },
     skills: [
       {
         type: Schema.Types.ObjectId,
