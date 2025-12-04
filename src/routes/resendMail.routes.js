@@ -5,6 +5,6 @@ import { authenticateJWT } from "../middlewares/auth.middleware.js";
 const router = express.Router();
 
 // Protected route
-router.post("/resend-verification-email", authenticateJWT, resendVerificationEmailController);
+router.post("/resend-verification-email", resendVerificationEmailController);
 
 export default router;
