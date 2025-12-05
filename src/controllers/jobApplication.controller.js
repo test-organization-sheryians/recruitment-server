@@ -4,24 +4,24 @@ import { AppError } from "../utils/errors.js";
 
 class JobApplicationController {
     
-    applyForJob = asyncHandler(async (req, res, next) => {
-        const { jobId, message, resumeUrl } = req.body;
-        const  candidateId  = req.userId;
-        
-        if (!resumeUrl) throw new AppError("Resume URL is required", 400);
+   applyForJob = asyncHandler(async (req, res, next) => {
+  const { jobId, message, resumeUrl } = req.body;
+  const candidateId = req.userId;
 
-        await jobApplicationService.applyForJob({
-            jobId,
-            candidateId,
-            message,
-            resumeUrl,
-        });
+  if (!resumeUrl) throw new AppError("Resume URL is required", 400);
 
-        res.status(201).json({
-            success: true,
-            message: "Application submitted successfully!",
-        });
-    });
+
+  const response = await jobApplicationService.applyForJob({
+    jobId,
+    candidateId,
+    message,
+    resumeUrl,
+  });
+
+ 
+  res.status(201).json(response);
+});
+
 
     getAllApplications = asyncHandler(async (req, res) => {
         const applications = await jobApplicationService.getAllApplications();

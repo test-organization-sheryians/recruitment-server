@@ -12,8 +12,6 @@ router.post(
   "/",
   authenticateJWT,
   createJobValidator ,
-
- 
   jobApplicationController.applyForJob
 );
 

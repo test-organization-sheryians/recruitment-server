@@ -1,16 +1,23 @@
 import UserService from "../services/user.service.js";
 
+const userService = new UserService();
+
 class UserController {
   constructor() {
     this.userService = new UserService();
+
     this.getMe = this.getMe.bind(this);
     this.updateMe = this.updateMe.bind(this);
+    this.getAllUsers = this.getAllUsers.bind(this);
+    this.deleteUser = this.deleteUser.bind(this);
+    this.updateUserRole = this.updateUserRole.bind(this);
   }
 
   async getMe(req, res, next) {
     try {
       const userId = req.userId;
       const user = await this.userService.getUser(userId);
+      console.log(" user >> ", user);
 
       return res.status(200).json({
         success: true,
@@ -50,6 +57,80 @@ class UserController {
       });
     } catch (err) {
       next(err);
+    }
+  }
+
+async updateUserRole(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { roleId } = req.body;
+
+    if (!roleId) {
+      return res.status(400).json({ message: "Role is required" });
+    }
+
+    // Update the user's role via service
+    const updatedUser = await this.userService.updateUserRole(id, roleId);
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Map the role from populated data
+    const safeUser = {
+      _id: updatedUser._id,
+      email: updatedUser.email,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+      phoneNumber: updatedUser.phoneNumber,
+      isVerified: updatedUser.isVerified,
+      role: updatedUser.role
+        ? { _id: updatedUser.role._id, name: updatedUser.role.name }
+        : null, // role will be null if not set
+    };
+
+    return res.status(200).json({
+      message: "User role updated successfully",
+      user: safeUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+
+
+  async getAllUsers(req, res, next) {
+    try {
+      const users = await this.userService.getAllUsers();
+
+      return res.status(200).json({
+        success: true,
+        data: users,
+        message: "Users fetched successfully",
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+  async deleteUser(req, res, next) {
+    try {
+      const userId = req.params.id;
+
+      console.log("Deleting user:", userId);
+
+      const deleted = await this.userService.deleteUser(userId);
+
+      console.log("Deleted user:", deleted);
+      return res.status(200).json({
+        success: true,
+        message: "User deleted successfully",
+      });
+    } catch (err) {
+      console.error("Delete user error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Server error", error: err.message });
     }
   }
 }
