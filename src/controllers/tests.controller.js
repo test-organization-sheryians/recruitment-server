@@ -12,14 +12,12 @@ class TestController {
         ...req.body,
         createdBy: req.user?._id,
       };
-      const promptt = req.body
-      console.log(promptt);
-      
 
-      testGenerator(promptt);
+      const resfromAI = await testGenerator({ prompt: req.body });
+      console.log("res from ai " , resfromAI);
 
       const test = await this.testService.createTest(payload);
-      res.status(201).json({ success: true, data: test });
+      res.status(201).json({ success: true, data: test , questions:resfromAI });
     } catch (error) {
       next(error);
     }

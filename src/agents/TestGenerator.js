@@ -1,16 +1,21 @@
+import { safeParseLLMJSON } from "../lib/cleanCode.js";
 import { llm } from "../services/ai.service.js";
+import prompt from "../lib/prompt/testGenerator.js";
 
 export async function testGenerator(state) {
-    const  promptt  = state.promptt
-    console.log("prompt--->",promptt);
+  try {
 
-    // const prompt = "what is capital of india"
-  const fullPrompt = `${JSON.stringify(promptt)}`
-  console.log(fullPrompt);
-  
+    const fullPrompt = `${prompt} 
+    TEST CONFIG:
+    ${JSON.stringify(state, null, 2)}`
 
+    const res = await llm.invoke(fullPrompt);
 
-    const res = await llm.invoke(fullPrompt)
+    const parsed = safeParseLLMJSON(res.content);
+    return parsed;
 
-    console.log(res);
+  } catch (err) {
+    console.error("❌ Failed to generate test questions:", err);
+    throw err;
+  }
 }
