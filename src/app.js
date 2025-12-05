@@ -17,6 +17,8 @@ import jobapply from "./routes/jobApplication.routes.js";
 import jobApplicationModel from "./models/jobApplication.model.js";
 import { authenticateJWT } from "./middlewares/auth.middleware.js";
 import awsRouter from './routes/aws.route.js'
+import resendMailRoutes from "./routes/resendMail.routes.js";
+
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
@@ -33,6 +35,8 @@ app.use("/api/ai", aiRoutes)
 app.use("/api/experience", expereniceRoutes);
 app.use('/api/candidate-profile', candidateProfileRoutes);
 app.use('/api/aws' , awsRouter)
+app.use("/api/auth", resendMailRoutes);
+
 app.use(errorHandler);
 export default app;
 
