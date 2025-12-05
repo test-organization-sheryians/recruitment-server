@@ -1,3 +1,4 @@
+import { testGenerator } from "../agents/TestGenerator.js";
 import TestService from "../services/tests.service.js";
 
 class TestController {
@@ -11,6 +12,11 @@ class TestController {
         ...req.body,
         createdBy: req.user?._id,
       };
+      const promptt = req.body
+      console.log(promptt);
+      
+
+      testGenerator(promptt);
 
       const test = await this.testService.createTest(payload);
       res.status(201).json({ success: true, data: test });
