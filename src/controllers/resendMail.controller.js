@@ -24,12 +24,31 @@ export const resendVerificationEmailController = async (req, res) => {
 
     const email = payload.email;
 
-    const result = await resendVerificationEmailService(email);
+    try {
+      // Service already handles all logic including isVerified
+      const result = await resendVerificationEmailService(email);
 
-    return res.status(200).json({
-      success: true,
-      message: result.message,
-    });
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+      });
+    } catch (serviceError) {
+      const msg = serviceError.message;
+
+      // Map service errors properly
+      if (msg === "User not found") {
+        return res.status(404).json({ success: false, message: msg });
+      }
+
+      if (msg === "Email is already verified") {
+        return res.status(400).json({ success: false, message: msg });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to resend verification email",
+      });
+    }
   } catch (error) {
     console.error("Resend email failed:", error.message);
     return res.status(500).json({
