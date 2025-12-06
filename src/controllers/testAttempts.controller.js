@@ -27,28 +27,28 @@ class TestAttemptsController {
       // }
 
       const data = {
-        title:testSummary.title,
-          summury:testSummary.summury,
-        showResults:testSummary.showResults,
-          category:testSummary.category,
-        status:testSummary.status,
-          duration:testSummary.duration,
-        passingScore:testSummary.passingScore,
-          prompt:testSummary.prompt,
+        title: testSummary.title,
+        summury: testSummary.summury,
+        showResults: testSummary.showResults,
+        category: testSummary.category,
+        status: testSummary.status,
+        duration: testSummary.duration,
+        passingScore: testSummary.passingScore,
+        prompt: testSummary.prompt,
       }
       // // console.log("test summary -----> ", testSummary.title);
       // console.log("////////////////////////////////");
       // console.log(data);
       // console.log("hehehehhe ----------------------------")
 
-      const resfromAI = await testGenerator({prompt : data});
-      console.log("////////////////////////////////");
-      console.log(resfromAI);
-      console.log("hehehehhe ----------------------------")
+      const resfromAI = await testGenerator({ prompt: data });
+      // console.log("////////////////////////////////");
+      // console.log(resfromAI);
+      // console.log("hehehehhe ----------------------------")
 
       const attempt = await this.testAttemptsService.startTest(testId, email);
 
-      return res.status(201).json({ success: true, data: attempt });
+      return res.status(201).json({ success: true, data: attempt, questions: resfromAI });
     } catch (error) {
       next(error);
     }
