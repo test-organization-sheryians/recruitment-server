@@ -22,9 +22,6 @@ class TestAttemptsController {
       const email = req.user.email;
 
       const testSummary = await this.testService.getTestById(testId);
-      // const payload = {
-
-      // }
 
       const data = {
         title: testSummary.title,
@@ -36,15 +33,8 @@ class TestAttemptsController {
         passingScore: testSummary.passingScore,
         prompt: testSummary.prompt,
       }
-      // // console.log("test summary -----> ", testSummary.title);
-      // console.log("////////////////////////////////");
-      // console.log(data);
-      // console.log("hehehehhe ----------------------------")
 
       const resfromAI = await testGenerator({ prompt: data });
-      // console.log("////////////////////////////////");
-      // console.log(resfromAI);
-      // console.log("hehehehhe ----------------------------")
 
       const attempt = await this.testAttemptsService.startTest(testId, email);
 

@@ -13,11 +13,8 @@ class TestController {
         createdBy: req.user?._id,
       };
 
-      const resfromAI = await testGenerator({ prompt: req.body });
-      console.log("res from ai " , resfromAI);
-
       const test = await this.testService.createTest(payload);
-      res.status(201).json({ success: true, data: test , questions:resfromAI });
+      res.status(201).json({ success: true, data: test });
     } catch (error) {
       next(error);
     }
