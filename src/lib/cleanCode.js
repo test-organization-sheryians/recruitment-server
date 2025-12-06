@@ -3,79 +3,54 @@ export function safeParseLLMJSON(raw) {
     throw new Error("No raw text to parse");
   }
 
-  let s = raw.trim();
+  // Remove code fences
+  raw = raw.replace(/```(json)?/gi, "").replace(/```/g, "").trim();
 
-  s = s.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+  // Find first { or [
+  const start = raw.search(/[\[{]/);
+  if (start === -1) {
+    throw new Error("No JSON object/array found.");
+  }
 
-  const firstObj = Math.min(
-    ...["{", "["].map((c) => {
-      const i = s.indexOf(c);
-      return i === -1 ? Infinity : i;
-    })
-  );
-  if (firstObj !== Infinity && firstObj > 0) s = s.slice(firstObj);
+  const jsonPart = raw.slice(start);
 
-  try {
-    return JSON.parse(s);
-  } catch (err) {
-    // More aggressive cleaning for problematic strings
-    let cleaned = s
-      // Fix common escape sequence issues
-      .replace(/\\n/g, '\\n')
-      .replace(/\\r/g, '\\r')
-      .replace(/\\t/g, '\\t')
-      .replace(/\\"/g, '\\"')
-      .replace(/\\\\/g, '\\\\')
-      // Remove control characters
-      .replace(/[\u0000-\u0019]+/g, "")
-      // Fix unescaped quotes in strings
-      .replace(/"([^"]*)"([^"]*)"([^"]*)"/g, (match, p1, p2, p3) => {
-        if (p2.includes(':') || p2.includes(',') || p2.includes('{') || p2.includes('}')) {
-          return match; // This is likely proper JSON structure
-        }
-        return `"${p1}\\"${p2}\\"${p3}"`;
-      });
+  // Detect whether it is array or object
+  const opening = jsonPart[0];
+  const closing = opening === "{" ? "}" : "]";
 
-    try {
-      return JSON.parse(cleaned);
-    } catch (err2) {
-      // Try to find and extract valid JSON
-      const lastCurly = cleaned.lastIndexOf("}");
-      const lastSquare = cleaned.lastIndexOf("]");
-      const lastIndex = Math.max(lastCurly, lastSquare);
-      
-      if (lastIndex !== -1) {
-        const truncated = cleaned.slice(0, lastIndex + 1);
-        try {
-          return JSON.parse(truncated);
-        } catch (err3) {
-          // Final attempt: try to fix common JSON issues
-          const finalAttempt = truncated
-            .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
-            .replace(/([{,]\s*)(\w+):/g, '$1"$2":') // Quote unquoted keys
-            .replace(/:\s*'([^']*)'/g, ': "$1"'); // Replace single quotes with double quotes
-          
-          try {
-            return JSON.parse(finalAttempt);
-          } catch (err4) {
-            const e = new Error(
-              "Unable to parse JSON from LLM response after sanitization."
-            );
-            e.raw = raw;
-            e.cleaned = cleaned;
-            e.cause = err4.message;
-            throw e;
-          }
-        }
-      }
-      const e = new Error("Unable to parse JSON from LLM response.");
-      e.raw = raw;
-      e.cause = err2.message;
-      throw e;
+  let depth = 0;
+  let endIndex = -1;
+
+  for (let i = 0; i < jsonPart.length; i++) {
+    const char = jsonPart[i];
+
+    if (char === opening) depth++;
+    if (char === closing) depth--;
+
+    if (depth === 0) {
+      endIndex = i;
+      break;
     }
   }
-}
 
+  if (endIndex === -1) {
+    throw new Error("Could not find end of JSON structure");
+  }
+
+  const extracted = jsonPart.slice(0, endIndex + 1);
+
+  try {
+    return JSON.parse(extracted);
+  } catch (err) {
+    // Try to fix common issues
+    const cleaned = extracted
+      .replace(/,\s*([}\]])/g, "$1")          // Remove trailing commas
+      .replace(/([{,]\s*)([A-Za-z0-9_]+)\s*:/g, '$1"$2":') // Quote keys
+      .replace(/:\s*'([^']*)'/g, ': "$1"');   // Convert single quotes
+
+    return JSON.parse(cleaned);
+  }
+}
 export function normalizeQuestionsArray(parsed) {
   let arr = [];
   if (Array.isArray(parsed)) arr = parsed;

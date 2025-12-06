@@ -10,6 +10,7 @@ export async function testGenerator(state) {
     ${JSON.stringify(state, null, 2)}`
 
     const res = await llm.invoke(fullPrompt);
+    console.log(res);
 
     const parsed = safeParseLLMJSON(res.content);
     return parsed;
