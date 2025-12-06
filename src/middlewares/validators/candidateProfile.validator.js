@@ -33,10 +33,7 @@ const createProfileSchema = Joi.object({
       "string.min": "Each skill name must be at least 1 character long",
       "string.max": "Each skill name cannot exceed 100 characters",
     })
-  ).min(1).required().messages({
-    "array.min": "At least one skill is required",
-    "any.required": "Skills are required",
-  }),
+  )
 });
 
 const updateProfileSchema = Joi.object({

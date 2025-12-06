@@ -6,7 +6,7 @@ export const experienceCreateValidator = Joi.object({
             title: Joi.string().trim().required(),
             location: Joi.string().trim().optional(),
             description: Joi.string().trim().optional(),
-
+            candidateId:Joi.string().trim().required(),
             startDate: Joi.date().required(),
             endDate: Joi.date().when("isCurrent", {
                         is: true,

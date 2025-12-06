@@ -10,8 +10,7 @@ class ExperienceController {
 
     try {
       const experienceData = {
-        ...req.body,
-        candidateId: req.userId
+        ...req.body
       }
       const result = await this.experienceService.addExperience(experienceData);
 
@@ -75,7 +74,7 @@ class ExperienceController {
       const userId = req.userId;
       const data = req.body;
 
-      const result = await this.experienceService.updateExperience(experienceId, data, userId); // FIXED
+      const result = await this.experienceService.updateExperience(experienceId, data, userId); 
 
       res.status(200).json({
         success: true,

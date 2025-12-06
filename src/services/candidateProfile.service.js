@@ -64,29 +64,7 @@ class CandidateProfileService {
   const profile = await this.candidateProfileRepository.findProfileByUserId(userId);
   if (!profile) throw new AppError("Profile not found", 404);
 
-  if (profileData.skills && Array.isArray(profileData.skills)) {
-    const trimmedSkillNames = profileData.skills
-      .map((name) => name.trim())
-      .filter((name) => name.length > 0);
 
-    if (trimmedSkillNames.length > 0) {
-      const skillIds = [];
-
-      for (const skillName of trimmedSkillNames) {
-        let skill = await this.skillRepository.findSkillByName(skillName);
-
-        if (!skill) {
-          skill = await this.skillRepository.createSkill({ name: skillName });
-        }
-
-        skillIds.push(skill._id);
-      }
-
-      profileData.skills = skillIds;
-    } else {
-      delete profileData.skills;
-    }
-  }
 
 
   await this.candidateProfileRepository.updateProfile(profile._id, profileData);

@@ -55,9 +55,7 @@ class ExperienceService {
 
     const user = await this.experienceRepository.getExperienceById(experienceId);
 
-    if (user.candidateId.toString() !== userId) {
-      throw new AppError("you are not allowed to updated", 401);
-    }
+    
     const updated = await this.experienceRepository.updateExperience(
       experienceId,
       data
