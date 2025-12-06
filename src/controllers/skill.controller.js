@@ -19,7 +19,7 @@ class SkillController {
         }
     }
 
-    async getAllSkills(req, res, next) {
+    async   getAllSkills(req, res, next) {
         try {
             const skills = await skillService.getAllSkills();
             res.status(200).json({ success: true, data: skills });
@@ -41,6 +41,16 @@ class SkillController {
         try {
             await skillService.deleteSkill(req.params.id);
             res.status(204).send();
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async searchSkills(req, res, next) {
+        try {
+            const nameQuery = req.query.name;
+            const skills = await skillService.searchSkillsByName(nameQuery);
+            res.status(200).json({ success: true, data: skills });
         } catch (error) {
             next(error);
         }

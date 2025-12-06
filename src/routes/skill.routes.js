@@ -11,10 +11,14 @@ router.post("/", authenticateJWT, authorize("admin"), validateRequest(createSkil
 
 router.get("/", authenticateJWT,  skillController.getAllSkills);
 
+router.get("/search",authenticateJWT,  skillController.searchSkills);
+
 router.get("/:id", authenticateJWT, authorize("admin"), skillController.getSkill);
 
 router.put("/:id", authenticateJWT, authorize("admin"), validateRequest(updateSkillSchema), skillController.updateSkill);
 
+
 router.delete("/:id", authenticateJWT, authorize("admin"), skillController.deleteSkill);
+
 
 export default router;
