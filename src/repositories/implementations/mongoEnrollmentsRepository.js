@@ -47,7 +47,7 @@ class MongoEnrollmentsRespository extends IEnrollment {
         },
       ]);
 
-      console.log(enrollments);
+      // console.log(enrollments);
       return enrollments;
     } catch (error) {
       throw new AppError(

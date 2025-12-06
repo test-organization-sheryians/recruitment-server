@@ -1,18 +1,50 @@
+import { testGenerator } from "../agents/TestGenerator.js";
 import TestAttemptsService from "../services/testAttempts.service.js";
+import TestService from "../services/tests.service.js";
+
+
 
 class TestAttemptsController {
   constructor() {
     this.testAttemptsService = new TestAttemptsService();
 
+
     this.startTest = this.startTest.bind(this);
     this.submitTest = this.submitTest.bind(this);
     this.getUserAttempts = this.getUserAttempts.bind(this);
+
+    this.testService = new TestService();
   }
 
   async startTest(req, res, next) {
     try {
       const { testId } = req.body;
       const email = req.user.email;
+
+      const testSummary = await this.testService.getTestById(testId);
+      // const payload = {
+
+      // }
+
+      const data = {
+        title:testSummary.title,
+          summury:testSummary.summury,
+        showResults:testSummary.showResults,
+          category:testSummary.category,
+        status:testSummary.status,
+          duration:testSummary.duration,
+        passingScore:testSummary.passingScore,
+          prompt:testSummary.prompt,
+      }
+      // // console.log("test summary -----> ", testSummary.title);
+      // console.log("////////////////////////////////");
+      // console.log(data);
+      // console.log("hehehehhe ----------------------------")
+
+      const resfromAI = await testGenerator({prompt : data});
+      console.log("////////////////////////////////");
+      console.log(resfromAI);
+      console.log("hehehehhe ----------------------------")
 
       const attempt = await this.testAttemptsService.startTest(testId, email);
 
