@@ -100,3 +100,36 @@ export async function sendVerificationEmail(user) {
     throw error;
   }
 }
+
+export async function sendEnrollEmail(data) {
+  console.log(data)
+
+  try {
+
+    const info = await transporter.sendMail({
+      from: '"Sheriyansh Team" <anshur9608837@gmail.com>',
+      to: data.to,
+      subject: `You have been assigned a Test to Attempt`,
+      html: `
+         <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; border-radius: 10px;">
+        <h1 style="color: #1a73e8;">Hiii !</h1>
+        <p>You have been assigned a test with ID: <strong></strong>.</p>
+        <p>Please log in to the portal and attempt it.</p>
+        <br>
+        <p>Best of luck!</p>
+      </div>
+      `
+    });
+
+    console.log("EMAIL SENT SUCCESSFULLY!", info.messageId);
+    logger.info(
+      `Welcome email sent to ${data.to} | MessageId: ${info.messageId}`
+    );
+    console.log("Verification email sent:", info.messageId);
+    return info;
+  } catch (error) {
+    console.error("FAILED TO SEND EMAIL:", error.message);
+    logger.error("Email send failed:", error);
+    throw error;
+  }
+}
