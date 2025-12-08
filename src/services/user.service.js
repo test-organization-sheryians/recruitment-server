@@ -10,6 +10,7 @@ import { sendVerificationEmail } from "./sendMail.js";
 import logger from "../utils/logger.js";
 import { emailQueue } from "../queues/emailQueue.js";
 
+
 const { JWT_SECRET, REFRESH_SECRET, REFRESH_EXPIRES_IN } = config;
 
 class UserService {

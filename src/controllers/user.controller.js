@@ -11,6 +11,8 @@ class UserController {
     this.getAllUsers = this.getAllUsers.bind(this);
     this.deleteUser = this.deleteUser.bind(this);
     this.updateUserRole = this.updateUserRole.bind(this);
+    this.getAllUsers = this.getAllUsers.bind(this); 
+    this.deleteUser = this.deleteUser.bind(this); 
   }
 
   async getMe(req, res, next) {
@@ -97,6 +99,8 @@ async updateUserRole(req, res, next) {
     next(error);
   }
 }
+
+
 
 
 

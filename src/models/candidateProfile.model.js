@@ -27,6 +27,7 @@ const CandidateProfileSchema = new Schema(
 
     highestEducation: { type: String },
     resumeFile: { type: String },
+    resumeFileNoPI : { type: String },
     resumeScore: { type: Number },
     skills: [
       {

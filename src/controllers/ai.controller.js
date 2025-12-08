@@ -1,4 +1,8 @@
+import { safeParseLLMJSON } from '../lib/cleanCode.js';
+import { llm } from "../services/ai.service.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { graph } from "../utils/langgraph.js";
+import extractResumePrompt from '../lib/prompt/extractFile.js';
 
 const pdfParse = async (buffer) => {
     const { default: pdf } = await import('pdf-parse/lib/pdf-parse.js');
@@ -122,3 +126,46 @@ export async function evaluateAnswers(req, res) {
         });
     }
 }
+
+export const extractResume = asyncHandler(async(req, res) => {
+    const {resumeText} = req.body;
+    if(!resumeText){
+        return res.status(400).json({
+            success: false,
+            message: 'Resume text is required'
+        });
+    }
+
+    const prompt = `
+${extractResumePrompt.instruction}
+
+${extractResumePrompt.task}
+
+Extraction Rules:
+- ${extractResumePrompt.extraction_rules.join('\n- ')}
+
+JSON Schema Example:
+${JSON.stringify(extractResumePrompt.json_schema, null, 2)}
+
+Example Output:
+${extractResumePrompt.example_output}
+
+Resume Text:
+${resumeText}
+`;
+
+    const response = await llm.invoke(prompt);
+
+    let data;
+    try {
+        data = safeParseLLMJSON(response.content);
+    } catch (error) {
+        data = { error: 'Invalid JSON from AI', raw: response.content };
+    }
+
+    res.status(200).json({
+        success: true,
+        data,
+        message: 'Resume extracted, anonymized, and saved to local system',
+    });
+});

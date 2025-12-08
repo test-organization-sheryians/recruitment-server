@@ -81,10 +81,11 @@ class CandidateProfileController {
   });
 
   uploadResume = asyncHandler(async (req, res) => {
-    const { resumeFile, resumeScore } = req.body;
+    const { resumeFile, resumeFileNoPI, resumeScore } = req.body;
     const profile = await this.candidateProfileService.uploadResume(
       req.userId,
       resumeFile,
+      resumeFileNoPI,
       resumeScore
     );
     res.status(200).json({

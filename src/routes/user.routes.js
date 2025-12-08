@@ -20,6 +20,11 @@ router.put(
   userController.updateUserRole
 );
 
-router.delete("/:id", authenticateJWT, authorize("admin"), userController.deleteUser);
+// Self-access
+router.get("/me", authenticateJWT, userController.getMe);
+router.patch("/me", authenticateJWT, updateUserValidator, userController.updateMe);
 
+// Admin routes
+router.get("/allUser", authenticateJWT, authorize("admin"), userController.getAllUsers);
+router.delete("/:id", authenticateJWT, authorize("admin"), userController.deleteUser);
 export default router;

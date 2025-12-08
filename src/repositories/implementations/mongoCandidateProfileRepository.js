@@ -65,6 +65,7 @@ _getProfileAggregationPipeline(userId) {
         portfolioUrl: 1,
         highestEducation: 1,
         resumeFile: 1,
+        resumeFileNoPI: 1,
         resumeScore: 1,
         createdAt: 1,
         updatedAt: 1,
@@ -192,11 +193,16 @@ _getProfileAggregationPipeline(userId) {
     }
   }
 
-  async uploadResume(userId, resumeFile, resumeScore) {
+  async uploadResume(userId, resumeFile, resumeFileNoPI, resumeScore) {
     try {
+      const updateData = { resumeFile, resumeScore };
+      if (resumeFileNoPI !== undefined) {
+        updateData.resumeFileNoPI = resumeFileNoPI;
+      }
+
       await CandidateProfile.findOneAndUpdate(
         { userId },
-        { resumeFile, resumeScore }
+        updateData
       );
 
       const [profile] = await CandidateProfile.aggregate(
@@ -213,7 +219,7 @@ _getProfileAggregationPipeline(userId) {
     try {
       await CandidateProfile.findOneAndUpdate(
         { userId },
-        { $unset: { resumeFile: 1, resumeScore: 1 } }
+        { $unset: { resumeFile: 1, resumeFileNoPI: 1, resumeScore: 1 } }
       );
 
       const [profile] = await CandidateProfile.aggregate(

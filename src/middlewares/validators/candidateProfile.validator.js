@@ -95,6 +95,7 @@ const uploadResumeSchema = Joi.object({
   resumeFile: Joi.string().required().messages({
     "any.required": "Resume file is required",
   }),
+  resumeFileNoPI: Joi.string().optional(),
   resumeScore: Joi.number().min(0).max(100).required().messages({
     "number.min": "Resume score must be at least 0",
     "number.max": "Resume score cannot exceed 100",
