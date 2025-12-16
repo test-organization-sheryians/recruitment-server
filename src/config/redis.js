@@ -10,6 +10,7 @@ const client = redis.createClient({
     host: REDIS_HOST,
     port: REDIS_PORT,
   },
+  maxRetriesPerRequest: null,
 });
 
 client.on("error", (err) => {

@@ -8,7 +8,7 @@ import logger from "../utils/logger.js";
 import { emailQueue } from "../queues/emailQueue.js";
 
 class JobApplicationService {
-  constructor() {
+  constructor(){
     this.jobAppRepo = new MongoApplicationRespository();
     this.candidateRepo = new MongoCandidateProfileRepository();
     this.jobRoleReop = new MongoJobRoleRepository();

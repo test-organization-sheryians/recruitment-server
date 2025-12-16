@@ -47,7 +47,7 @@ class MongoRoleRepository extends IRoleRepository {
         runValidators: true 
       });
     } catch (error) {
-      if (error.code === 11000) {
+      if (error.code === 11000) { 
         throw new AppError("Role name already exists", 409);
       }
       throw new AppError("Failed to update role", 500);

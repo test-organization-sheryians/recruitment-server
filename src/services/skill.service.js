@@ -40,10 +40,6 @@ class SkillService {
         }
         return deleted;
     }
-
-    async searchSkillsByName(name) {
-        return await skillRepo.searchSkillsByName(name);
-    }
 }
 
 export default new SkillService();

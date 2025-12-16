@@ -45,16 +45,6 @@ class SkillController {
             next(error);
         }
     }
-
-    async searchSkills(req, res, next) {
-        try {
-            const nameQuery = req.query.name;
-                const skills = await skillService.searchSkillsByName(nameQuery);
-            res.status(200).json({ success: true, skills: skills });
-        } catch (error) {
-            next(error);
-        }
-    }
 }
 
 export default new SkillController();
