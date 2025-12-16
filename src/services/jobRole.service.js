@@ -8,7 +8,6 @@ class JobRoleService {
   }
 
   async createJobRole(jobRoleData) {
-    // Business Logic: Ensure expiry date is valid
     const currentDate = new Date();
     const expiryDate = new Date(jobRoleData.expiry);
     
@@ -16,7 +15,6 @@ class JobRoleService {
       throw new AppError("Expiry date must be in the future", 400);
     }
 
-    // Business Logic: Check for duplicate title for same client
     const existingJobRoles = await this.jobRoleRepository.findJobRolesByClient(jobRoleData.clientId);
     const duplicateTitle = existingJobRoles.find(
       role => role.title.toLowerCase() === jobRoleData.title.toLowerCase()
@@ -29,8 +27,9 @@ class JobRoleService {
     return await this.jobRoleRepository.createJobRole(jobRoleData);
   }
 
-  async getAllJobRoles(filter = {} , userId ) {
-    return await this.jobRoleRepository.findAllJobRoles(filter , userId);
+  async getAllJobRoles(filter = {}) {
+    
+    return await this.jobRoleRepository.findAllJobRoles(filter);
   }
 
   async getJobRoleById(id , userId) {
@@ -42,7 +41,6 @@ class JobRoleService {
   }
 
   async updateJobRole(id, jobRoleData) {
-    // Business Logic: Validate expiry date if provided
     if (jobRoleData.expiry) {
       const currentDate = new Date();
       const expiryDate = new Date(jobRoleData.expiry);
@@ -52,7 +50,6 @@ class JobRoleService {
       }
     }
 
-    // Business Logic: Check for duplicate title if title or clientId is being updated
     if (jobRoleData.title || jobRoleData.clientId) {
       const existingJobRole = await this.jobRoleRepository.findJobRoleById(id);
       if (!existingJobRole) {

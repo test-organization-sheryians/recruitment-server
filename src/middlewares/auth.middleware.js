@@ -11,8 +11,7 @@ export const authenticateJWT = async (req, res, next) => {
     if (!token) {
       throw new AppError("Access denied. No token provided.", 401);
     }
-    
-    
+
     const isBlacklisted = await redisClient.get(`bl_${token}`);
 
     if (isBlacklisted) {

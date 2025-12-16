@@ -71,16 +71,6 @@ class MongoSkillRepository extends ISkillRepository {
       throw new AppError("Failed to delete skill", 500);
     }
   }
-
-  async searchSkillsByName(name) {
-    const query = (name || "").trim();
-    if (!query) {
-      throw new AppError("Query parameter 'name' is required", 400);
-    }
-    return Skill.find(
-      { name: { $regex: query, $options: "i" } }
-    );
-  }
 }
 
 export default MongoSkillRepository;

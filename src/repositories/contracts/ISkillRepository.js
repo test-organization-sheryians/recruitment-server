@@ -22,11 +22,6 @@ class ISkillRepository {
     async deleteSkill(id) {
         throw new Error("Method not implemented");
     }
-
-    async searchSkillsByName(name) {
-        throw new Error("Method not implemented");
-    }
-
 }
 
 export default ISkillRepository;

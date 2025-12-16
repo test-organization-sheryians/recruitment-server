@@ -10,14 +10,11 @@ const skillSchema = new mongoose.Schema(
       lowercase: true,
       index: true,
     },
-    
   },
   {
     timestamps: true,
   }
 );
-
-skillSchema.index({ name: "text" });
 
 const Skill = mongoose.model("Skill", skillSchema);
 

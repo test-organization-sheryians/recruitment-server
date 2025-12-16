@@ -1,130 +1,102 @@
+import nodemailer from "nodemailer";
+import logger from "../utils/logger.js";
 
-import axios from "axios";
-
-
-const BREVO_API_KEY = process.env.BREVO_API_KEY;
-
-const BREVO_URL = "https://api.brevo.com/v3/smtp/email";
-
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, 
+  requireTLS: true,
+   auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,              
+  },
+});
+transporter.verify((error) => {
+  if (error) {
+    logger.error("Gmail SMTP connection failed:", error);
+  } else {
+    logger.info("Gmail SMTP ready — emails will send!");
+    console.log("Gmail SMTP CONNECTED — READY TO SEND");
+  }
+});
 
 export async function sendWelcomeEmail(data) {
-  try {
-    const payload = {
-      sender: { name: "Sheriyansh", email: "anshur9608837@gmail.com" },
-      to: [{ email: data.to, name: data.name }],
-      subject: `We received your application for ${data.jobTitle}`,
-      htmlContent: `
-        <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
-          <h1 style="color: #1a73e8;">Hi ${data.name || "Candidate"}!</h1>
-          <p>Thank you for applying to <strong>${data.jobTitle}</strong> at <strong>Sheriyansh</strong>.</p>
-          <p>Your application has been received and is under review.</p>
-          <br />
-          <p>We'll get back to you soon!</p>
-          <hr />
-          <small>Applied on: ${new Date(data.appliedAt).toLocaleString()}</small>
-        </div>
-      `,
-      textContent: `Hi ${data.name}, thank you for applying to ${data.jobTitle}!`,
-    };
-
-    const response = await axios.post(BREVO_URL, payload, {
-      headers: {
-        "api-key": BREVO_API_KEY,
-        "Content-Type": "application/json",
-      },
-    });
-     
-    console.log("WELCOME EMAIL SENT:", response.data.messageId);
-    return response.data;
-  } catch (error) {
-    console.error("Brevo email failed:");
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-export async function sendVerificationEmail(user) {
-  const verificationLink = `https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app/user-verification/${user.id}`;
-    console.log(user)
-  try {
-    const payload = {
-      sender: { name: "Sheriyansh Team", email: "anshur9608837@gmail.com" },
-      to: [{ email: user.email, name: user.name }],
-      subject: "Verify Your Email Address",
-      htmlContent: `
-        <div style="font-family: Arial; max-width: 600px; padding: 20px;">
-          <h2 style="color: #1a73e8;">Welcome, ${user.name || "there"}!</h2>
-          <p>Please verify your email by clicking below:</p>
-          
-          <a href="${verificationLink}"
-            style="background:#1a73e8;color:white;padding:12px 25px;
-                   text-decoration:none;border-radius:6px;display:inline-block;margin:20px 0;">
-            Verify Email
-          </a>
-
-          <p>Or copy this link:</p>
-          <p style="word-wrap: break-word; color: #1a73e8;">${verificationLink}</p>
-
-          <hr />
-          <small>If you didn’t sign up, ignore this email.</small>
-        </div>
-      `,
-      textContent: `Verify your email: ${verificationLink}`,
-    };
-
-    const response = await axios.post(BREVO_URL, payload, {
-      headers: {
-        "api-key": BREVO_API_KEY,
-        "Content-Type": "application/json",
-      },
-    });
-
-    console.log("VERIFICATION EMAIL SENT:", response.data.messageId);
-    return response.data;
-  } catch (error) {
-    console.error("Brevo email failed:", error.response?.data || error.message);
-    throw error;
-  }
-}
-
-export async function sendEnrollEmail(data) {
-  console.log(data)
 
   try {
-
     const info = await transporter.sendMail({
-      from: '"Sheriyansh Team" <anshur9608837@gmail.com>',
+      from: 'anshur9608837@gmail.com',
       to: data.to,
-      subject: `You have been assigned a Test to Attempt`,
+      subject: `We received your application for ${data.jobTitle}`,
       html: `
-         <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; border-radius: 10px;">
-        <h1 style="color: #1a73e8;">Hiii !</h1>
-        <p>You have been assigned a test with ID: <strong></strong>.</p>
-        <p>Please log in to the portal and attempt it.</p>
-        <br>
-        <p>Best of luck!</p>
-      </div>
-      `
+        <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; border-radius: 10px;">
+          <h1 style="color: #1a73e8;">Hi ${data.name || "Candidate"}!</h1>
+          <p>Thank you for applying to <strong>${
+            data.jobTitle
+          }</strong> at <strong>Sheriyansh</strong>.</p>
+          <p>Your application has been received and is under review.</p>
+          <br>
+          <p>We'll get back to you soon!</p>
+          <hr>
+          <small style="color: #666;">
+            Applied on: ${new Date(data.appliedAt).toLocaleString()}
+          </small>
+        </div>
+      `,
+      text: `Hi ${data.name}, thanks for applying to ${
+        data.jobTitle
+      } at Sheriyansh! Applied on: ${new Date(
+        data.appliedAt
+      ).toLocaleString()}`,
     });
 
     console.log("EMAIL SENT SUCCESSFULLY!", info.messageId);
     logger.info(
       `Welcome email sent to ${data.to} | MessageId: ${info.messageId}`
     );
-    console.log("Verification email sent:", info.messageId);
     return info;
   } catch (error) {
     console.error("FAILED TO SEND EMAIL:", error.message);
     logger.error("Email send failed:", error);
-    throw error;
+    throw error; 
   }
 }
 
+
+export async function sendVerificationEmail(user) {
+  const verificationLink = `https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app//user-verification/${user.id}`;
+
+  try {
+    const info = await transporter.sendMail({
+      from: '"Sheriyansh Team" <anshur9608837@gmail.com>',
+      to: user.email,
+      subject: "Verify Your Email Address",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background: #f9f9f9; border-radius: 12px; border: 1px solid #eee;">
+          <h2 style="color: #1a73e8;">Welcome to Sheriyansh, ${user.name || "there"}!</h2>
+          <p>You're almost ready to start. Please verify your email address by clicking the button below:</p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationLink}" 
+               style="background: #1a73e8; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+              Verify Email Address
+            </a>
+          </div>
+
+          <p>Or copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; color: #1a73e8;">${verificationLink}</p>
+
+          <hr style="border: 1px solid #ddd; margin: 30px 0;">
+          <small style="color: #888;">If you didn’t create an account, you can safely ignore this email.</small>
+        </div>
+      `,
+      text: `Hi ${user.name},\n\nPlease verify your email by visiting this link:\n${verificationLink}\n\nIf you didn't sign up, ignore this email.`,
+    });
+
+    logger.info(`Verification email sent to ${user.email} | ${info.messageId}`);
+    console.log("Verification email sent:", info.messageId);
+    return info;
+  } catch (error) {
+    logger.error("Failed to send verification email:", error);
+    throw error;
+  }
+}
