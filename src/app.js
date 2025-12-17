@@ -49,6 +49,7 @@ app.use('/api/candidate-profile', candidateProfileRoutes);
 app.use('/api/aws' , awsRouter)
 app.use("/api/auth", resendMailRoutes);
 
+
 ///---------------new api routes-------
 app.use("/api/saved-jobs", savedJobRoutes);
 
