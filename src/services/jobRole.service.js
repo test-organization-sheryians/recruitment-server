@@ -92,8 +92,8 @@ class JobRoleService {
     return await this.jobRoleRepository.findJobRolesByClient(clientId);
   }
 
-  async getJobRolesByCategory(categoryId) {
-    return await this.jobRoleRepository.findJobRolesByCategory(categoryId);
+  async getJobRolesByCategory(categoryId,userId) {
+    return await this.jobRoleRepository.findJobRolesByCategory(categoryId,userId);
   }
 
   async getActiveJobRoles() {

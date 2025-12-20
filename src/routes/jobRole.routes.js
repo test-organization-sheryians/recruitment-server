@@ -57,7 +57,7 @@ router.get(
 );
 
 router.get(
-  "/category/:categoryId",
+  "/category/:categoryId",authenticateJWT,
   jobRoleController.getJobRolesByCategory
 );
 

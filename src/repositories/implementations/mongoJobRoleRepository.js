@@ -266,36 +266,76 @@ async findAllJobRoles(filter = {} , userId ) {
     }
   }
 
-  async findJobRolesByCategory(categoryId) {
-    try {
-      return await JobRole.aggregate([
-        { $match: { category: new mongoose.Types.ObjectId(categoryId) } },
-        {
-          $lookup: {
-            from: "users",
-            localField: "clientId",
-            foreignField: "_id",
-            as: "client",
-            pipeline: [{ $project: { name: 1, email: 1, company: 1 } }]
+  async findJobRolesByCategory(categoryId, userId) {    
+  try {
+    return await JobRole.aggregate([
+      {
+        $match: {
+          category: new mongoose.Types.ObjectId(categoryId)
+        }
+      },
+
+      {
+        $lookup: {
+          from: "jobapplications",
+          localField: "_id",
+          foreignField: "jobId",
+          as: "applications"
+        }
+      },
+
+      {
+        $addFields: {
+          applied: {
+            $cond: {
+              if: userId
+                ? {
+                    $in: [
+                      new mongoose.Types.ObjectId(userId),
+                      "$applications.candidateId"
+                    ]
+                  }
+                : false,
+              then: true,
+              else: false
+            }
           }
-        },
-        {
-          $lookup: {
-            from: "skills",
-            localField: "skills",
-            foreignField: "_id",
-            as: "skills"
-          }
-        },
-        {
-          $unwind: { path: "$client", preserveNullAndEmptyArrays: true }
-        },
-        { $sort: { createdAt: -1 } }
-      ]);
-    } catch (error) {
-      throw new AppError("Failed to fetch category job roles", 500);
-    }
+        }
+      },
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "clientId",
+          foreignField: "_id",
+          as: "client",
+          pipeline: [{ $project: { name: 1, email: 1, company: 1 } }]
+        }
+      },
+
+      {
+        $lookup: {
+          from: "skills",
+          localField: "skills",
+          foreignField: "_id",
+          as: "skills"
+        }
+      },
+
+      {
+        $project: {
+          applications: 0
+        }
+      },
+
+      { $unwind: { path: "$client", preserveNullAndEmptyArrays: true } },
+      { $sort: { createdAt: -1 } }
+    ]);
+  } catch (error) {
+    throw new AppError("Failed to fetch category job roles", 500);
   }
+}
+
 }
 
 export default MongoJobRoleRepository;

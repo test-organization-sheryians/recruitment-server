@@ -240,6 +240,14 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
       );
     }
   }
+
+  async getCandidatebyId(Id){
+    if(!Id) throw new AppError("Candidate Id not found",404)
+
+    const candidate = await CandidateProfile.findById(Id);
+    return candidate
+  }
+
 }
 
 export default MongoCandidateProfileRepository;

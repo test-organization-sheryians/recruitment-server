@@ -1,9 +1,11 @@
 import MongoExperienceRepository from "../repositories/implementations/mongoExperienceRepository.js";
+import MongoCandidateRepository from "../repositories/implementations/mongoCandidateProfileRepository.js";
 import { AppError } from "../utils/errors.js";
 
 class ExperienceService {
   constructor() {
     this.experienceRepository = new MongoExperienceRepository();
+    this.candidateRepository = new MongoCandidateRepository();
   }
   async addExperience(data) {
     if (!data.candidateId) {
@@ -19,13 +21,11 @@ class ExperienceService {
     if (!candidateId) {
       throw new AppError("candidateId is required", 400);
     }
-    
+
     if (candidateId !== userId) {
       throw new AppError("You are not allowed to view this experience", 401);
     }
-    return await this.experienceRepository.findByCandidateId(
-      candidateId
-    );
+    return await this.experienceRepository.findByCandidateId(candidateId);
   }
   async getSingleExperience(id, userId) {
     if (!id) {
@@ -44,7 +44,6 @@ class ExperienceService {
   }
 
   async updateExperience(experienceId, data, userId) {
-
     if (!experienceId) {
       throw new AppError("experience id is required", 400);
     }
@@ -52,10 +51,10 @@ class ExperienceService {
       data.endDate = null;
     }
 
+    const user = await this.experienceRepository.getExperienceById(
+      experienceId
+    );
 
-    const user = await this.experienceRepository.getExperienceById(experienceId);
-
-    
     const updated = await this.experienceRepository.updateExperience(
       experienceId,
       data
@@ -73,18 +72,31 @@ class ExperienceService {
       throw new AppError("experience id is required", 400);
     }
 
-    const user = await this.experienceRepository.getExperienceById(experienceId);
+    const experience = await this.experienceRepository.getExperienceById(
+      experienceId
+    );
 
-    if (userId !== user.candidateId.toString()) {
-      throw new AppError("You are not allowed to delete", 401);
+    if (!experience) {
+      throw new AppError("Experience not found", 404);
     }
 
+    const candidate = await this.candidateRepository.getCandidatebyId(
+      experience.candidateId
+    );
+
+    if (!candidate) {
+      throw new AppError("Candidate profile not found", 404);
+    }
+
+    if (candidate.userId.toString() !== userId) {
+      throw new AppError("You are not allowed to delete this experience", 401);
+    }
 
     const deleted = await this.experienceRepository.deleteExperience(
       experienceId
     );
 
-    console.log(deleted)
+    console.log(deleted);
 
     if (!deleted) {
       throw new AppError("Failed to delete — Experience not found", 404);

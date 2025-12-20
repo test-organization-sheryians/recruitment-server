@@ -66,8 +66,7 @@ const updateProfileSchema = Joi.object({
       "string.min": "Each skill name must be at least 1 character long",
       "string.max": "Each skill name cannot exceed 100 characters",
     })
-  ).min(1).messages({
-    "array.min": "At least one skill is required",
+  ).messages({
     "any.required": "Skills are required",
   }),
 });
