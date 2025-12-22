@@ -66,13 +66,60 @@ class MongoTestAttampsRepository extends IAttempts {
   }
 }
 
-async findAttemptsByEmail(email) {               //new one for test attempt by email
+async findAttemptsByEmail(email) {
   try {
-    const attempts = await TestAttempts.find({ email })
-      .sort({ startTime: -1 })
-      .lean();
+    const attempts = await TestAttempts.aggregate([
+      // 1️⃣ filter by user
+      {
+        $match: { email }
+      },
 
-    return attempts; // ✅ ARRAY
+      // 2️⃣ join tests collection
+      {
+        $lookup: {
+          from: "tests",
+          localField: "testId",
+          foreignField: "_id",
+          as: "test"
+        }
+      },
+
+      // 3️⃣ convert array → object
+      {
+        $unwind: {
+          path: "$test",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+
+      // 4️⃣ shape response exactly for frontend
+      {
+        $project: {
+          _id: 0,
+
+          title: "$test.title",
+          summury: "$test.summury",
+          duration: "$test.duration",
+          passingScore: "$test.passingScore",
+          createdAt: "$test.createdAt",
+          showResults: "$test.showResults",
+
+          attempt: {
+            status: "$status",
+            isPassed: "$isPassed",
+            score: "$score",
+            percentage: "$percentage"
+          }
+        }
+      },
+
+      // 5️⃣ latest attempt first
+      {
+        $sort: { createdAt: -1 }
+      }
+    ]);
+
+    return attempts;
   } catch (error) {
     throw new AppError(
       `Failed to find user attempts: ${error.message}`,
@@ -81,6 +128,7 @@ async findAttemptsByEmail(email) {               //new one for test attempt by e
     );
   }
 }
+
 
 
 

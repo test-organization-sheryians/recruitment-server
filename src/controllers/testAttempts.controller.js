@@ -14,7 +14,6 @@ class TestAttemptsController {
     this.testService = new TestService();
   }
 
-  
   // async startTest(req, res, next) {
   //   try {
   //     const { testId } = req.body;
@@ -140,23 +139,22 @@ class TestAttemptsController {
     }
   }
 
-async getUserAttempts(req, res, next) {
-  try {
-    const email = req.user.email;
+  async getUserAttempts(req, res, next) {
+    try {
+      const testId = req.params.testId;
+      const email = req.user.email;
 
-    const attempts =
-      await this.testAttemptsService
-        .testAttemptsRepogitory
-        .findAttemptsByEmail(email);
+      const attempts =
+        await this.testAttemptsService.testAttemptsRepogitory.findAttemptsByUser(
+          testId,
+          email
+        );
 
-    // ✅ RETURN ARRAY DIRECTLY
-    return res.status(200).json(attempts);
-  } catch (error) {
-    next(error);
+      return res.status(200).json({ success: true, data: attempts });
+    } catch (error) {
+      next(error);
+    }
   }
-}
-
-
 }
 
 export default new TestAttemptsController();
