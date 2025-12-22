@@ -66,6 +66,23 @@ class MongoTestAttampsRepository extends IAttempts {
   }
 }
 
+async findAttemptsByEmail(email) {               //new one for test attempt by email
+  try {
+    const attempts = await TestAttempts.find({ email })
+      .sort({ startTime: -1 })
+      .lean();
+
+    return attempts; // ✅ ARRAY
+  } catch (error) {
+    throw new AppError(
+      `Failed to find user attempts: ${error.message}`,
+      500,
+      error
+    );
+  }
+}
+
+
 
   async updateTestAttempt(id, updateData) {
     try {
