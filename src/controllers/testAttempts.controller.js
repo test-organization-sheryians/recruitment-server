@@ -14,92 +14,52 @@ class TestAttemptsController {
     this.testService = new TestService();
   }
 
-  // async startTest(req, res, next) {
-  //   try {
-  //     const { testId } = req.body;
-  //     const email = req.user.email;
-
-  //     const testSummary = await this.testService.getTestById(testId);
-
-  //     const data = {
-  //       title: testSummary.title,
-  //       summury: testSummary.summury,
-  //       showResults: testSummary.showResults,
-  //       category: testSummary.category,
-  //       status: testSummary.status,
-  //       duration: testSummary.duration,
-  //       passingScore: testSummary.passingScore,
-  //       prompt: testSummary.prompt,
-  //     };
-
-  //     const resfromAI = await testGenerator({ prompt: data });
-
-  //     const attempt = await this.testAttemptsService.startTest(testId, email);
-
-  //     return res.status(201).json({
-  //       success: true,
-  //       data: attempt,
-  //       questions: resfromAI,
-  //     });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
-
   async startTest(req, res, next) {
-  try {
-    const { testId } = req.body;
-    const email = req.user.email;
+    try {
+      const { testId } = req.body;
+      const email = req.user.email;
 
-    // 1️⃣ Fetch test config
-    const testSummary = await this.testService.getTestById(testId);
+      // 1️⃣ Fetch test config
+      const testSummary = await this.testService.getTestById(testId);
 
-    const testConfig = {
-      title: testSummary.title,
-      summury: testSummary.summury,
-      showResults: testSummary.showResults,
-      category: testSummary.category,
-      status: testSummary.status,
-      duration: testSummary.duration,
-      passingScore: testSummary.passingScore,
-      prompt: testSummary.prompt,
-    };
+      const testConfig = {
+        title: testSummary.title,
+        summury: testSummary.summury,
+        showResults: testSummary.showResults,
+        category: testSummary.category,
+        status: testSummary.status,
+        duration: testSummary.duration,
+        passingScore: testSummary.passingScore,
+        prompt: testSummary.prompt,
+      };
 
-    // 2️⃣ Generate questions from AI (already normalized)
-    const aiResult = await testGenerator(testConfig);
-    /**
-     * aiResult = {
-     *   questions: [],
-     *   duration: number,
-     *   passingScore: number
-     * }
-     */
+      // 2️⃣ Generate questions from AI (already normalized)
+      const aiResult = await testGenerator(testConfig);
 
-    // 3️⃣ Create attempt
-    const attempt = await this.testAttemptsService.startTest(testId, email);
+      // 3️⃣ Create attempt
+      const attempt = await this.testAttemptsService.startTest(testId, email);
 
-    // 4️⃣ EXACT RESPONSE SHAPE (CLIENT SAFE)
-    return res.status(201).json({
-      success: true,
-      data: attempt,
-      questions: {
-        test: {
-          questions: aiResult.questions,
-          duration: aiResult.duration,
-          passingScore: aiResult.passingScore,
+      // 4️⃣ EXACT RESPONSE SHAPE (CLIENT SAFE)
+      return res.status(201).json({
+        success: true,
+        data: attempt,
+        questions: {
+          test: {
+            questions: aiResult.questions,
+            duration: aiResult.duration,
+            passingScore: aiResult.passingScore,
+          },
         },
-      },
-    });
-  } catch (error) {
-    next(error);
+      });
+    } catch (error) {
+      next(error);
+    }
   }
-}
-
 
   async submitTest(req, res, next) {
     try {
       const attemptId = req.params.attemptId;
-      const { testId, questions ,answers } = req.body;
+      const { testId, questions, answers } = req.body;
 
       if (!testId) {
         return res
@@ -113,7 +73,7 @@ class TestAttemptsController {
         questions: questions,
         answers,
         passingScore: test.passingScore,
-        testPrompt:test.prompt
+        testPrompt: test.prompt,
       });
 
       const updatedAttempt = await this.testAttemptsService.submitTest(
@@ -139,16 +99,12 @@ class TestAttemptsController {
     }
   }
 
+  // ✅ FIXED: Now correctly fetches attempts for the logged-in user
   async getUserAttempts(req, res, next) {
     try {
-      const testId = req.params.testId;
-      const email = req.user.email;
+      const email = req.user.email; // Use secure email from auth middleware
 
-      const attempts =
-        await this.testAttemptsService.testAttemptsRepogitory.findAttemptsByUser(
-          testId,
-          email
-        );
+      const attempts = await this.testAttemptsService.getAttemptsByUser(email);
 
       return res.status(200).json({ success: true, data: attempts });
     } catch (error) {

@@ -55,9 +55,11 @@ class TestAttemptsService {
 
     return updatedAttempt;
   }
+
+  // ✅ ADDED: Helper to get attempts by email
+  async getAttemptsByUser(email) {
+    return await this.testAttemptsRepogitory.findAttemptsByEmail(email);
+  }
 }
-
-
-
 
 export default TestAttemptsService;
