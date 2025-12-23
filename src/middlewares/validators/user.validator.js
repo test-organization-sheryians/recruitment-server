@@ -19,6 +19,7 @@ export const updateUserSchema = Joi.object({
   }),
 }).min(1); 
 
+
 const validate = (schema) => (req, _res, next) => {
   const { error } = schema.validate(req.body, { abortEarly: false, stripUnknown: true });
   if (error) {

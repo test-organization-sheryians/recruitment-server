@@ -1,18 +1,18 @@
-import mongoose from "mongoose";
-import IUserRepository from "../contracts/IUserRepository.js";
-import User from "../../models/user.model.js";
-import { AppError } from "../../utils/errors.js";
-import { paginateAggregation } from "../../utils/pagination.util.js";
+import mongoose from "mongoose"
+import IUserRepository from "../contracts/IUserRepository.js"
+import User from "../../models/user.model.js"
+import { AppError } from "../../utils/errors.js"
+import { paginateAggregation } from "../../utils/pagination.util.js"
 
 class MongoUserRepository extends IUserRepository {
   async createUser(userData) {
     try {
-      const user = new User(userData);
-      const savedUser = await user.save();
-      return savedUser;
+      const user = new User(userData)
+      const savedUser = await user.save()
+      return savedUser
     } catch (error) {
-      console.error("Error creating user:", error);
-      throw new AppError(`Failed to create user: ${error.message}`, 500, error);
+      console.error("Error creating user:", error)
+      throw new AppError(`Failed to create user: ${error.message}`, 500, error)
     }
   }
 
@@ -44,6 +44,7 @@ class MongoUserRepository extends IUserRepository {
             password: 1,
             googleId: 1,
             isVerified: 1,
+            resetPasswordToken: 1,
             role: {
               _id: "$role._id",
               name: "$role.name",
@@ -52,11 +53,10 @@ class MongoUserRepository extends IUserRepository {
           },
         },
         { $limit: 1 },
-      ]);
-
-      return user || null;
+      ])
+      return user || null
     } catch (error) {
-      throw new AppError("Failed to find user with role", 500, error);
+      throw new AppError("Failed to find user with role", 500, error)
     }
   }
 
@@ -94,23 +94,23 @@ class MongoUserRepository extends IUserRepository {
             },
           },
         },
-        { $sort: { createdAt: -1 } }
-      ];
-      return await paginateAggregation(User, pipeline, { page, limit });
+        { $sort: { createdAt: -1 } },
+      ]
+      return await paginateAggregation(User, pipeline, { page, limit })
     } catch (error) {
-      throw new AppError("Failed to fetch all users with roles", 500, error);
+      throw new AppError("Failed to fetch all users with roles", 500, error)
     }
   }
 
   // Improved findUserById (combining best from both branches)
   async findUserById(id) {
-    const isValid = mongoose.Types.ObjectId.isValid(id);
+    const isValid = mongoose.Types.ObjectId.isValid(id)
     if (!isValid) {
-      console.log("ERROR: Invalid ObjectId format:", id);
-      return null;
+      console.log("ERROR: Invalid ObjectId format:", id)
+      return null
     }
 
-    const objectId = new mongoose.Types.ObjectId(id);
+    const objectId = new mongoose.Types.ObjectId(id)
 
     try {
       const [user] = await User.aggregate([
@@ -153,41 +153,41 @@ class MongoUserRepository extends IUserRepository {
           },
         },
         { $limit: 1 },
-      ]);
+      ])
 
-      return user || null;
+      return user || null
     } catch (error) {
-      console.error("Error finding user by ID:", error);
-      throw new AppError("Failed to find user by ID", 500, error);
+      console.error("Error finding user by ID:", error)
+      throw new AppError("Failed to find user by ID", 500, error)
     }
   }
 
   async updateUser(userId, updateObj) {
     try {
-      return await User.findByIdAndUpdate(userId, updateObj, { new: true });
+      return await User.findByIdAndUpdate(userId, updateObj, { new: true })
     } catch (error) {
-      throw new AppError("Failed to update user", 500, error);
+      throw new AppError("Failed to update user", 500, error)
     }
   }
 
   // Optional: populate role if needed (kept as is)
   async getUserById(userId, populateRole = false) {
     try {
-      let query = User.findById(userId);
+      let query = User.findById(userId)
       if (populateRole) {
-        query = query.populate("roleId");
+        query = query.populate("roleId")
       }
-      return await query;
+      return await query
     } catch (error) {
-      throw new AppError("Failed to get user by ID", 500, error);
+      throw new AppError("Failed to get user by ID", 500, error)
     }
   }
 
   async findUser(query) {
-    const searchQuery = query.trim();
-    if (!searchQuery) return [];
+    const searchQuery = query.trim()
+    if (!searchQuery) return []
 
-    const regex = new RegExp(searchQuery, "i");
+    const regex = new RegExp(searchQuery, "i")
 
     try {
       const users = await User.aggregate([
@@ -241,14 +241,53 @@ class MongoUserRepository extends IUserRepository {
           },
         },
         { $limit: 20 },
-      ]);
+      ])
 
-      return users;
+      return users
     } catch (error) {
-      console.error("Error searching users:", error);
-      throw new AppError("Failed to search users", 500, error);
+      console.error("Error searching users:", error)
+      throw new AppError("Failed to search users", 500, error)
+    }
+  }
+
+  async updateResetToken(id, token, expires) {
+    try {
+      return User.findByIdAndUpdate(id, {
+        resetPasswordToken: token,
+        resetPasswordExpires: expires,
+      })
+    } catch (error) {
+      console.error("Error in update to reset token:", error)
+      throw new AppError("Failed to update reset token", 500, error)
+    }
+  }
+
+  async findByResetToken(token) {
+    try {
+      return User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: { $gt: new Date() },
+      })
+    } catch (error) {
+      console.error("Error finding reset token:", error)
+      throw new AppError("Failed to finding reset token", 500, error)
+    }
+  }
+
+  async clearResetToken(id) {
+    try {
+      return User.findByIdAndUpdate(
+        id, // ✅ FIRST ARG MUST BE USER ID
+        {
+          resetPasswordToken: null,
+          resetPasswordExpires: null,
+        }
+      )
+    } catch (error) {
+      console.error("Error clear reset token:", error)
+      throw new AppError("Failed to clear reset token", 500, error)
     }
   }
 }
 
-export default MongoUserRepository;
+export default MongoUserRepository

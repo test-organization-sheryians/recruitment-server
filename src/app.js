@@ -24,6 +24,7 @@ import resendMailRoutes from "./routes/resendMail.routes.js";
 import { sendWelcomeEmail } from "./services/sendMail.js";
 
 import savedJobRoutes from "./routes/savedJob.routes.js";
+import passwordRoutes from "./routes/password.routes.js";
 
 
 const app = express();
@@ -55,6 +56,8 @@ app.use("/api/auth", resendMailRoutes);
 // });
 
 app.use("/api/saved-jobs", savedJobRoutes);
+app.use("/api/password", passwordRoutes);
+
 
 
 app.use(errorHandler);

@@ -17,6 +17,15 @@ class IUserRepository {
   async findUser(query){
      throw new Error("Method not implemented");
   }
+  async findByResetToken(token){
+    throw new Error("Method not implemented");
+  }
+  async updateResetToken(id,token,expires){
+    throw new Error("Method not implemented");
+  }
+  async clearResetToken(id){
+    throw new Error("Method not implemented");
+  }
 }
 
 export default IUserRepository;
