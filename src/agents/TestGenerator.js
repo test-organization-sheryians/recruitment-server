@@ -1,6 +1,6 @@
-import { safeParseLLMJSON } from "../lib/cleanCode.js";
+import { safeParseLLMJSON } from "../controllers/lib/cleanCode.js";
 import { llm } from "../services/ai.service.js";
-import prompt from "../lib/prompt/testGenerator.js";
+import prompt from "../controllers/lib/prompt/testGenerator.js";
 
 export async function testGenerator(state) {
   try {

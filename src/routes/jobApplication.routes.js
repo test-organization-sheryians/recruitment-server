@@ -54,4 +54,6 @@ router.get("/applicants/:id", authenticateJWT, authorize("admin"), jobApplicatio
 
 router.get("/my-applications", authenticateJWT, jobApplicationController.getCandidateAllApplications);
 
+
+
 export default router;

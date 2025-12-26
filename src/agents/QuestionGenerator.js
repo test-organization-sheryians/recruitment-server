@@ -1,6 +1,6 @@
-import prompt from "../lib/prompt/questionGenerator.js";
+import prompt from "../controllers/lib/prompt/questionGenerator.js";
 import { llm } from "../services/ai.service.js";
-import { safeParseLLMJSON, normalizeQuestionsArray } from "../lib/cleanCode.js";
+import { safeParseLLMJSON, normalizeQuestionsArray } from "../controllers/lib/cleanCode.js";
 
 export async function questionGenerator(state) {
   const profile = state.profile; // now resumeText only from frontend

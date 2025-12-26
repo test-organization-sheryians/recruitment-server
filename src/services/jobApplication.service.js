@@ -104,10 +104,6 @@ class JobApplicationService {
     return await this.jobAppRepo.getAllApplications(page, limit);
   }
 
-  async bulkUpdateApplicationStatus(applicationIds, status){
-    return await this.jobAppRepo.bulkUpdateApplicationStatus(applicationIds,status);
-  }
-
   async updateApplicationStatus(applicationId, status) {
     return await this.jobAppRepo.updateApplicationStatus(applicationId, status);
   }
@@ -123,6 +119,40 @@ class JobApplicationService {
   async getApplicantsByJobId(jobId) {
     return await this.jobAppRepo.getApplicantsByJobId(jobId);
   }
+
+
+
+  async bulkUpdateApplicationStatus(applicationIds, status) {
+  // 1️⃣ Fetch applicants for mail
+  const applications =
+    await this.jobAppRepo.findApplicationsForBulkMail(applicationIds);
+
+  // 2️⃣ Update status
+  const updateResult =
+    await this.jobAppRepo.bulkUpdateApplicationStatus(applicationIds, status);
+
+  // 3️⃣ Push mails to queue
+  for (const app of applications) {
+    await emailQueue.add(
+      "application-status-update",
+      {
+        to: app.candidate.email,
+        name: `${app.candidate.firstName} ${app.candidate.lastName}`,
+        jobTitle: app.job.title,
+        status,
+        applicationId: app._id.toString(),
+      },
+      {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 5000 },
+        removeOnComplete: true,
+      }
+    );
+  }
+
+  return updateResult;
+}
+
 
 }
 

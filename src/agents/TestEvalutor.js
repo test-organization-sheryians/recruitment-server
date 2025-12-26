@@ -1,6 +1,6 @@
 import { llm } from "../services/ai.service.js";
-import { safeParseLLMJSON } from "../lib/cleanCode.js";
-import evaluationPrompt from "../lib/prompt/answerEvaluatorPrompt.js";
+import { safeParseLLMJSON } from "../controllers/lib/cleanCode.js";
+import evaluationPrompt from "../controllers/lib/prompt/answerEvaluatorPrompt.js";
 
 export async function evaluateTest({
   questions,

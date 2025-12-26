@@ -1,9 +1,9 @@
-import axios from "axios";
+import axios from "axios"
 
-const FRONTEND_URL = "https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app";
+const FRONTEND_URL = "https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app"
 
-const BREVO_API_KEY = process.env.BREVO_API_KEY;
-const BREVO_URL = "https://api.brevo.com/v3/smtp/email";
+const BREVO_API_KEY = process.env.BREVO_API_KEY
+const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
 
 /**
  * Send welcome email after job application
@@ -17,7 +17,9 @@ export async function sendWelcomeEmail(data) {
       htmlContent: `
         <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
           <h1 style="color: #1a73e8;">Hi ${data.name || "Candidate"}!</h1>
-          <p>Thank you for applying to <strong>${data.jobTitle}</strong> at <strong>Sheriyansh</strong>.</p>
+          <p>Thank you for applying to <strong>${
+            data.jobTitle
+          }</strong> at <strong>Sheriyansh</strong>.</p>
           <p>Your application has been received and is under review.</p>
           <br />
           <p>We'll get back to you soon!</p>
@@ -26,24 +28,24 @@ export async function sendWelcomeEmail(data) {
         </div>
       `,
       textContent: `Hi ${data.name || "Candidate"}, thank you for applying to ${data.jobTitle}!`,
-    };
+    }
 
     const response = await axios.post(BREVO_URL, payload, {
       headers: {
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
       },
-    });
+    })
 
-    console.log("WELCOME EMAIL SENT:", response.data.messageId);
-    return response.data;
+    console.log("WELCOME EMAIL SENT:", response.data.messageId)
+    return response.data
   } catch (error) {
     console.error("Brevo welcome email failed:", {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-    });
-    throw error; // Re-throw to let caller handle it
+    })
+    throw error // Re-throw to let caller handle it
   }
 }
 
@@ -59,7 +61,9 @@ export async function sendInterviewEmail(data) {
       htmlContent: `
         <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
           <h1 style="color: #1a73e8;">Hi ${data.candidateName || "Candidate"}!</h1>
-          <p>Your interview for <strong>${data.jobTitle}</strong> at <strong>Sheryians</strong> has been scheduled.</p>
+          <p>Your interview for <strong>${
+            data.jobTitle
+          }</strong> at <strong>Sheryians</strong> has been scheduled.</p>
           <p><strong>Date & Time:</strong> ${new Date(data.Timing).toLocaleString()}</p>
           <p><strong>Meeting Link:</strong></p>
           <a href="${data.meetingLink}" target="_blank">${data.meetingLink}</a>
@@ -69,27 +73,29 @@ export async function sendInterviewEmail(data) {
           <small>Best of luck!</small>
         </div>
       `,
-      textContent: `Hi ${data.candidateName || "Candidate"}, your interview for ${data.jobTitle} is scheduled on ${new Date(
-        data.Timing
-      ).toLocaleString()}. Meeting link: ${data.meetingLink}`,
-    };
+      textContent: `Hi ${data.candidateName || "Candidate"}, your interview for ${
+        data.jobTitle
+      } is scheduled on ${new Date(data.Timing).toLocaleString()}. Meeting link: ${
+        data.meetingLink
+      }`,
+    }
 
     const response = await axios.post(BREVO_URL, payload, {
       headers: {
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
       },
-    });
+    })
 
-    console.log("INTERVIEW EMAIL SENT (Candidate):", response.data.messageId);
-    return response.data;
+    console.log("INTERVIEW EMAIL SENT (Candidate):", response.data.messageId)
+    return response.data
   } catch (error) {
     console.error("Brevo interview email (candidate) failed:", {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-    });
-    throw error;
+    })
+    throw error
   }
 }
 
@@ -120,27 +126,29 @@ export async function sendInterviewerEmail(data) {
           <small>Best regards,<br />Sheryians Team</small>
         </div>
       `,
-      textContent: `Dear Interviewer, an interview has been scheduled for candidate ${data.candidateName} for the position ${data.jobTitle} on ${new Date(
+      textContent: `Dear Interviewer, an interview has been scheduled for candidate ${
+        data.candidateName
+      } for the position ${data.jobTitle} on ${new Date(
         data.Timing
       ).toLocaleString()}. Meeting link: ${data.meetingLink}`,
-    };
+    }
 
     const response = await axios.post(BREVO_URL, payload, {
       headers: {
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
       },
-    });
+    })
 
-    console.log("INTERVIEW EMAIL SENT (Interviewer):", response.data.messageId);
-    return response.data;
+    console.log("INTERVIEW EMAIL SENT (Interviewer):", response.data.messageId)
+    return response.data
   } catch (error) {
     console.error("Brevo interviewer email failed:", {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-    });
-    throw error;
+    })
+    throw error
   }
 }
 
@@ -149,7 +157,7 @@ export async function sendInterviewerEmail(data) {
  */
 export async function sendResetPasswordEmail(data) {
   try {
-    const resetLink = `${FRONTEND_URL}/reset-password?token=${data.token}`;
+    const resetLink = `${FRONTEND_URL}/reset-password?token=${data.token}`
 
     const payload = {
       sender: { name: "Sheriyansh", email: "anshur9608837@gmail.com" },
@@ -196,25 +204,27 @@ export async function sendResetPasswordEmail(data) {
           </small>
         </div>
       `,
-      textContent: `Hi ${data.name || "User"}, reset your password using this link: ${resetLink} (expires in 15 minutes)`,
-    };
+      textContent: `Hi ${
+        data.name || "User"
+      }, reset your password using this link: ${resetLink} (expires in 15 minutes)`,
+    }
 
     const response = await axios.post(BREVO_URL, payload, {
       headers: {
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
       },
-    });
+    })
 
-    console.log("RESET PASSWORD EMAIL SENT:", response.data.messageId);
-    return response.data;
+    console.log("RESET PASSWORD EMAIL SENT:", response.data.messageId)
+    return response.data
   } catch (error) {
     console.error("Reset password email failed:", {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-    });
-    throw error;
+    })
+    throw error
   }
 }
 
@@ -222,7 +232,7 @@ export async function sendResetPasswordEmail(data) {
  * Send email verification email
  */
 export async function sendVerificationEmail(user) {
-  const verificationLink = `${FRONTEND_URL}/user-verification/${user.id}`;
+  const verificationLink = `${FRONTEND_URL}/user-verification/${user.id}`
 
   try {
     const payload = {
@@ -248,20 +258,20 @@ export async function sendVerificationEmail(user) {
         </div>
       `,
       textContent: `Verify your email: ${verificationLink}`,
-    };
+    }
 
     const response = await axios.post(BREVO_URL, payload, {
       headers: {
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
       },
-    });
+    })
 
-    console.log("VERIFICATION EMAIL SENT:", response.data.messageId);
-    return response.data;
+    console.log("VERIFICATION EMAIL SENT:", response.data.messageId)
+    return response.data
   } catch (error) {
-    console.error("Brevo verification email failed:", error.response?.data || error.message);
-    throw error;
+    console.error("Brevo verification email failed:", error.response?.data || error.message)
+    throw error
   }
 }
 
@@ -270,7 +280,7 @@ export async function sendVerificationEmail(user) {
  */
 export async function sendEnrollEmail(data) {
   try {
-    const testLink = `https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app/test/${data.testId}`;
+    const testLink = `https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app/test/${data.testId}`
 
     const payload = {
       sender: { name: "Sheriyansh Team", email: "anshur9608837@gmail.com" },
@@ -300,19 +310,94 @@ export async function sendEnrollEmail(data) {
         </div>
       `,
       textContent: `You have been assigned a test. Attempt it here: ${testLink}`,
-    };
+    }
 
     const response = await axios.post(BREVO_URL, payload, {
       headers: {
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
       },
-    });
+    })
 
-    console.log("ENROLL EMAIL SENT:", response.data.messageId);
-    return response.data;
+    console.log("ENROLL EMAIL SENT:", response.data.messageId)
+    return response.data
   } catch (error) {
-    console.error("Brevo enroll email failed:", error.response?.data || error.message);
-    throw error;
+    console.error("Brevo enroll email failed:", error.response?.data || error.message)
+    throw error
+  }
+}
+
+export const sendApplicationStatusUpdateEmail = async ({ to, name, jobTitle, status }) => {
+  try {
+    const payload = {
+      sender: {
+        name: "Sheriyansh Team",
+        email: "anshur9608837@gmail.com",
+      },
+      to: [
+        {
+          email: to,
+          name: name || "Candidate",
+        },
+      ],
+      subject: `Update on your application for ${jobTitle}`,
+      htmlContent: `
+        <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
+          <h2 style="color: #1a73e8;">Hello ${name || "there"} 👋</h2>
+
+          <p>
+            We wanted to inform you that the status of your application for the
+            <strong>${jobTitle}</strong> position has been updated.
+          </p>
+
+          <p style="font-size: 16px; margin: 20px 0;">
+            <strong>Current Status:</strong>
+            <span style="
+              padding: 6px 12px;
+              background: #1a73e8;
+              color: #ffffff;
+              border-radius: 6px;
+              text-transform: capitalize;
+            ">
+              ${status}
+            </span>
+          </p>
+
+          <p>
+            We truly appreciate the time and effort you invested in applying.
+            Our team will reach out to you if there are further steps.
+          </p>
+
+          <hr style="margin: 30px 0;" />
+
+          <p style="font-size: 14px; color: #555;">
+            Best wishes,<br />
+            <strong>Sheriyansh Recruitment Team</strong>
+          </p>
+        </div>
+      `,
+      textContent: `Hello ${name},
+Your application for "${jobTitle}" has been updated.
+Current Status: ${status}
+Regards,
+Sheriyansh Recruitment Team`,
+    }
+
+    const response = await axios.post(BREVO_URL, payload, {
+      headers: {
+        "api-key": BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+    })
+
+    console.log("APPLICATION STATUS UPDATE EMAIL SENT:", response.data.messageId)
+
+    return response.data
+  } catch (error) {
+    console.error(
+      "Brevo application status update email failed:",
+      error.response?.data || error.message
+    )
+    throw error
   }
 }

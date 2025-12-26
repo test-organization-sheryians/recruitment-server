@@ -1,7 +1,7 @@
 // src/workers/emailWorker.js
-import { Worker } from 'bullmq';
-import connection from '../config/config/bullmq-connection.js';
-import logger from '../utils/logger.js';
+import { Worker } from "bullmq";
+import connection from "../config/config/bullmq-connection.js";
+import logger from "../utils/logger.js";
 import {
   sendEnrollEmail,
   sendVerificationEmail,
@@ -9,35 +9,33 @@ import {
   sendInterviewEmail,
   sendInterviewerEmail,
   sendResetPasswordEmail,
-} from '../services/sendMail.js';
+  sendApplicationStatusUpdateEmail,
+} from "../services/sendMail.js";
 
 // NO QueueScheduler needed in BullMQ v5+
 // BullMQ automatically handles delayed jobs, retries, etc. when Worker is active
 
 const worker = new Worker(
-  'email',
+  "email",
   async (job) => {
     logger.info(`Processing job ${job.id} - ${job.name}`);
 
     try {
-      if (job.name === 'welcome-candidate') {
+      if (job.name === "welcome-candidate") {
         await sendWelcomeEmail(job.data);
-      } 
-      else if (job.name === 'verification-mail') {
+      } else if (job.name === "verification-mail") {
         await sendVerificationEmail(job.data);
-      } 
-      else if (job.name === 'enroll-candidate') {
+      } else if (job.name === "enroll-candidate") {
         await sendEnrollEmail(job.data);
-      } 
-      else if (job.name === 'schedule-interview') {
+      } else if (job.name === "schedule-interview") {
         // Send to both candidate and interviewer
         await sendInterviewEmail(job.data);
         await sendInterviewerEmail(job.data);
-      } 
-      else if (job.name === 'reset-password') {
+      } else if (job.name === "reset-password") {
         await sendResetPasswordEmail(job.data);
-      } 
-      else {
+      } else if (job.name === "application-status-update") {
+        await sendApplicationStatusUpdateEmail(job.data);
+      } else {
         logger.warn(`Unknown job type: ${job.name}`);
       }
     } catch (error) {
@@ -52,16 +50,18 @@ const worker = new Worker(
 );
 
 // Worker event listeners
-worker.on('completed', (job) => {
+worker.on("completed", (job) => {
   logger.info(`Job ${job.id} (${job.name}) completed successfully`);
 });
 
-worker.on('failed', (job, err) => {
-  logger.error(`Job ${job?.id} (${job?.name}) failed: ${err.message}`, { error: err });
+worker.on("failed", (job, err) => {
+  logger.error(`Job ${job?.id} (${job?.name}) failed: ${err.message}`, {
+    error: err,
+  });
 });
 
-worker.on('error', (err) => {
-  logger.error('Worker encountered an error:', { error: err });
+worker.on("error", (err) => {
+  logger.error("Worker encountered an error:", { error: err });
 });
 
-logger.info('BullMQ Email Worker started — ready to process email jobs!');
+logger.info("BullMQ Email Worker started — ready to process email jobs!");
