@@ -285,10 +285,11 @@ class UserService {
     return safeUser;
   }
 
-  async getAllUsers() {
-  const users = await this.userRepository.findAllUsers();
-  return users;
-}
+  async getAllUsers(filters = {}) {
+    // Accept filters: { role: 'admin' } or { role: 'admin,user' }
+    const users = await this.userRepository.findAllUsers(filters);
+    return users;
+  }
 
   async updateUser(id, userData) {
     const user = await this.userRepository.updateUser(id, userData);

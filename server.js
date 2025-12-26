@@ -1,6 +1,6 @@
 // server.js (or index.js — your main entry file)
-import app from "./src/app.js";
 import config from "./src/config/environment.js";
+import app from "./src/app.js";
 import { connectRedis } from "./src/config/redis.js";
 import { connectDB } from "./src/config/database.js";
 import logger from "./src/utils/logger.js";

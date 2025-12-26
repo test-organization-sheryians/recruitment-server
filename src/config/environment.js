@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
-dotenv.config();
+// Load .env from project src folder (fallback to root if needed)
+dotenv.config({ path: './src/.env' });
 
 export default {
   MONGO_URI: process.env.MONGO_URI,

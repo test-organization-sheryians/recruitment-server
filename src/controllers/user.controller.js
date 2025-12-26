@@ -87,9 +87,19 @@ class UserController {
     }
   }
 
+  /**
+   * GET /allUser
+   * Optional query param: `role` - single role name or comma-separated names
+   * Example: /allUser?role=admin or /allUser?role=admin,user
+   */
   async getAllUsers(req, res, next) {
     try {
-      const users = await this.userService.getAllUsers();
+      // Optional role filter: single name or comma-separated list
+      const { role } = req.query || {};
+      const filters = {};
+      if (role) filters.role = role;
+
+      const users = await this.userService.getAllUsers(filters);
 
       return res.status(200).json({
         success: true,

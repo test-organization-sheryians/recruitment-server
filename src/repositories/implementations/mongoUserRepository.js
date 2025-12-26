@@ -60,9 +60,9 @@ class MongoUserRepository extends IUserRepository {
   }
 
   // New method from dev branch: Get all users with role info
-  async findAllUsers() {
+  async findAllUsers(filters = {}) {
     try {
-      const users = await User.aggregate([
+      const pipeline = [
         {
           $lookup: {
             from: "roles",
@@ -77,23 +77,49 @@ class MongoUserRepository extends IUserRepository {
             preserveNullAndEmptyArrays: true,
           },
         },
-        {
-          $project: {
-            _id: 1,
-            email: 1,
-            firstName: 1,
-            lastName: 1,
-            phoneNumber: 1,
-            googleId: 1,
-            isVerified: 1,
-            role: {
-              _id: "$role._id",
-              name: "$role.name",
-              description: "$role.description",
+      ];
+
+      // Role filtering (supports comma-separated list, case-insensitive)
+      if (filters.role) {
+        const roles = Array.isArray(filters.role)
+          ? filters.role
+          : String(filters.role)
+              .split(",")
+              .map((r) => r.trim())
+              .filter(Boolean);
+
+        if (roles.length === 0) return [];
+
+        const lowerRoles = roles.map((r) => r.toLowerCase());
+
+        pipeline.push({
+          $match: {
+            $expr: {
+              $in: [{ $toLower: "$role.name" }, lowerRoles],
             },
           },
+        });
+      }
+
+      // Project after potential filtering
+      pipeline.push({
+        $project: {
+          _id: 1,
+          email: 1,
+          firstName: 1,
+          lastName: 1,
+          phoneNumber: 1,
+          googleId: 1,
+          isVerified: 1,
+          role: {
+            _id: "$role._id",
+            name: "$role.name",
+            description: "$role.description",
+          },
         },
-      ]);
+      });
+
+      const users = await User.aggregate(pipeline);
 
       return users;
     } catch (error) {
