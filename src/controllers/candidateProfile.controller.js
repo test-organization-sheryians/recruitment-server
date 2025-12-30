@@ -115,6 +115,7 @@ class CandidateProfileController {
       message: "Availability updated successfully",
     });
   });
+
 }
 
 export default CandidateProfileController;

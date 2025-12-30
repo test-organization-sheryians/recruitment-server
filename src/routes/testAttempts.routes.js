@@ -21,10 +21,18 @@ router.patch(
   testAttemptsController.submitTest
 );
 
+
 router.get(
   "/user/:testId",
   authenticateJWT,
   testAttemptsController.getUserAttempts
 );
+
+router.get(
+  "/candidate/:testId",
+  authenticateJWT,
+  testAttemptsController.getCandidateAttempts
+);
+
 
 export default router;

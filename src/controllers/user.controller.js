@@ -89,11 +89,14 @@ class UserController {
 
   async getAllUsers(req, res, next) {
     try {
-      const users = await this.userService.getAllUsers();
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const result = await this.userService.getAllUsers(page, limit);
 
       return res.status(200).json({
         success: true,
-        data: users,
+        data: result.data,
+        pagination: result.pagination,
         message: "Users fetched successfully",
       });
     } catch (err) {
@@ -132,18 +135,18 @@ class UserController {
       const { roleId } = req.body;
 
       if (!roleId) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
-          message: "Role is required" 
+          message: "Role is required"
         });
       }
 
       const updatedUser = await this.userService.updateUserRole(id, roleId);
 
       if (!updatedUser) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           success: false,
-          message: "User not found" 
+          message: "User not found"
         });
       }
 

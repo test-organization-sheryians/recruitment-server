@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import IUserRepository from "../contracts/IUserRepository.js";
 import User from "../../models/user.model.js";
 import { AppError } from "../../utils/errors.js";
+import { paginateAggregation } from "../../utils/pagination.util.js";
 
 class MongoUserRepository extends IUserRepository {
   async createUser(userData) {
@@ -60,9 +61,9 @@ class MongoUserRepository extends IUserRepository {
   }
 
   // New method from dev branch: Get all users with role info
-  async findAllUsers() {
+  async findAllUsers(page = 1, limit = 10) {
     try {
-      const users = await User.aggregate([
+      const pipeline = [
         {
           $lookup: {
             from: "roles",
@@ -93,9 +94,9 @@ class MongoUserRepository extends IUserRepository {
             },
           },
         },
-      ]);
-
-      return users;
+        { $sort: { createdAt: -1 } }
+      ];
+      return await paginateAggregation(User, pipeline, { page, limit });
     } catch (error) {
       throw new AppError("Failed to fetch all users with roles", 500, error);
     }
@@ -246,6 +247,45 @@ class MongoUserRepository extends IUserRepository {
     } catch (error) {
       console.error("Error searching users:", error);
       throw new AppError("Failed to search users", 500, error);
+    }
+  }
+
+  async updateResetToken(id, token, expires) {
+    try {
+      return User.findByIdAndUpdate(id, {
+        resetPasswordToken: token,
+        resetPasswordExpires: expires,
+      })
+    } catch (error) {
+      console.error("Error in update to reset token:", error)
+      throw new AppError("Failed to update reset token", 500, error)
+    }
+  }
+
+  async findByResetToken(token) {
+    try {
+      return User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: { $gt: new Date() },
+      })
+    } catch (error) {
+      console.error("Error finding reset token:", error)
+      throw new AppError("Failed to finding reset token", 500, error)
+    }
+  }
+
+  async clearResetToken(id) {
+    try {
+      return User.findByIdAndUpdate(
+        id, // ✅ FIRST ARG MUST BE USER ID
+        {
+          resetPasswordToken: null,
+          resetPasswordExpires: null,
+        }
+      )
+    } catch (error) {
+      console.error("Error clear reset token:", error)
+      throw new AppError("Failed to clear reset token", 500, error)
     }
   }
 }

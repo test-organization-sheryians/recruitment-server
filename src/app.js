@@ -22,6 +22,11 @@ import testAttemptRoutes from "./routes/testAttempts.routes.js";
 import awsRouter from './routes/aws.route.js'
 import resendMailRoutes from "./routes/resendMail.routes.js";
 import { sendWelcomeEmail } from "./services/sendMail.js";
+import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
+
+import savedJobRoutes from "./routes/savedJob.routes.js";
+import passwordRoutes from "./routes/password.routes.js";
+
 
 const app = express();
 app.set("trust proxy", 1);  
@@ -32,7 +37,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
-app.use("/api/jobs", jobRoleRoutes);
+app.use("/api/jobs", jobRoleRoutes);     // add new route inside it
 app.use("/api/job-categories", jobCategoryRoutes);
 app.use("/api/job-apply", jobapply);
 app.use("/api/skills", skillRoutes);
@@ -44,6 +49,7 @@ app.use("/api/test-attempts", testAttemptRoutes);
 app.use('/api/candidate-profile', candidateProfileRoutes);
 app.use('/api/aws' , awsRouter)
 app.use("/api/auth", resendMailRoutes);
+app.use("/api/interviews", ScheduleInterviewRoutes);
 // await sendWelcomeEmail({
 //   to: "agr.rbih@gmail.com",
 //   name: "Rohan",
@@ -51,14 +57,9 @@ app.use("/api/auth", resendMailRoutes);
 //   appliedAt: new Date()
 // });
 
+app.use("/api/saved-jobs", savedJobRoutes);
+app.use("/api/password", passwordRoutes);
+
+
 app.use(errorHandler);
 export default app;
-
-
-
-
-
-
-
-
-

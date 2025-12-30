@@ -21,6 +21,14 @@ const TestEnrollmentsSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
+// 🔴 THIS LINE IS THE MAIN FIX
+TestEnrollmentsSchema.index(
+  { testId: 1, email: 1 },
+  { unique: true }
+);
+
+
 const TestEnrollments = mongoose.model("TestEnrollment", TestEnrollmentsSchema);
 
 export default TestEnrollments;

@@ -10,41 +10,91 @@ class TestAttemptsController {
     this.startTest = this.startTest.bind(this);
     this.submitTest = this.submitTest.bind(this);
     this.getUserAttempts = this.getUserAttempts.bind(this);
-
+    this.getCandidateAttempts = this.getCandidateAttempts.bind(this);
     this.testService = new TestService();
   }
 
+  // async startTest(req, res, next) {
+  //   try {
+  //     const { testId } = req.body;
+  //     const email = req.user.email;
+
+  //     const testSummary = await this.testService.getTestById(testId);
+
+  //     const data = {
+  //       title: testSummary.title,
+  //       summury: testSummary.summury,
+  //       showResults: testSummary.showResults,
+  //       category: testSummary.category,
+  //       status: testSummary.status,
+  //       duration: testSummary.duration,
+  //       passingScore: testSummary.passingScore,
+  //       prompt: testSummary.prompt,
+  //     };
+
+  //     const resfromAI = await testGenerator({ prompt: data });
+
+  //     const attempt = await this.testAttemptsService.startTest(testId, email);
+
+  //     return res.status(201).json({
+  //       success: true,
+  //       data: attempt,
+  //       questions: resfromAI,
+  //     });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
+
   async startTest(req, res, next) {
-    try {
-      const { testId } = req.body;
-      const email = req.user.email;
+  try {
+    const { testId } = req.body;
+    const email = req.user.email;
 
-      const testSummary = await this.testService.getTestById(testId);
+    // 1️⃣ Fetch test config
+    const testSummary = await this.testService.getTestById(testId);
 
-      const data = {
-        title: testSummary.title,
-        summury: testSummary.summury,
-        showResults: testSummary.showResults,
-        category: testSummary.category,
-        status: testSummary.status,
-        duration: testSummary.duration,
-        passingScore: testSummary.passingScore,
-        prompt: testSummary.prompt,
-      };
+    const testConfig = {
+      title: testSummary.title,
+      summury: testSummary.summury,
+      showResults: testSummary.showResults,
+      category: testSummary.category,
+      status: testSummary.status,
+      duration: testSummary.duration,
+      passingScore: testSummary.passingScore,
+      prompt: testSummary.prompt,
+    };
 
-      const resfromAI = await testGenerator({ prompt: data });
+    // 2️⃣ Generate questions from AI (already normalized)
+    const aiResult = await testGenerator(testConfig);
+    /**
+     * aiResult = {
+     *   questions: [],
+     *   duration: number,
+     *   passingScore: number
+     * }
+     */
 
-      const attempt = await this.testAttemptsService.startTest(testId, email);
+    // 3️⃣ Create attempt
+    const attempt = await this.testAttemptsService.startTest(testId, email);
 
-      return res.status(201).json({
-        success: true,
-        data: attempt,
-        questions: resfromAI,
-      });
-    } catch (error) {
-      next(error);
-    }
+    // 4️⃣ EXACT RESPONSE SHAPE (CLIENT SAFE)
+    return res.status(201).json({
+      success: true,
+      data: attempt,
+      questions: {
+        test: {
+          questions: aiResult.questions,
+          duration: aiResult.duration,
+          passingScore: aiResult.passingScore,
+        },
+      },
+    });
+  } catch (error) {
+    next(error);
   }
+}
+
 
   async submitTest(req, res, next) {
     try {
@@ -63,6 +113,7 @@ class TestAttemptsController {
         questions: questions,
         answers,
         passingScore: test.passingScore,
+        testPrompt:test.prompt
       });
 
       const updatedAttempt = await this.testAttemptsService.submitTest(
@@ -104,6 +155,25 @@ class TestAttemptsController {
       next(error);
     }
   }
+
+  async getCandidateAttempts(req, res, next) {
+    try {
+      const { testId } = req.params;
+      const email = req.user.email; // 🔐 from JWT
+
+      const attempts =
+        await this.testAttemptsService.getAttemptsForCandidate(testId, email);
+
+      res.status(200).json({
+        success: true,
+        data: attempts,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  
 }
 
 export default new TestAttemptsController();

@@ -100,24 +100,61 @@ class JobApplicationService {
     };
   }
 
+  async getAllApplications(page = 1, limit = 10) {
+    return await this.jobAppRepo.getAllApplications(page, limit);
+  }
 
-
-
-  async getAllApplications() {
-    return await this.jobAppRepo.getAllApplications();
+  async bulkUpdateApplicationStatus(applicationIds, status){
+    return await this.jobAppRepo.bulkUpdateApplicationStatus(applicationIds,status);
   }
 
   async updateApplicationStatus(applicationId, status) {
     return await this.jobAppRepo.updateApplicationStatus(applicationId, status);
   }
 
-  async filterApplications(status) {
-    return await this.jobAppRepo.filterApplications(status);
+  async filterApplications(status, page = 1, limit = 10) {
+    return await this.jobAppRepo.filterApplications(status, page, limit);
   }
 
-  async getCandidateAllApplications(candidateId) {
-    return await this.jobAppRepo.getCandidateAllApplications(candidateId);
+  async getCandidateAllApplications(candidateId, page = 1, limit = 10) {
+    return await this.jobAppRepo.getCandidateAllApplications(candidateId, page, limit);
   }
+
+  async getApplicantsByJobId(jobId) {
+    return await this.jobAppRepo.getApplicantsByJobId(jobId);
+  }
+
+   async bulkUpdateApplicationStatus(applicationIds, status) {
+  // 1️⃣ Fetch applicants for mail
+  const applications =
+    await this.jobAppRepo.findApplicationsForBulkMail(applicationIds);
+
+  // 2️⃣ Update status
+  const updateResult =
+    await this.jobAppRepo.bulkUpdateApplicationStatus(applicationIds, status);
+
+  // 3️⃣ Push mails to queue
+  for (const app of applications) {
+    await emailQueue.add(
+      "application-status-update",
+      {
+        to: app.candidate.email,
+        name: `${app.candidate.firstName} ${app.candidate.lastName}`,
+        jobTitle: app.job.title,
+        status,
+        applicationId: app._id.toString(),
+      },
+      {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 5000 },
+        removeOnComplete: true,
+      }
+    );
+  }
+
+  return updateResult;
+}
+
 }
 
 export default new JobApplicationService();
