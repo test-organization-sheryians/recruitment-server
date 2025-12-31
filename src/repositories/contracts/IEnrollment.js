@@ -13,6 +13,9 @@ class IEnrollment{
   async bulkCreateEnrollment (testId , emails ) {
       throw new Error("Method not implemented")
   }
+   async updateEnrollmentStatus(id,email){
+    throw new Error("Method not implemented")
+  }
 }
 
 export default IEnrollment ; 

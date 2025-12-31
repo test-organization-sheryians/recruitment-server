@@ -11,6 +11,37 @@ class TestAttemptsService {
   }
 
   async startTest(testId, email) {
+
+        const enrollment =
+    await this.enrollmentReposetory.findEnrollment(testId, email);
+    console.log(enrollment);
+
+
+    if (!enrollment) {
+      throw new AppError("you are not enrolled for this test.",409)
+    }
+
+    
+  // 2️⃣ Block re-attempt
+  if (enrollment.status === "Started") {
+    throw new AppError(
+      "You have already started this test. Re-attempt is not allowed.",
+      409
+    );
+  }
+
+  if (enrollment.status === "Completed") {
+    throw new AppError(
+      "You have already completed this test.",
+      409
+    );
+  }
+
+
+  await this.enrollmentReposetory.updateEnrollmentStatus(
+     enrollment._id,
+    "Started"
+  )
     const attemptData = {
       testId,
       email,
@@ -52,6 +83,11 @@ class TestAttemptsService {
     if (!updatedAttempt) {
       throw new AppError("Test attempt not found", 404);
     }
+      await this.enrollmentReposetory.updateEnrollmentStatus(
+  testResults.testId,
+  updatedAttempt.email,
+  "Completed"
+);
 
     return updatedAttempt;
   }
