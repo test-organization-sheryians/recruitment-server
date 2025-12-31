@@ -267,7 +267,7 @@ class MongoUserRepository extends IUserRepository {
       return User.findOne({
         resetPasswordToken: token,
         resetPasswordExpires: { $gt: new Date() },
-      })
+      }).select("+password") // ✅ IMPORTANT
     } catch (error) {
       console.error("Error finding reset token:", error)
       throw new AppError("Failed to finding reset token", 500, error)

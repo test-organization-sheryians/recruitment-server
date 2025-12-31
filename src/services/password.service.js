@@ -68,6 +68,17 @@ class PasswordService {
       throw new AppError("Invalid or expired reset token", 400)
     }
 
+    
+  // ✅ CHECK: new password vs old password
+  const isSamePassword = await bcrypt.compare(newPassword, user.password)
+
+  if (isSamePassword) {
+    throw new AppError(
+      "New password cannot be the same as the old password",
+      400
+    )
+  }
+
     const hashedPassword = await bcrypt.hash(newPassword, 10)
 
     await this.userRepository.updateUser(user._id, {
