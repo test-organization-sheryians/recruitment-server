@@ -67,6 +67,37 @@ class MongoTestAttampsRepository extends IAttempts {
 }
 
 
+async findAttemptsByCandidate(testId, email) {           ///user specifuic test
+    try {
+      const attempts = await TestAttempts.aggregate([
+        {
+          $match: {
+            testId: new mongoose.Types.ObjectId(testId),
+            email: email, // 🔐 FILTER BY LOGGED-IN USER
+          },
+        },
+        {
+          $project: {
+            answers: 0,     // ❌ NEVER expose answers
+            __v: 0,
+          },
+        },
+        {
+          $sort: { startTime: -1 },
+        },
+      ]);
+
+      return attempts;
+    } catch (error) {
+      throw new AppError(
+        `Failed to find candidate attempts: ${error.message}`,
+        500,
+        error
+      );
+    }
+  }
+
+
   async updateTestAttempt(id, updateData) {
     try {
       if (!mongoose.Types.ObjectId.isValid(id)) return null;

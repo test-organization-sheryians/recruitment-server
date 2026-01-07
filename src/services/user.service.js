@@ -6,7 +6,6 @@ import config from "../config/environment.js";
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import { json } from "express";
-import { sendVerificationEmail } from "./sendMail.js";
 import logger from "../utils/logger.js";
 import { emailQueue } from "../queues/emailQueue.js";
 
@@ -30,10 +29,10 @@ class UserService {
   _getSafeRole(user) {
     return user.role
       ? {
-          _id: user.role._id,
-          name: user.role.name,
-          description: user.role.description,
-        }
+        _id: user.role._id,
+        name: user.role.name,
+        description: user.role.description,
+      }
       : null;
   }
 
@@ -285,10 +284,10 @@ class UserService {
     return safeUser;
   }
 
-  async getAllUsers() {
-  const users = await this.userRepository.findAllUsers();
-  return users;
-}
+  async getAllUsers(page = 1, limit = 10) {
+    const result = await this.userRepository.findAllUsers(page, limit);
+    return result;
+  }
 
   async updateUser(id, userData) {
     const user = await this.userRepository.updateUser(id, userData);
@@ -341,7 +340,7 @@ class UserService {
     return safeUser;
   }
 
-   async deleteUser(userId) {
+  async deleteUser(userId) {
     return User.findByIdAndDelete(userId);
   }
 
@@ -364,50 +363,50 @@ class UserService {
     return true;
   }
 
-  async findUser (query){ 
-     const users =  await this.userRepository.findUser(query); 
-     return users ; 
+  async findUser(query) {
+    const users = await this.userRepository.findUser(query);
+    return users;
   }
-async updateUserRole(userId, newRoleId) {
-  // 1️⃣ Update the role
-  await this.userRepository.updateUser(userId, { roleId: newRoleId });
+  async updateUserRole(userId, newRoleId) {
+    // 1️⃣ Update the role
+    await this.userRepository.updateUser(userId, { roleId: newRoleId });
 
-  // 2️⃣ Fetch updated user with populated roleId
-  const updatedUser = await this.userRepository.findUserById(userId, true); 
-  // Pass `true` to populate roleId in repository
+    // 2️⃣ Fetch updated user with populated roleId
+    const updatedUser = await this.userRepository.findUserById(userId, true);
+    // Pass `true` to populate roleId in repository
 
-  if (!updatedUser) {
-    throw new AppError("User not found", 404);
+    if (!updatedUser) {
+      throw new AppError("User not found", 404);
+    }
+
+    // 3️⃣ Create safe payload including role
+    const safeUser = {
+      _id: updatedUser._id,
+      email: updatedUser.email,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+      phoneNumber: updatedUser.phoneNumber,
+      isVerified: updatedUser.isVerified,
+      role: updatedUser.roleId
+        ? { _id: updatedUser.roleId._id, name: updatedUser.roleId.name }
+        : null,
+    };
+
+    // 4️⃣ Update cache
+    await this.cacheRepository.set(
+      `user:id:${userId}`,
+      JSON.stringify(safeUser),
+      3600
+    );
+
+    await this.cacheRepository.set(
+      `user:email:${updatedUser.email}`,
+      JSON.stringify(safeUser),
+      3600
+    );
+
+    return safeUser;
   }
-
-  // 3️⃣ Create safe payload including role
-  const safeUser = {
-    _id: updatedUser._id,
-    email: updatedUser.email,
-    firstName: updatedUser.firstName,
-    lastName: updatedUser.lastName,
-    phoneNumber: updatedUser.phoneNumber,
-    isVerified: updatedUser.isVerified,
-    role: updatedUser.roleId
-      ? { _id: updatedUser.roleId._id, name: updatedUser.roleId.name }
-      : null,
-  };
-
-  // 4️⃣ Update cache
-  await this.cacheRepository.set(
-    `user:id:${userId}`,
-    JSON.stringify(safeUser),
-    3600
-  );
-
-  await this.cacheRepository.set(
-    `user:email:${updatedUser.email}`,
-    JSON.stringify(safeUser),
-    3600
-  );
-
-  return safeUser;
-}
 
 
 

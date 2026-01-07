@@ -31,6 +31,12 @@ class TestService {
     if (!test) throw AppError("Failed to update ", 500);
     return test;
   }
+
+  async deleteTest(id) {
+    const deleted = await this.testRepository.deleteTest(id);
+    if (!deleted) throw new AppError("Test not found or could not be deleted", 404);
+    return deleted;
+  }
 }
 
 export default TestService;

@@ -55,6 +55,15 @@ class TestAttemptsService {
 
     return updatedAttempt;
   }
+
+  async getAttemptsForCandidate(testId, email) {
+    if (!testId || !email) {
+      throw new AppError("testId and email are required", 400);
+    }
+
+    return this.testAttemptsRepogitory.findAttemptsByCandidate(testId, email);
+  }
+
 }
 
 export default TestAttemptsService;

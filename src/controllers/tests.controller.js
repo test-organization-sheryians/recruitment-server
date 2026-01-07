@@ -49,6 +49,15 @@ class TestController {
       next(error);
     }
   }
+
+  async deleteTest(req, res, next) {
+    try {
+      const deleted = await this.testService.deleteTest(req.params.testId);
+      res.status(200).json({ success: true, data: deleted });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new TestController();

@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import Tests from "../../models/Tests.js";
 import ItestsRepository from "../contracts/ITestsRepository.js";
 import { AppError } from "../../utils/errors.js";
+import TestEnrollments from "../../models/TestEnrollments.js";
+import TestAttempts from "../../models/TestAttempt.js";
 
 class MongoTestRepository extends ItestsRepository {
   async createTest(testData) {
@@ -84,6 +86,23 @@ class MongoTestRepository extends ItestsRepository {
       }).lean();
     } catch (error) {
       throw new AppError(`Failed to update test: ${error.message}`, 500, error);
+    }
+  }
+
+  async deleteTest(id) {
+    try {
+      if (!mongoose.Types.ObjectId.isValid(id)) return null;
+
+      // delete the test document
+      const deleted = await Tests.findByIdAndDelete(id).lean();
+
+      // cleanup related enrollments and attempts
+      await TestEnrollments.deleteMany({ testId: id });
+      await TestAttempts.deleteMany({ testId: id });
+
+      return deleted;
+    } catch (error) {
+      throw new AppError(`Failed to delete test: ${error.message}`, 500, error);
     }
   }
 }
