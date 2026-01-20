@@ -19,7 +19,7 @@ class TestAttemptsService {
     }
       
     // 2️⃣ Block re-attempt
-    if (enrollment.status === "Completed") {
+    if (enrollment.status === "Graded") {
       throw new AppError("You have already completed this test.", 409)
     }
 

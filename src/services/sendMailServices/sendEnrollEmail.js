@@ -8,7 +8,7 @@ const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
  */
 export async function sendEnrollEmail(data) {
   try {
-    const testLink = `https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app/test/${data.testId}`
+    const testLink = `https://hire.sheryians.com/test/${data.testId}`
 
     const payload = {
       sender: { name: "Sheriyansh Recruitment", email: "anshur9608837@gmail.com" },
