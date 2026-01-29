@@ -3,6 +3,7 @@ import AITest from "../../models/AITest.js";
 import mongoose from "mongoose";
 
 class MongoAITestRepository extends IAITestRepository {
+  
   async createAITest({ userId, title, summary, totalMarks, duration }) {
     try {
       const aitest = new AITest({

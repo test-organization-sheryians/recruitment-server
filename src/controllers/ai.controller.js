@@ -34,7 +34,6 @@ export async function generateQuestion(req, res) {
             });
         }
 
-
         res.json({
             success: true,
             questions: result.questionsData || result

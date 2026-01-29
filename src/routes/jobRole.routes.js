@@ -11,6 +11,12 @@ import {
 
 const router = express.Router();
 
+
+// job search 
+router.get("/search",authenticateJWT,jobRoleController.searchJobsJobRoles)
+
+
+
 // Main CRUD routes
 router.post(
   "/",
@@ -57,7 +63,7 @@ router.get(
 );
 
 router.get(
-  "/category/:categoryId",
+  "/category/:categoryId",authenticateJWT,
   jobRoleController.getJobRolesByCategory
 );
 

@@ -15,4 +15,5 @@ export default {
   GROQ_API_KEY: process.env.GROQ_API_KEY,
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
   NODE_ENV: process.env.NODE_ENV,
+  FRONTEND_URL:process.env.FRONTEND_URL
 };

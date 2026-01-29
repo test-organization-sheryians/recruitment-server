@@ -1,6 +1,7 @@
 import express from "express";
 import testController from "../controllers/tests.controller.js";
 import { authenticateJWT } from "../middlewares/auth.middleware.js";
+import { checkEnrollment } from "../middlewares/checkEnrollment.middleware.js";
 
 const router = express.Router();
 
@@ -13,12 +14,17 @@ router.get(
   "/published/all",
   testController.getPublishedTests.bind(testController)
 );
-router.get("/:testId", testController.getTest.bind(testController));
+
+
+router.get("/:testId",
+  testController.getTest.bind(testController));
 
 router.patch(
   "/:testId",
   authenticateJWT,
   testController.updateTest.bind(testController)
 );
+
+
 
 export default router;

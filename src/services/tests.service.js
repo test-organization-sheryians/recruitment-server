@@ -26,8 +26,8 @@ class TestService {
     return tests;
   }
 
-  async updateTest(id) {
-    const test = await this.testRepository.updateTest(id);
+  async updateTest(id, updateData) {
+    const test = await this.testRepository.updateTest(id, updateData);
     if (!test) throw AppError("Failed to update ", 500);
     return test;
   }

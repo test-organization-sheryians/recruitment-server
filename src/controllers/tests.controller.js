@@ -1,4 +1,3 @@
-import { testGenerator } from "../agents/TestGenerator.js";
 import TestService from "../services/tests.service.js";
 
 class TestController {
@@ -40,7 +39,7 @@ class TestController {
 
   async updateTest(req, res, next) {
     try {
-      const updated = await this.testService.testRepository.updateTest(
+      const updated = await this.testService.updateTest(
         req.params.testId,
         req.body
       );

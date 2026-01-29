@@ -9,12 +9,8 @@ import { authenticateJWT } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/register",
-   registerValidator, 
-   authController.register);
-router.post("/login",
-   loginValidator, 
-   authController.login);
+router.post("/register", registerValidator,  authController.register);
+router.post("/login", loginValidator,  authController.login);
 router.post("/refresh", authController.refreshTokenController);
 router.post("/update" , authController.updateUser) ; 
 router.post("/logout", authController.logout);

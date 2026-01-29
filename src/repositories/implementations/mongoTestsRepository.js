@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Tests from "../../models/Tests.js";
 import ItestsRepository from "../contracts/ITestsRepository.js";
 import { AppError } from "../../utils/errors.js";
+import TestAttempt from "../../models/TestAttempt.js";
 
 class MongoTestRepository extends ItestsRepository {
   async createTest(testData) {
@@ -48,6 +49,7 @@ class MongoTestRepository extends ItestsRepository {
         {
           $addFields: {
             enrolledCount: { $size: "$enrollments" },
+            prompt: { $ifNull: ["$prompt", "Create a Test"] },
           },
         },
         {
@@ -86,6 +88,29 @@ class MongoTestRepository extends ItestsRepository {
       throw new AppError(`Failed to update test: ${error.message}`, 500, error);
     }
   }
+
+  async findAttemptsByTest(testId) {
+  try {
+    return await TestAttempt.find({ testId })
+      .select("questions") 
+      .lean();
+  } catch (error) {
+    throw new AppError("Failed to fetch test results", 500);
+  }
+}
+
+  async enableShowResults(testId) {
+    const test = await Tests.findById(testId);
+    if (!test) return null;
+    if (test.showResults === true) {
+      return { alreadyEnabled: true };
+    }
+    test.showResults = true;
+    await test.save();
+
+    return test;
+  }
+
 }
 
 export default MongoTestRepository;

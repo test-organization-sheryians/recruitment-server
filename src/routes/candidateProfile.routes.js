@@ -44,5 +44,6 @@ router.patch(
   candidateProfileController.updateAvailability
 );
 
+
 export default router;
 
