@@ -5,13 +5,16 @@ import { safeParseLLMJSON, normalizeQuestionsArray } from "../lib/cleanCode.js";
 export async function questionGenerator(state) {
   const profile = state.profile; // now resumeText only from frontend
 
-  const fullPrompt = `${JSON.stringify(prompt)}
+const fullPrompt = `
+${prompt}
 
 CANDIDATE PROFILE DATA:
 ${JSON.stringify(profile, null, 2)}
 
-Based on the above candidate profile, first validate if you have sufficient information, 
-then generate exactly 6 programming questions following the specified rules.`;
+Based on the above candidate profile, first validate if you have sufficient information,
+then generate exactly 6 programming questions following the specified rules.
+`;
+
 
   // LLM CALL
   const res = await llm.invoke(fullPrompt);

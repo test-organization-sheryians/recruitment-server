@@ -16,7 +16,7 @@ router.get("/search", authenticateJWT, userController.searchUser);
 // Admin-only routes
 router.get("/allUser", authenticateJWT, authorize("admin"), userController.getAllUsers);
 
-router.put("/:id/role", authenticateJWT, authorize("admin"), userController.updateUserRole);
+router.put("/update-role/:id", authenticateJWT, authorize("admin"), userController.updateUserRole);
 
 router.delete("/:id", authenticateJWT, authorize("admin"), userController.deleteUser);
 
