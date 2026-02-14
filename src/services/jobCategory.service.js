@@ -14,8 +14,8 @@ class JobCategoryService {
     return await this.jobCategoryRepository.create(data);
   }
 
-  async listCategories() {
-    return await this.jobCategoryRepository.findAll();
+  async listCategories(page = 1, limit = 10) {
+    return await this.jobCategoryRepository.findAll(page, limit);
   }
 
   async getCategoryById(id) {

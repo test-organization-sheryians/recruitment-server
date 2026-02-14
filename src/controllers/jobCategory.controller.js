@@ -18,10 +18,13 @@ class JobCategoryController {
 
   list = async (req, res, next) => {
     try {
-      const categories = await this.jobCategoryService.listCategories();
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const result = await this.jobCategoryService.listCategories(page, limit);
       return res.json({
         success: true,
-        data: categories,
+        data: result.data,
+        pagination: result.pagination,
         message: "Categories fetched",
       });
     } catch (err) {

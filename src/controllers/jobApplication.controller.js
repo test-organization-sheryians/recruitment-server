@@ -17,19 +17,41 @@ class JobApplicationController {
             message,
             resumeUrl,
         });
-
-
         res.status(201).json(response);
     });
 
+    bulkUpdateApplicationStatus = asyncHandler(async (req,res)=>{
+        const {applicationIds, status} = req.body;
+
+        if(!status){
+            throw new AppError("Status is required", 400);
+        }
+        
+        if (!applicationIds || applicationIds.length === 0) {
+        throw new AppError("Application IDs are required", 400);
+        }
+
+        const bulkUpdate = await jobApplicationService.bulkUpdateApplicationStatus(
+            applicationIds,
+            status
+        );
+        res.status(200).json({
+            success: true,
+            message:"Bulk Application Status updated successfully",
+            data: bulkUpdate,
+        });
+    });
 
     getAllApplications = asyncHandler(async (req, res) => {
-        const applications = await jobApplicationService.getAllApplications();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const result = await jobApplicationService.getAllApplications(page, limit);
 
         res.status(200).json({
             success: true,
-            total: applications.length,
-            data: applications,
+            pagination: result.pagination,
+            data: result.data,
         });
     });
 
@@ -55,26 +77,51 @@ class JobApplicationController {
 
     filterApplications = asyncHandler(async (req, res) => {
         const { status } = req.params;
-        const applications = await jobApplicationService.filterApplications(status);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const result = await jobApplicationService.filterApplications(status, page, limit);
 
         res.status(200).json({
             success: true,
-            total: applications.length,
-            data: applications,
+            pagination: result.pagination,
+            data: result.data,
         });
     });
 
     // Get Candidate Applied job applications
     getCandidateAllApplications = asyncHandler(async (req, res) => {
         const candidateId = req.userId;
-        const applications = await jobApplicationService.getCandidateAllApplications(candidateId);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const result = await jobApplicationService.getCandidateAllApplications(candidateId, page, limit);
 
         res.status(200).json({
             success: true,
-            total: applications.length,
-            data: applications,
+            pagination: result.pagination,
+            data: result.data,
         });
     })
+// Get Applicants by Job ID
+  getApplicantsByJobId = asyncHandler(async (req, res) => {
+  const jobId = req.params.id;
+
+  const result = await jobApplicationService.getApplicantsByJobId(jobId);
+
+  res.status(200).json({
+    success: true,
+    applicants: result.applicants,
+  });
+});
+
+    getShortlistedCount = asyncHandler(async (req, res) => {
+        const result = await jobApplicationService.getShortlistedCounts();
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    });
 }
 
 export default new JobApplicationController();
