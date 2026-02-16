@@ -22,6 +22,7 @@ class SkillService {
     }
 
     async getAllSkills() {
+        
         return await skillRepo.findAllSkills();
     }
 

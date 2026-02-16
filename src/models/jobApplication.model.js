@@ -24,10 +24,10 @@ const jobApplicationSchema = new mongoose.Schema(
         "applied",
         "shortlisted",
         "rejected",
-        "forwareded",
+        "forwarded",
         "interview",
         "hired",
-      ],
+      ], 
       default: "applied",
     },
     appliedAt: {

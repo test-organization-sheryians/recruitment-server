@@ -1,3 +1,4 @@
+
 class IAttempts {
   async createTestAttempt(attemptData) {
     throw new Error("Method not implemented");
@@ -8,6 +9,10 @@ class IAttempts {
   }
 
   async updateTestAttempt(id, updateData) {
+    throw new Error("Method not implemented");
+  }
+
+   async findAttemptsByCandidate(testId, email) {
     throw new Error("Method not implemented");
   }
 }
