@@ -21,3 +21,5 @@ export const authorize = (role) => {
     }
   };
 };
+
+export  default authorize;

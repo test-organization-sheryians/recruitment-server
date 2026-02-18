@@ -21,10 +21,12 @@ const jobRoleSchema = new mongoose.Schema(
       trim: true,
     },
     requiredExperience: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+  type: Number,
+  
+  required: true,
+  index: true,
+},
+
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "JobCategory",
@@ -62,7 +64,31 @@ const jobRoleSchema = new mongoose.Schema(
     location: {
       type: locationSchema,
       required: true,
-    }
+    },
+    jobType: {
+  type: String,
+  enum: ["Remote", "Hybrid", "Full-Time", "Part-Time"],
+  required: true,
+  index: true,
+},
+salary: {
+  min: {
+    type: Number,
+    required: true,
+    index: true,
+  },
+  max: {
+    type: Number,
+    required: true,
+    index: true,
+  },
+  currency: {
+    type: String,
+    default: "INR",
+  },
+},
+
+
   },
   {
     timestamps: true,

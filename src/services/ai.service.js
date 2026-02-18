@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const llm = new ChatGroq({
-    temperature: 0,
+    temperature: 0.7,
     model: 'llama-3.1-8b-instant',
     apiKey: process.env.GROQ_API_KEY,
 });
