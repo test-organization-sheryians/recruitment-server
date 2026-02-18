@@ -10,13 +10,18 @@ class IJobApplicationRepository {
   async updateApplicationStatus(applicationId, status) {
     throw new Error("Method not implemented");
   }
-  async getAllApplications() {
+
+  async bulkUpdateApplicationStatus(applicationIds, status){
     throw new Error("Method not implemented");
   }
-  async filterApplications(status) {
+
+  async getAllApplications(page = 1, limit = 10) {
     throw new Error("Method not implemented");
   }
-  async getCandidateAllApplications(candidateId) {
+  async filterApplications(status, page = 1, limit = 10) {
+    throw new Error("Method not implemented");
+  }
+  async getCandidateAllApplications(candidateId, page = 1, limit = 10) {
     throw new Error("Method not implemented");
   }
 }

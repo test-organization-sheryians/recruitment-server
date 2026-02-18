@@ -10,8 +10,7 @@ const TestAttemptSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-    },
-
+    },    
     score: {
       type: Number,
       required: true,
@@ -29,7 +28,7 @@ const TestAttemptSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["Started", "Submitted", "Graded", "Failed"],
+      enum: ["Started", "Submitted", "Graded", "Failed", "Disqualified"],
       default: "Submitted",
     },
     startTime: {
@@ -42,11 +41,22 @@ const TestAttemptSchema = new mongoose.Schema(
     durationTaken: {
       type: Number,
     },
-
-    answers: {
+    questions: {
       type: [mongoose.Schema.Types.Mixed],
       required: true,
     },
+    answers: {
+      type: [mongoose.Schema.Types.Mixed],
+      default: [],
+    },
+    tabSwitches: {
+    type: Number,
+    default: 0
+  },
+  isDisqualified: {
+    type: Boolean,
+    default: false
+  },
   },
   {
     timestamps: true,

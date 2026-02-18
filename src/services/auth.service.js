@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 import config from "../config/environment.js";
 
+
 class AuthService {
 
   async getUserWithPermissions(userId) {
@@ -134,6 +135,7 @@ async hasPermission(userId, roleName) {
   verifyToken(token) {
     return jwt.verify(token, config.JWT_SECRET);
   }
+
 }
 
 export default AuthService;
