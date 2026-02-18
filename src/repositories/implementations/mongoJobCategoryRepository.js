@@ -1,5 +1,6 @@
 import IJobCategoryRepository from "../contracts/IJobCategoryRepository.js";
 import JobCategory from "../../models/jobCategory.model.js";
+import { paginateAggregation } from "../../utils/pagination.util.js";
 
 class MongoJobCategoryRepository extends IJobCategoryRepository {
   async create(categoryData) {
@@ -11,7 +12,7 @@ class MongoJobCategoryRepository extends IJobCategoryRepository {
         throw { status: 400, message: "Category name already exists" };
       }
       throw err;
-    }
+    } 
   }
 
   async findById(id) {
@@ -22,9 +23,44 @@ class MongoJobCategoryRepository extends IJobCategoryRepository {
     return await JobCategory.findOne({ name });
   }
 
-  async findAll() {
-    return await JobCategory.find().sort({ name: 1 });
-  }
+async findAll(page = 1, limit = 10) {
+  const pipeline = [
+    {
+      $lookup: {
+        from: "jobroles",
+        let: { categoryId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ["$category", "$$categoryId"],
+              },
+              $or: [
+                { expiry: { $exists: false } },
+                { expiry: { $gte: new Date() } },
+              ],
+            },
+          },
+        ],
+        as: "activeJobs",
+      },
+    },
+    {
+      $addFields: {
+        jobCount: { $size: "$activeJobs" },
+      },
+    },
+    {
+      $project: {
+        activeJobs: 0,
+      },
+    },
+    { $sort: { name: 1 } },
+  ];
+
+  return await paginateAggregation(JobCategory, pipeline, { page, limit });
+}
+
 
   async updateById(id, updateData) {
     try {

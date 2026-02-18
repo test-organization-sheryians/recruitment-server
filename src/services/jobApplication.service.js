@@ -3,7 +3,6 @@ import { AppError } from "../utils/errors.js";
 import MongoApplicationRespository from "../repositories/implementations/mongoJobApplication.js";
 import MongoCandidateProfileRepository from "../repositories/implementations/mongoCandidateProfileRepository.js";
 import MongoJobRoleRepository from "../repositories/implementations/mongoJobRoleRepository.js";
-import { sendWelcomeEmail } from "./sendMail.js";
 import logger from "../utils/logger.js";
 import { emailQueue } from "../queues/emailQueue.js";
 
@@ -14,7 +13,7 @@ class JobApplicationService {
     this.jobRoleReop = new MongoJobRoleRepository();
   }
 
-  async applyForJob({ jobId, candidateId, message, resumeUrl }) {
+  async applyForJob({ jobId, candidateId, message, resumeUrl, answers }) {
     const candidateDetails = await this.candidateRepo.findProfileByUserId(
       candidateId
     );
@@ -32,11 +31,22 @@ class JobApplicationService {
     const exists = await this.jobAppRepo.findByUserAndJob(candidateId, jobId);
     if (exists) throw new AppError("Already applied for this job", 409);
 
+    let formattedAnswers;
+
+    if(Array.isArray(answers) && answers.length > 0){
+      formattedAnswers = answers.map((item)=>({
+        question:item?.question?.trim(),
+        answer:item?.answer?.trim()
+      }))
+      .filter((a)=>a.question && a.answer)
+    }
+
     const application = await this.jobAppRepo.createJobApplication({
       jobId,
       candidateId,
       message,
       resumeUrl,
+      ...(formattedAnswers && {answers:formattedAnswers})
     });
 
     // const candidateDetails = await this.candidateRepo.findProfileByUserId(
@@ -100,24 +110,66 @@ class JobApplicationService {
     };
   }
 
+  async getAllApplications(page = 1, limit = 10) {
+    return await this.jobAppRepo.getAllApplications(page, limit);
+  }
 
-
-
-  async getAllApplications() {
-    return await this.jobAppRepo.getAllApplications();
+  async bulkUpdateApplicationStatus(applicationIds, status){
+    return await this.jobAppRepo.bulkUpdateApplicationStatus(applicationIds,status);
   }
 
   async updateApplicationStatus(applicationId, status) {
     return await this.jobAppRepo.updateApplicationStatus(applicationId, status);
   }
 
-  async filterApplications(status) {
-    return await this.jobAppRepo.filterApplications(status);
+  async filterApplications(status, page = 1, limit = 10) {
+    return await this.jobAppRepo.filterApplications(status, page, limit);
   }
 
-  async getCandidateAllApplications(candidateId) {
-    return await this.jobAppRepo.getCandidateAllApplications(candidateId);
+  async getCandidateAllApplications(candidateId, page = 1, limit = 10) {
+    return await this.jobAppRepo.getCandidateAllApplications(candidateId, page, limit);
   }
+
+  async getApplicantsByJobId(jobId) {
+    return await this.jobAppRepo.getApplicantsByJobId(jobId);
+  }
+
+  async getShortlistedCounts() {
+    const shortlistedApplications = await this.jobAppRepo.countByStatus("shortlisted");
+    return { shortlistedApplications };
+  }
+
+   async bulkUpdateApplicationStatus(applicationIds, status) {
+  // 1️⃣ Fetch applicants for mail
+  const applications =
+    await this.jobAppRepo.findApplicationsForBulkMail(applicationIds);
+
+  // 2️⃣ Update status
+  const updateResult =
+    await this.jobAppRepo.bulkUpdateApplicationStatus(applicationIds, status);
+
+  // 3️⃣ Push mails to queue
+  for (const app of applications) {
+    await emailQueue.add(
+      "application-status-update",
+      {
+        to: app.candidate.email,
+        name: `${app.candidate.firstName} ${app.candidate.lastName}`,
+        jobTitle: app.job.title,
+        status,
+        applicationId: app._id.toString(),
+      },
+      {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 5000 },
+        removeOnComplete: true,
+      }
+    );
+  }
+
+  return updateResult;
+}
+
 }
 
 export default new JobApplicationService();
