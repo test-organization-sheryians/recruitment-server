@@ -26,6 +26,9 @@ class ICandidateProfileRepository {
   async updateAvailability(userId, availability) {
     throw new Error("Method not implemented");
   }
+  async getCandidatebyId(userId) {
+    throw new Error("Method not implemented");
+  }
 }
 
 export default ICandidateProfileRepository;
