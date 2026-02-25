@@ -38,4 +38,11 @@ export const authenticateJWT = async (req, res, next) => {
     console.log(error);
     next(new AppError(error || "Invalid or expired token.", 401));
   }
+
+
 };
+
+
+
+
+export default authenticateJWT;

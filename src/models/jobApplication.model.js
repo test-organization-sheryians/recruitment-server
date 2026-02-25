@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import crypto from "crypto";
+import { type } from "os";
 
 const jobApplicationSchema = new mongoose.Schema(
   {
@@ -18,13 +19,27 @@ const jobApplicationSchema = new mongoose.Schema(
       required: true,
     },
     message: String,
+
+    answers: [
+      {
+        question: {
+          type: String,
+          trim: true,
+        },
+        answer: {
+          type: String,
+          trim: true,
+        },
+      },
+    ],
+
     status: {
       type: String,
       enum: [
         "applied",
         "shortlisted",
         "rejected",
-        "forwareded",
+        "forwarded",
         "interview",
         "hired",
       ],

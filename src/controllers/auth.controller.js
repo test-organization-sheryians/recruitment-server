@@ -8,6 +8,7 @@ class AuthController {
     this.userService = new UserService();
     this.authService = new AuthService();
   }
+  
 
   get cookieOptions() {
     const isProd = process.env.NODE_ENV === "production";
@@ -23,6 +24,9 @@ class AuthController {
       path: "/",
     };
   }
+  
+  
+
 
   refreshTokenController = async (req, res, next) => {
     try {
@@ -52,10 +56,12 @@ class AuthController {
       const userData = req.body;
       const result = await this.userService.register(userData);
 
-      res.cookie("token", result.token, {
-        ...this.cookieOptions,
-        maxAge: 60 * 60 * 1000,
-      });
+    res.cookie("token", result.token, {
+  ...this.cookieOptions,
+  maxAge: 60 * 60 * 1000,   // 1 hour
+
+});
+
 
       res.cookie("refreshToken", result.refreshToken, {
         ...this.cookieOptions,
@@ -73,17 +79,19 @@ class AuthController {
       const { email, password } = req.body;
       const result = await this.userService.login({ email, password });
       console.log(this.cookieOptions , "this is cookies options")
-      res.cookie("token", result.token, {
-        ...this.cookieOptions,
-        maxAge: 60 * 60 * 1000,
-      });
+
+     res.cookie("token", result.token, {
+  ...this.cookieOptions,
+ maxAge: 60 * 60 * 1000,   // 1 hour
+
+});
 
       res.cookie("refreshToken", result.refreshToken, {
         ...this.cookieOptions,
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.status(200).json({ success: true, data: result });
+      res.status(200).json({ success: true, expiresIn: 3600 , data: result });
     } catch (error) {
       next(error);
     }
@@ -167,6 +175,8 @@ class AuthController {
       }
       next(error);
     }
+    console.log("LOGIN API HIT", req.body);
+
   };
 }
 

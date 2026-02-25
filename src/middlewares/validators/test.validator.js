@@ -44,8 +44,10 @@ const testAttemptSchema = joi.object({
 
   status: joi
     .string()
-    .valid("Started", "Submitted", "Graded", "Failed")
+    .valid("Started", "Submitted", "Graded", "Failed", "Disqualified")
     .default("Submitted"),
+
+  tabSwitches: joi.number().min(0).default(0), 
 
   startTime: joi.date().required(),
 
