@@ -10,6 +10,10 @@ class IAttempts {
   async updateTestAttempt(id, updateData) {
     throw new Error("Method not implemented");
   }
+
+   async findAttemptsByCandidate(testId, email) {
+    throw new Error("Method not implemented");
+  }
 }
 
 export default IAttempts;

@@ -3,7 +3,7 @@ import express from "express";
 import { authorize } from "../middlewares/role.middleware.js";
 import { authenticateJWT } from "../middlewares/auth.middleware.js";
 import jobApplicationController from "../controllers/jobApplication.controller.js";
-import { createJobValidator, updateJobStatus } from "../middlewares/validators/jobApplication.validator.js";
+import { bulkUpdateJobStatus, createJobValidator, updateJobStatus } from "../middlewares/validators/jobApplication.validator.js";
 
 
 const router = express.Router();
@@ -19,12 +19,20 @@ router.get(
   "/",
   authenticateJWT,
   authorize("admin"),
-
   jobApplicationController.getAllApplications
 );
 
 router.patch(
-  "/status",
+  "/bulk-update",
+  authenticateJWT,
+  authorize("admin"),
+  bulkUpdateJobStatus,
+  jobApplicationController.bulkUpdateApplicationStatus
+)
+
+router.patch(
+  "/:status",
+  // "status",
   authenticateJWT,
   authorize("admin"),
   updateJobStatus,
@@ -35,8 +43,20 @@ router.get(
   "/filter/:status",
   authenticateJWT,
   authorize("admin"),
+
   jobApplicationController.filterApplications
 );
+
+
+router.get("/applicants/:id", authenticateJWT, authorize("admin"), jobApplicationController.getApplicantsByJobId);
+
+router.get(
+  "/shortlisted/count",
+  authenticateJWT,
+  authorize("admin"),
+  jobApplicationController.getShortlistedCount
+);
+
 
 router.get("/my-applications", authenticateJWT, jobApplicationController.getCandidateAllApplications);
 

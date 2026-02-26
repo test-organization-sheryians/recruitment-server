@@ -1,9 +1,9 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import dotenv from 'dotenv'
+import dotenv from "dotenv";
 
-dotenv.config()
-const s3Client = new S3Client({
+dotenv.config();
+export const s3Client = new S3Client({
   region: "ap-south-1",
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY,

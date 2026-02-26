@@ -1,6 +1,7 @@
 import ISkillRepository from "../contracts/ISkillRepository.js";
 import Skill from "../../models/skill.model.js";
 import { AppError } from "../../utils/errors.js";
+import { paginateAggregation } from "../../utils/pagination.util.js";
 import mongoose from "mongoose";
 
 class MongoSkillRepository extends ISkillRepository {
@@ -34,14 +35,14 @@ class MongoSkillRepository extends ISkillRepository {
       throw new AppError("Failed to find skill", 500);
     }
   }
-
-  async findAllSkills() {
-    try {
-      return await Skill.find({}, { name: 1 }).sort({ name: 1 }).lean();
-    } catch (error) {
-      throw new AppError("Failed to fetch skills", 500);
-    }
+async findAllSkills() {
+  
+  try {
+    return await Skill.find()
+  } catch (error) {
+    throw new AppError("Failed to fetch skills", 500);
   }
+}
 
   async updateSkill(id, skillData) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
