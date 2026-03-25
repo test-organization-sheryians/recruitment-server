@@ -12,6 +12,8 @@ class ExperienceController {
       const experienceData = {
         ...req.body
       }
+      console.log(experienceData);
+      
       const result = await this.experienceService.addExperience(experienceData);
 
       res.status(201).json({
@@ -92,6 +94,7 @@ class ExperienceController {
   // Delete experience
   deleteExperience = async (req, res) => {
     try {
+      
       const { id } = req.params;
       const userId = req.userId
 
