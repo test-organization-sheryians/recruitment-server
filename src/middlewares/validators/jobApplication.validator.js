@@ -72,6 +72,19 @@ export const updateApplicationStatusSchema = Joi.object({
         .allow(null, '')
 });
 
+export const bulkUpdateApplicationStatusSchema= Joi.object({
+    applicationIds : Joi.array()
+    .items(validateObjectId.label("Application ID"))
+    .min(1)
+    .required(),
+
+    status: Joi.string()
+    .valid(...validStatuses)
+    .required(),
+
+    note: Joi.string().trim().max(500).allow(null, "")
+})
+
 
 // ----------------------------------------------------------------------
 // 3. Validator for ObjectId in URL params (e.g., job application ID in future routes)
@@ -91,3 +104,5 @@ const validate = (schema) => (req, res, next) => {
 
 export const createJobValidator = validate(applyForJobSchema);
 export const updateJobStatus = validate(updateApplicationStatusSchema);
+export const bulkUpdateJobStatus = validate(bulkUpdateApplicationStatusSchema);
+

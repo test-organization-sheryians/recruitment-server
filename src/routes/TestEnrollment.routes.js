@@ -22,3 +22,6 @@ router.get(
 router.post("/bulk-enroll" , authenticateJWT ,validateRequest(testEnrollmentsBulkSchema) ,enrollmentController.enrollUsersBulk)
 
 export default router;
+
+
+

@@ -1,5 +1,5 @@
 import User from "../models/user.model.js";
-import { sendVerificationEmail } from "./sendMail.js";
+import { sendVerificationEmail } from "./sendMailServices/sendVerificationEmail.js";
 
 export const resendVerificationEmailService = async (email) => {
   const user = await User.findOne({ email }).select("email name isVerified");
