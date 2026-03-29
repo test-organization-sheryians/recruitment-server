@@ -6,6 +6,7 @@ import roleRoutes from "./routes/role.routes.js";
 import skillRoutes from "./routes/skill.routes.js";
 import permissionRoutes from "./routes/permission.routes.js";
 import jobRoleRoutes from "./routes/jobRole.routes.js";
+import productRoutes from "./routes/products.route.js"
 import candidateProfileRoutes from "./routes/candidateProfile.routes.js";
 import errorHandler from "./middlewares/errorHandler.middleware.js";
 import cookieParser from "cookie-parser";
@@ -39,6 +40,7 @@ app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/products",productRoutes)
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
 app.use("/api/jobs", jobRoleRoutes);     // add new route inside it
