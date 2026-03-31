@@ -1,4 +1,3 @@
-import { testGenerator } from "../agents/TestGenerator.js";
 import TestService from "../services/tests.service.js";
 
 class TestController {
@@ -38,9 +37,29 @@ class TestController {
     }
   }
 
+
+
+
+
+async deleteTest(req, res, next) {
+  try {
+    const deletedTest = await this.testService.deleteTest(req.params.testId);
+    res.status(200).json({
+      success: true,
+      message: "Test deleted successfully",
+      data: deletedTest,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+
+
+
   async updateTest(req, res, next) {
     try {
-      const updated = await this.testService.testRepository.updateTest(
+      const updated = await this.testService.updateTest(
         req.params.testId,
         req.body
       );

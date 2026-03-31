@@ -37,6 +37,7 @@ const TestsSchema = new mongoose.Schema(
     prompt: {
       type: String,
       required: true,
+      default: "Create a Test"
     },
   },
   { timestamps: true }

@@ -9,13 +9,16 @@ class AuthController {
     this.authService = new AuthService();
   }
 
+
   get cookieOptions() {
     const isProd = process.env.NODE_ENV === "production";
     console.log(process.env.NODE_ENV)
-     console.log({ httpOnly: true,
+    console.log({
+      httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
-      path: "/",})
+      path: "/",
+    })
     return {
       httpOnly: true,
       secure: isProd,
@@ -24,6 +27,9 @@ class AuthController {
     };
   }
 
+
+
+
   refreshTokenController = async (req, res, next) => {
     try {
       const refreshToken = req.cookies.refreshToken;
@@ -31,7 +37,7 @@ class AuthController {
 
       const tokens = await this.userService.refresh(refreshToken);
 
-      res.cookie("token", tokens.accessToken, {
+      res.cookie("token", tokens.token, {
         ...this.cookieOptions,
         maxAge: 15 * 60 * 1000,
       });
@@ -54,8 +60,10 @@ class AuthController {
 
       res.cookie("token", result.token, {
         ...this.cookieOptions,
-        maxAge: 60 * 60 * 1000,
+        maxAge: 60 * 60 * 1000,   // 1 hour
+
       });
+
 
       res.cookie("refreshToken", result.refreshToken, {
         ...this.cookieOptions,
@@ -72,10 +80,12 @@ class AuthController {
     try {
       const { email, password } = req.body;
       const result = await this.userService.login({ email, password });
-      console.log(this.cookieOptions , "this is cookies options")
+      console.log(this.cookieOptions, "this is cookies options")
+
       res.cookie("token", result.token, {
         ...this.cookieOptions,
-        maxAge: 60 * 60 * 1000,
+        maxAge: 60 * 60 * 1000,   // 1 hour
+
       });
 
       res.cookie("refreshToken", result.refreshToken, {
@@ -83,7 +93,7 @@ class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.status(200).json({ success: true, data: result });
+      res.status(200).json({ success: true, expiresIn: 3600, data: result });
     } catch (error) {
       next(error);
     }
@@ -101,9 +111,9 @@ class AuthController {
 
   updateUser = async (req, res, next) => {
     try {
-      const id = req.query.id ; 
+      const id = req.query.id;
       const userData = req.body;
-      console.log(id , userData , "this is from Update user")
+      console.log(id, userData, "this is from Update user")
       const user = await this.userService.updateUser(id, userData);
       res.status(200).json({ success: true, data: user });
     } catch (error) {
@@ -111,7 +121,7 @@ class AuthController {
     }
   };
 
-  
+
   logout = async (req, res, next) => {
     try {
       const token =
@@ -167,6 +177,8 @@ class AuthController {
       }
       next(error);
     }
+    console.log("LOGIN API HIT", req.body);
+
   };
 }
 
