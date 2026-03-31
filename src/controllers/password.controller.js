@@ -44,7 +44,7 @@ class PasswordController {
 
       console.log(response)
       if (!response) {
-         throw new AppError("Something went wrong in reset password", 400)
+        throw new AppError("Something went wrong in reset password", 400)
       }
       return res.status(200).json({
         success: true,
