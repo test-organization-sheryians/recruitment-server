@@ -2,6 +2,18 @@
   "name": "recruitment-server",
   "version": "1.0.0",
   "description": "",
+  "keywords": [],
+  "homepage": "https://github.com/test-organization-sheryians/recruitment-server#readme",
+  "bugs": {
+    "url": "https://github.com/test-organization-sheryians/recruitment-server/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/test-organization-sheryians/recruitment-server.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -9,12 +21,9 @@
     "worker": "node src/workers/emailWorker.js",
     "worker:dev": "nodemon src/workers/emailWorker.js",
     "dev:all": "concurrently \"npm run dev\" \"npm run worker:dev\"",
-    "start:all": "concurrently \"npm run start\" \"npm run worker\" --names \"API,WORKER\" --prefix-colors \"blue,green\""
+    "start:all": "concurrently \"npm run start\" \"npm run worker\" --names \"API,WORKER\" --prefix-colors \"blue,green\"",
+    "build": "echo \"No build step for backend\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.943.0",
     "@aws-sdk/s3-request-presigner": "^3.943.0",
@@ -24,21 +33,23 @@
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.2",
     "bullmq": "^5.65.1",
-    "cloudinary": "^1.41.3",
+    "cloudinary": "^2.8.0",
     "concurrently": "^9.2.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "joi": "^18.0.1",
+    "express": "^5.2.1",
+    "iconv-lite": "^0.7.2",
+    "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.2",
     "multer": "^2.0.2",
-    "multer-storage-cloudinary": "^4.0.0",
+    "multer-storage-cloudinary": "^2.2.1",
     "nodemailer": "^7.0.11",
     "pdf-parse": "^1.1.1",
     "redis": "^5.8.2",
     "resend": "^6.5.2",
+    "slugify": "^1.6.6",
     "winston": "^3.17.0"
   },
   "devDependencies": {

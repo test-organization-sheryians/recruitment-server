@@ -14,11 +14,17 @@ const TestEnrollmentsSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Assigned", "Started", "Completed"],
+      enum: ["Assigned", "Started", "Completed", "Disqualified"],
       default: "Assigned",
     },
   },
   { timestamps: true }
+);
+
+// 🔴 THIS LINE IS THE MAIN FIX
+TestEnrollmentsSchema.index(
+  { testId: 1, email: 1 },
+  { unique: true }
 );
 
 const TestEnrollments = mongoose.model("TestEnrollment", TestEnrollmentsSchema);
