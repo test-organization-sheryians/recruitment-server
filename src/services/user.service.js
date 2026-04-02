@@ -408,7 +408,60 @@ class UserService {
   }
 
 
+  //bast
+  async blastUsers({ userIds, subject, message }) {
+  if (!userIds || userIds.length === 0) {
+    throw new AppError("No users selected", 400);
+  }
 
+  // 1️⃣ Fetch users from DB
+  const users = await this.userRepository.findUsersByIds(userIds);
+
+  if (!users || users.length === 0) {
+    throw new AppError("No users found", 404);
+  }
+
+  let successCount = 0;
+
+  // 2️⃣ Queue emails (SAME as register 🔥)
+  try {
+    await Promise.all(
+      users.map(async (user) => {
+        if (!user.email) return;
+
+        await emailQueue.add(
+          "blast-mail",
+          {
+            email: user.email,
+            name: user.firstName,
+            subject,
+            message,
+          },
+          {
+            attempts: 3,
+            backoff: {
+              type: "exponential",
+              delay: 5000,
+            },
+            removeOnComplete: true,
+            removeOnFail: false,
+          }
+        );
+
+        successCount++;
+      })
+    );
+
+    logger.info(`Blast queued for ${successCount} users`);
+
+    return {
+      message: `Blast queued for ${successCount} users 🚀`,
+    };
+  } catch (error) {
+    logger.error("Blast queue failed", error);
+    throw new AppError("Failed to queue blast emails", 500);
+  }
+}
 
 }
 

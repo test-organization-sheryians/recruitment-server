@@ -13,6 +13,7 @@ class UserController {
     this.getAllUsers = this.getAllUsers.bind(this);
     this.deleteUser = this.deleteUser.bind(this);
     this.updateUserRole = this.updateUserRole.bind(this);
+    this.blastUsers = this.blastUsers.bind(this);
   }
 
   async getMe(req, res, next) {
@@ -172,6 +173,42 @@ class UserController {
       next(error);
     }
   }
+
+  async blastUsers(req, res, next) {
+  try {
+    const { userIds, subject, message } = req.body;
+
+    if (!userIds || userIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No users selected",
+      });
+    }
+
+    if (!subject || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "Subject and message are required",
+      });
+    }
+
+    const result = await this.userService.blastUsers({
+      userIds,
+      subject,
+      message,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (error) {
+    next(error);
+  }
 }
+
+}
+
+
 
 export default new UserController();

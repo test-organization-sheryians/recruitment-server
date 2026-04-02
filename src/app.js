@@ -27,7 +27,7 @@ import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
-
+import productRoute from "./routes/product.routes.js"
 import ViolationRoutes  from "./routes/testViolation.routes.js";
 import shareCandidate from "./routes/shareCandidate.routes.js";
 import tokenRoutes from "./routes/token.route.js"
@@ -75,7 +75,8 @@ app.use("/api/blogs", blogPostRoutes);
 
 
 app.use("/api/categories", categoryRoutes);
-
+//Product route
+app.use("/api/products",productRoute)
 
 app.use(errorHandler);
 export default app;
