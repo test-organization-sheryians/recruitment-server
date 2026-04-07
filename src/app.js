@@ -24,6 +24,7 @@ import resendMailRoutes from "./routes/resendMail.routes.js";
 import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
 import blogPostRoutes from "./routes/blogPost.routes.js";
 import savedJobRoutes from "./routes/savedJob.routes.js";
+import savedCandidateRoutes from "./routes/savedCandidate.routes.js";  ///// new route for saved candidates
 import passwordRoutes from "./routes/password.routes.js";
 import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
@@ -62,6 +63,7 @@ app.use("/api/interviews", ScheduleInterviewRoutes);
 // });
 
 app.use("/api/saved-jobs", savedJobRoutes);
+app.use("/api/saved-candidates", savedCandidateRoutes);     //////////////// new route for saved candidates
 app.use("/api/password", passwordRoutes);
 app.use("/api/job-questions",jobApplicationQuesition)
 
