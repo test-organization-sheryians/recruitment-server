@@ -17,12 +17,17 @@ export const updateUserSchema = Joi.object({
   phoneNumber: Joi.string().min(10).messages({
     "string.min": "Phone number must be at least 10 digits long",
   }),
-}).min(1); 
+}).min(1);
 
 const validate = (schema) => (req, _res, next) => {
-  const { error } = schema.validate(req.body, { abortEarly: false, stripUnknown: true });
+  const { error } = schema.validate(req.body, {
+    abortEarly: false,
+    stripUnknown: true,
+  });
   if (error) {
-    return next(new AppError(error.details.map((d) => d.message).join(", "), 400));
+    return next(
+      new AppError(error.details.map((d) => d.message).join(", "), 400),
+    );
   }
   next();
 };

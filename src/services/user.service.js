@@ -22,7 +22,7 @@ class UserService {
     await this.cacheRepository.set(
       `refresh:${userId}`,
       refreshToken,
-      7 * 24 * 3600
+      7 * 24 * 3600,
     );
   }
 
@@ -69,7 +69,7 @@ class UserService {
         await this.cacheRepository.set(
           cacheKey,
           JSON.stringify(existingUser),
-          3600
+          3600,
         );
       }
     }
@@ -97,12 +97,12 @@ class UserService {
     await this.cacheRepository.set(
       `user:id:${userWithRole._id}`,
       JSON.stringify(safeUser),
-      3600
+      3600,
     );
     await this.cacheRepository.set(
       cacheKey,
       JSON.stringify({ ...safeUser, password: user.password }),
-      3600
+      3600,
     );
 
     const jwtPayload = {
@@ -136,7 +136,7 @@ class UserService {
     //   // throw new AppError("Failed to send verification email", 500);
     // }
 
-    // Adding into the queue for sending verification mail 
+    // Adding into the queue for sending verification mail
     try {
       emailQueue.add(
         "verification-mail",
@@ -153,11 +153,9 @@ class UserService {
           },
           removeOnComplete: true,
           removeOnFail: false,
-        }
+        },
       );
-      logger.info(
-        `Welcome email job queued for ${safeUser?.email}`
-      );
+      logger.info(`Welcome email job queued for ${safeUser?.email}`);
     } catch (error) {
       logger.warn("Failed to queue Verification email", {
         email: safeUser.email,
@@ -286,9 +284,9 @@ class UserService {
   }
 
   async getAllUsers() {
-  const users = await this.userRepository.findAllUsers();
-  return users;
-}
+    const users = await this.userRepository.findAllUsers();
+    return users;
+  }
 
   async updateUser(id, userData) {
     const user = await this.userRepository.updateUser(id, userData);
@@ -297,7 +295,7 @@ class UserService {
     await this.cacheRepository.set(
       `user:id:${id}`,
       JSON.stringify(safeUser),
-      3600
+      3600,
     );
 
     if (userData.email && userData.email !== user.email) {
@@ -306,7 +304,7 @@ class UserService {
     await this.cacheRepository.set(
       `user:email:${user.email}`,
       JSON.stringify(safeUser),
-      3600
+      3600,
     );
 
     return safeUser;
@@ -323,7 +321,7 @@ class UserService {
     await this.cacheRepository.set(
       `user:id:${userId}`,
       JSON.stringify(safeUser),
-      3600
+      3600,
     );
 
     const oldEmailKey = updates.email ? `user:email:${updates.email}` : null;
@@ -331,7 +329,7 @@ class UserService {
     await this.cacheRepository.set(
       `user:email:${updated.email}`,
       JSON.stringify({ ...safeUser, password: updated.password }),
-      3600
+      3600,
     );
 
     if (oldEmailKey && updates.email !== updated.email) {
@@ -341,7 +339,7 @@ class UserService {
     return safeUser;
   }
 
-   async deleteUser(userId) {
+  async deleteUser(userId) {
     return User.findByIdAndDelete(userId);
   }
 
@@ -364,54 +362,50 @@ class UserService {
     return true;
   }
 
-  async findUser (query){ 
-     const users =  await this.userRepository.findUser(query); 
-     return users ; 
+  async findUser(query) {
+    const users = await this.userRepository.findUser(query);
+    return users;
   }
-async updateUserRole(userId, newRoleId) {
-  // 1️⃣ Update the role
-  await this.userRepository.updateUser(userId, { roleId: newRoleId });
+  async updateUserRole(userId, newRoleId) {
+    // 1️⃣ Update the role
+    await this.userRepository.updateUser(userId, { roleId: newRoleId });
 
-  // 2️⃣ Fetch updated user with populated roleId
-  const updatedUser = await this.userRepository.findUserById(userId, true); 
-  // Pass `true` to populate roleId in repository
+    // 2️⃣ Fetch updated user with populated roleId
+    const updatedUser = await this.userRepository.findUserById(userId, true);
+    // Pass `true` to populate roleId in repository
 
-  if (!updatedUser) {
-    throw new AppError("User not found", 404);
+    if (!updatedUser) {
+      throw new AppError("User not found", 404);
+    }
+
+    // 3️⃣ Create safe payload including role
+    const safeUser = {
+      _id: updatedUser._id,
+      email: updatedUser.email,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+      phoneNumber: updatedUser.phoneNumber,
+      isVerified: updatedUser.isVerified,
+      role: updatedUser.roleId
+        ? { _id: updatedUser.roleId._id, name: updatedUser.roleId.name }
+        : null,
+    };
+
+    // 4️⃣ Update cache
+    await this.cacheRepository.set(
+      `user:id:${userId}`,
+      JSON.stringify(safeUser),
+      3600,
+    );
+
+    await this.cacheRepository.set(
+      `user:email:${updatedUser.email}`,
+      JSON.stringify(safeUser),
+      3600,
+    );
+
+    return safeUser;
   }
-
-  // 3️⃣ Create safe payload including role
-  const safeUser = {
-    _id: updatedUser._id,
-    email: updatedUser.email,
-    firstName: updatedUser.firstName,
-    lastName: updatedUser.lastName,
-    phoneNumber: updatedUser.phoneNumber,
-    isVerified: updatedUser.isVerified,
-    role: updatedUser.roleId
-      ? { _id: updatedUser.roleId._id, name: updatedUser.roleId.name }
-      : null,
-  };
-
-  // 4️⃣ Update cache
-  await this.cacheRepository.set(
-    `user:id:${userId}`,
-    JSON.stringify(safeUser),
-    3600
-  );
-
-  await this.cacheRepository.set(
-    `user:email:${updatedUser.email}`,
-    JSON.stringify(safeUser),
-    3600
-  );
-
-  return safeUser;
-}
-
-
-
-
 }
 
 export default UserService;

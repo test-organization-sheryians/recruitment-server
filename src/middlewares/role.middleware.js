@@ -9,7 +9,7 @@ export const authorize = (role) => {
     try {
       const hasPermission = await authService.hasPermission(
         req.userId, // changed it to req.userId from req.body.userId as userId is already attached to req thru middleware
-        role
+        role,
       );
       console.log("haspermission", hasPermission);
       if (!hasPermission) {

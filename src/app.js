@@ -1,4 +1,5 @@
 import express from "express";
+import "dotenv/config";
 import cors from "cors";
 import userRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
@@ -19,12 +20,13 @@ import { authenticateJWT } from "./middlewares/auth.middleware.js";
 import testRoutes from "./routes/test.routes.js";
 import testEnrollmentRoutes from "./routes/TestEnrollment.routes.js";
 import testAttemptRoutes from "./routes/testAttempts.routes.js";
-import awsRouter from './routes/aws.route.js'
+import awsRouter from "./routes/aws.route.js";
 import resendMailRoutes from "./routes/resendMail.routes.js";
 import { sendWelcomeEmail } from "./services/sendMail.js";
+import productRoutes from "./routes/product.routes.js";
 
 const app = express();
-app.set("trust proxy", 1);  
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
@@ -41,9 +43,10 @@ app.use("/api/experience", expereniceRoutes);
 app.use("/api/tests", testRoutes);
 app.use("/api/enrollments", testEnrollmentRoutes);
 app.use("/api/test-attempts", testAttemptRoutes);
-app.use('/api/candidate-profile', candidateProfileRoutes);
-app.use('/api/aws' , awsRouter)
+app.use("/api/candidate-profile", candidateProfileRoutes);
+app.use("/api/aws", awsRouter);
 app.use("/api/auth", resendMailRoutes);
+app.use("/api/products", productRoutes);
 // await sendWelcomeEmail({
 //   to: "agr.rbih@gmail.com",
 //   name: "Rohan",
@@ -53,12 +56,3 @@ app.use("/api/auth", resendMailRoutes);
 
 app.use(errorHandler);
 export default app;
-
-
-
-
-
-
-
-
-

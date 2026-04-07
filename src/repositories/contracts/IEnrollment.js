@@ -15,4 +15,4 @@ class IEnrollment{
   }
 }
 
-export default IEnrollment ; 
+export default IEnrollment;
