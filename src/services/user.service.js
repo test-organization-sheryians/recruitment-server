@@ -6,7 +6,6 @@ import config from "../config/environment.js";
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import { json } from "express";
-import { sendVerificationEmail } from "./sendMail.js";
 import logger from "../utils/logger.js";
 import { emailQueue } from "../queues/emailQueue.js";
 
@@ -25,15 +24,15 @@ class UserService {
       7 * 24 * 3600
     );
   }
-
+  
   // Helper: Safe role object for cache & JWT
   _getSafeRole(user) {
     return user.role
       ? {
-          _id: user.role._id,
-          name: user.role.name,
-          description: user.role.description,
-        }
+        _id: user.role._id,
+        name: user.role.name,
+        description: user.role.description,
+      }
       : null;
   }
 
@@ -285,11 +284,10 @@ class UserService {
     return safeUser;
   }
 
-  async getAllUsers() {
-  const users = await this.userRepository.findAllUsers();
-  return users;
-}
-
+  async getAllUsers(page = 1, limit = 10,search = "") {
+    const result = await this.userRepository.findAllUsers(page, limit,search);
+    return result;
+  }
   async updateUser(id, userData) {
     const user = await this.userRepository.updateUser(id, userData);
     if (!user) throw new AppError("User not found", 404);
@@ -341,7 +339,7 @@ class UserService {
     return safeUser;
   }
 
-   async deleteUser(userId) {
+  async deleteUser(userId) {
     return User.findByIdAndDelete(userId);
   }
 
@@ -364,53 +362,106 @@ class UserService {
     return true;
   }
 
-  async findUser (query){ 
-     const users =  await this.userRepository.findUser(query); 
-     return users ; 
+  async findUser(query) {
+    const users = await this.userRepository.findUser(query);
+    return users;
   }
-async updateUserRole(userId, newRoleId) {
-  // 1️⃣ Update the role
-  await this.userRepository.updateUser(userId, { roleId: newRoleId });
+  async updateUserRole(userId, newRoleId) {
+    // 1️⃣ Update the role
+    await this.userRepository.updateUser(userId, { roleId: newRoleId });
 
-  // 2️⃣ Fetch updated user with populated roleId
-  const updatedUser = await this.userRepository.findUserById(userId, true); 
-  // Pass `true` to populate roleId in repository
+    // 2️⃣ Fetch updated user with populated roleId
+    const updatedUser = await this.userRepository.findUserById(userId, true);
+    // Pass `true` to populate roleId in repository
 
-  if (!updatedUser) {
-    throw new AppError("User not found", 404);
+    if (!updatedUser) {
+      throw new AppError("User not found", 404);
+    }
+
+    // 3️⃣ Create safe payload including role
+    const safeUser = {
+      _id: updatedUser._id,
+      email: updatedUser.email,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+      phoneNumber: updatedUser.phoneNumber,
+      isVerified: updatedUser.isVerified,
+      role: updatedUser.roleId
+        ? { _id: updatedUser.roleId._id, name: updatedUser.roleId.name }
+        : null,
+    };
+
+    // 4️⃣ Update cache
+    await this.cacheRepository.set(
+      `user:id:${userId}`,
+      JSON.stringify(safeUser),
+      3600
+    );
+
+    await this.cacheRepository.set(
+      `user:email:${updatedUser.email}`,
+      JSON.stringify(safeUser),
+      3600
+    );
+
+    return safeUser;
   }
 
-  // 3️⃣ Create safe payload including role
-  const safeUser = {
-    _id: updatedUser._id,
-    email: updatedUser.email,
-    firstName: updatedUser.firstName,
-    lastName: updatedUser.lastName,
-    phoneNumber: updatedUser.phoneNumber,
-    isVerified: updatedUser.isVerified,
-    role: updatedUser.roleId
-      ? { _id: updatedUser.roleId._id, name: updatedUser.roleId.name }
-      : null,
-  };
 
-  // 4️⃣ Update cache
-  await this.cacheRepository.set(
-    `user:id:${userId}`,
-    JSON.stringify(safeUser),
-    3600
-  );
+  //bast
+  async blastUsers({ userIds, subject, message }) {
+  if (!userIds || userIds.length === 0) {
+    throw new AppError("No users selected", 400);
+  }
 
-  await this.cacheRepository.set(
-    `user:email:${updatedUser.email}`,
-    JSON.stringify(safeUser),
-    3600
-  );
+  // 1️⃣ Fetch users from DB
+  const users = await this.userRepository.findUsersByIds(userIds);
 
-  return safeUser;
+  if (!users || users.length === 0) {
+    throw new AppError("No users found", 404);
+  }
+
+  let successCount = 0;
+
+  // 2️⃣ Queue emails (SAME as register 🔥)
+  try {
+    await Promise.all(
+      users.map(async (user) => {
+        if (!user.email) return;
+
+        await emailQueue.add(
+          "blast-mail",
+          {
+            email: user.email,
+            name: user.firstName,
+            subject,
+            message,
+          },
+          {
+            attempts: 3,
+            backoff: {
+              type: "exponential",
+              delay: 5000,
+            },
+            removeOnComplete: true,
+            removeOnFail: false,
+          }
+        );
+
+        successCount++;
+      })
+    );
+
+    logger.info(`Blast queued for ${successCount} users`);
+
+    return {
+      message: `Blast queued for ${successCount} users.`,
+    };
+  } catch (error) {
+    logger.error("Blast queue failed", error);
+    throw new AppError("Failed to queue blast emails", 500);
+  }
 }
-
-
-
 
 }
 

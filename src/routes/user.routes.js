@@ -8,16 +8,42 @@ const router = express.Router();
 
 // Self-access routes (available to authenticated users)
 router.get("/me", authenticateJWT, userController.getMe);
-router.patch("/me", authenticateJWT, updateUserValidator, userController.updateMe);
+router.patch(
+  "/me",
+  authenticateJWT,
+  updateUserValidator,
+  userController.updateMe,
+);
 
 // User search (useful for authenticated users, e.g., in UI)
 router.get("/search", authenticateJWT, userController.searchUser);
 
 // Admin-only routes
-router.get("/allUser", authenticateJWT, authorize("admin"), userController.getAllUsers);
+router.get(
+  "/allUser",
+  authenticateJWT,
+  authorize("admin"),
+  userController.getAllUsers,
+);
 
-router.put("/:id/role", authenticateJWT, authorize("admin"), userController.updateUserRole);
+router.put(
+  "/update-role/:id",
+  authenticateJWT,
+  authorize("admin"),
+  userController.updateUserRole,
+);
 
-router.delete("/:id", authenticateJWT, authorize("admin"), userController.deleteUser);
-
+router.delete(
+  "/:id",
+  authenticateJWT,
+  authorize("admin"),
+  userController.deleteUser,
+);
+//blast feature
+router.post(
+  "/blast",
+  authenticateJWT,
+  authorize("admin"),
+  userController.blastUsers,
+);
 export default router;

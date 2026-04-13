@@ -13,6 +13,7 @@ class UserController {
     this.getAllUsers = this.getAllUsers.bind(this);
     this.deleteUser = this.deleteUser.bind(this);
     this.updateUserRole = this.updateUserRole.bind(this);
+    this.blastUsers = this.blastUsers.bind(this);
   }
 
   async getMe(req, res, next) {
@@ -89,11 +90,15 @@ class UserController {
 
   async getAllUsers(req, res, next) {
     try {
-      const users = await this.userService.getAllUsers();
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+       const search = req.query.search || ""; // search by name
+      const result = await this.userService.getAllUsers(page, limit,search);
 
       return res.status(200).json({
         success: true,
-        data: users,
+        data: result.data,
+        pagination: result.pagination,
         message: "Users fetched successfully",
       });
     } catch (err) {
@@ -132,18 +137,18 @@ class UserController {
       const { roleId } = req.body;
 
       if (!roleId) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
-          message: "Role is required" 
+          message: "Role is required"
         });
       }
 
       const updatedUser = await this.userService.updateUserRole(id, roleId);
 
       if (!updatedUser) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           success: false,
-          message: "User not found" 
+          message: "User not found"
         });
       }
 
@@ -168,6 +173,42 @@ class UserController {
       next(error);
     }
   }
+
+  async blastUsers(req, res, next) {
+  try {
+    const { userIds, subject, message } = req.body;
+
+    if (!userIds || userIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No users selected",
+      });
+    }
+
+    if (!subject || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "Subject and message are required",
+      });
+    }
+
+    const result = await this.userService.blastUsers({
+      userIds,
+      subject,
+      message,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (error) {
+    next(error);
+  }
 }
+
+}
+
+
 
 export default new UserController();
