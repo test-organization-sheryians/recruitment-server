@@ -27,16 +27,21 @@ import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
-
+import adminProfileRoutes from "./routes/adminProfile.routes.js";
+import readerRoutes from "./routes/reader.routes.js";
 import ViolationRoutes  from "./routes/testViolation.routes.js";
 import shareCandidate from "./routes/shareCandidate.routes.js";
 import tokenRoutes from "./routes/token.route.js"
 import categoryRoutes from "./routes/category.routes.js";
+import teacherRoutes from "./routes/teacher.routes.js";
+
 const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
+// app.use(express.urlencoded({ extended: true })); // Enable parsing of URL-encoded data (if needed) 
 app.use(cookieParser());
 app.use(cors(corsOptions));
+app.use("/api/teachers", teacherRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/roles", roleRoutes);

@@ -19,7 +19,10 @@ export const authenticateJWT = async (req, res, next) => {
     }
 
     const decoded = authService.verifyToken(token);
-    if (!decoded.isVerified || decoded.isVerified === false) {
+
+    console.log(decoded);
+
+    if (!decoded.isVerified ) {
       throw new AppError("User is not verified", 401);
     }
     req.userId = decoded.id;
