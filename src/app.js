@@ -22,6 +22,8 @@ import testAttemptRoutes from "./routes/testAttempts.routes.js";
 import awsRouter from './routes/aws.route.js'
 import resendMailRoutes from "./routes/resendMail.routes.js";
 import { sendWelcomeEmail } from "./services/sendMail.js";
+import studentRoutes from "./routes/student.routes.js";
+import { errorMiddleware } from "./middlewares/error.middleware.js";
 
 const app = express();
 app.set("trust proxy", 1);  
@@ -44,6 +46,7 @@ app.use("/api/test-attempts", testAttemptRoutes);
 app.use('/api/candidate-profile', candidateProfileRoutes);
 app.use('/api/aws' , awsRouter)
 app.use("/api/auth", resendMailRoutes);
+app.use("/api/students", studentRoutes);
 // await sendWelcomeEmail({
 //   to: "agr.rbih@gmail.com",
 //   name: "Rohan",
@@ -53,12 +56,3 @@ app.use("/api/auth", resendMailRoutes);
 
 app.use(errorHandler);
 export default app;
-
-
-
-
-
-
-
-
-
