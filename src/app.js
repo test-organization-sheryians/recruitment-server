@@ -22,12 +22,14 @@ import testAttemptRoutes from "./routes/testAttempts.routes.js";
 import awsRouter from './routes/aws.route.js'
 import resendMailRoutes from "./routes/resendMail.routes.js";
 import { sendWelcomeEmail } from "./services/sendMail.js";
+import crudRoutes from "./routes/crud.routes.js"
 
 const app = express();
 app.set("trust proxy", 1);  
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
+app.use('/api',crudRoutes)
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/roles", roleRoutes);
