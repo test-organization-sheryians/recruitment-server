@@ -1,5 +1,8 @@
 import express from "express";
 import cors from "cors";
+import messageRoutes from "./routes/messages.route.js"
+import adminProfileRoutes from "./routes/adminProfile.routes.js";
+import readerRoutes from "./routes/reader.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import roleRoutes from "./routes/role.routes.js";
@@ -22,6 +25,7 @@ import testAttemptRoutes from "./routes/testAttempts.routes.js";
 import awsRouter from './routes/aws.route.js'
 import resendMailRoutes from "./routes/resendMail.routes.js";
 import { sendWelcomeEmail } from "./services/sendMail.js";
+import messageRoutes from "./routes/messages.route.js"
 
 const app = express();
 app.set("trust proxy", 1);  
@@ -44,6 +48,8 @@ app.use("/api/test-attempts", testAttemptRoutes);
 app.use('/api/candidate-profile', candidateProfileRoutes);
 app.use('/api/aws' , awsRouter)
 app.use("/api/auth", resendMailRoutes);
+//Message Routes
+app.use("/api/message", messageRoutes)
 // await sendWelcomeEmail({
 //   to: "agr.rbih@gmail.com",
 //   name: "Rohan",
