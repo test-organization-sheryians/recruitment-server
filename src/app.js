@@ -26,9 +26,13 @@ import blogPostRoutes from "./routes/blogPost.routes.js";
 import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
+import productRoutes from "./routes/product.routes.js";
+import adminProfileRoutes from "./routes/adminProfile.routes.js";
+import readerRoutes from "./routes/reader.routes.js";
+
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
 
-import ViolationRoutes  from "./routes/testViolation.routes.js";
+import ViolationRoutes from "./routes/testViolation.routes.js";
 import shareCandidate from "./routes/shareCandidate.routes.js";
 import tokenRoutes from "./routes/token.route.js"
 import categoryRoutes from "./routes/category.routes.js";
@@ -52,8 +56,9 @@ app.use("/api/enrollments", testEnrollmentRoutes);
 app.use("/api/test-attempts", testAttemptRoutes);
 app.use('/api/candidate-profile', candidateProfileRoutes);
 app.use("/api/admin-profile", adminProfileRoutes);
-app.use('/api/aws' , awsRouter)
+app.use('/api/aws', awsRouter)
 app.use("/api/auth", resendMailRoutes);
+app.use("/api/products", productRoutes);
 // app.use("/api/tests", deleteTestsRoutes);
 app.use("/api/interviews", ScheduleInterviewRoutes);
 //   to: "agr.rbih@gmail.com",
@@ -64,11 +69,11 @@ app.use("/api/interviews", ScheduleInterviewRoutes);
 
 app.use("/api/saved-jobs", savedJobRoutes);
 app.use("/api/password", passwordRoutes);
-app.use("/api/job-questions",jobApplicationQuesition)
+app.use("/api/job-questions", jobApplicationQuesition)
 
 app.use('/api/ai/', ViolationRoutes)
 app.use('/api/share', shareCandidate);
-app.use("/api/token",tokenRoutes)
+app.use("/api/token", tokenRoutes)
 
 
 
