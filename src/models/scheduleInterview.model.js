@@ -10,7 +10,7 @@ const scheduleSchema = new mongoose.Schema(
    
     candidateId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Users",
+      ref: "User",
       required: true,
     },
 

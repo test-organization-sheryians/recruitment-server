@@ -14,7 +14,7 @@ const TestEnrollmentsSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Assigned", "Started", "Completed"],
+      enum: ["Assigned", "Started", "Completed", "Disqualified"],
       default: "Assigned",
     },
   },

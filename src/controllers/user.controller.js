@@ -13,32 +13,54 @@ class UserController {
     this.getAllUsers = this.getAllUsers.bind(this);
     this.deleteUser = this.deleteUser.bind(this);
     this.updateUserRole = this.updateUserRole.bind(this);
+    this.blastUsers = this.blastUsers.bind(this);
   }
 
   async getMe(req, res, next) {
-    try {
-      const userId = req.userId;
-      const user = await this.userService.getUser(userId);
+  try {
+    const userId = req.userId;
 
-      return res.status(200).json({
-        success: true,
-        data: {
-          id: user.id || user._id,
-          email: user.email,
-          role: {
-            _id: user.role._id,
-            name: user.role.name,
-            description: user.role.description,
-          },
-          firstName: user.firstName,
-          lastName: user.lastName,
-          phoneNumber: user.phoneNumber,
-        },
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
       });
-    } catch (err) {
-      next(err);
     }
+
+    const user = await this.userService.getUser(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        id: user.id || user._id,
+        email: user.email,
+
+        // 🔥 FIX: safe role handling
+        role: user.role
+          ? {
+              _id: user.role._id,
+              name: user.role.name,
+              description: user.role.description,
+            }
+          : null,
+
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phoneNumber: user.phoneNumber,
+      },
+    });
+  } catch (err) {
+    console.log("GET ME ERROR:", err);
+    next(err);
   }
+}
 
   async updateMe(req, res, next) {
     try {
@@ -172,6 +194,42 @@ class UserController {
       next(error);
     }
   }
+
+  async blastUsers(req, res, next) {
+  try {
+    const { userIds, subject, message } = req.body;
+
+    if (!userIds || userIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No users selected",
+      });
+    }
+
+    if (!subject || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "Subject and message are required",
+      });
+    }
+
+    const result = await this.userService.blastUsers({
+      userIds,
+      subject,
+      message,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (error) {
+    next(error);
+  }
 }
+
+}
+
+
 
 export default new UserController();

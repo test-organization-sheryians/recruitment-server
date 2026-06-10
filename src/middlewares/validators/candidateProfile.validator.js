@@ -10,14 +10,17 @@ const createProfileSchema = Joi.object({
   availability: Joi.string().valid("immediate", "1_week", "2_weeks", "1_month", "not_looking").optional().messages({
     "any.only": "Availability must be one of: immediate, 1_week, 2_weeks, 1_month, not_looking",
   }),
-  linkedinUrl: Joi.string().uri().optional().allow('').messages({
+  linkedinUrl: Joi.string().trim().uri({ scheme: ["http", "https"] }).optional().allow('').messages({
     "string.uri": "LinkedIn URL must be a valid URL",
   }),
-  githubUrl: Joi.string().uri().optional().allow('').messages({
+  githubUrl: Joi.string().trim().uri({ scheme: ["http", "https"] }).optional().allow('').messages({
     "string.uri": "GitHub URL must be a valid URL",
   }),
-  portfolioUrl: Joi.string().uri().optional().allow('').messages({
+  portfolioUrl: Joi.string().trim().uri({ scheme: ["http", "https"] }).optional().allow('').messages({
     "string.uri": "Portfolio URL must be a valid URL",
+  }),
+  leetcodeUrl: Joi.string().trim().uri({ scheme: ["http", "https"] }).optional().allow('').messages({
+    "string.uri": "LeetCode URL must be a valid URL",
   }),
   highestEducation: Joi.string().min(1).max(200).optional().messages({
     "string.min": "Highest education must be at least 1 character long",
@@ -43,14 +46,17 @@ const updateProfileSchema = Joi.object({
   availability: Joi.string().valid("immediate", "1_week", "2_weeks", "1_month", "not_looking").optional().messages({
     "any.only": "Availability must be one of: immediate, 1_week, 2_weeks, 1_month, not_looking",
   }),
-  linkedinUrl: Joi.string().uri().optional().allow('').messages({
+  linkedinUrl: Joi.string().trim().uri({ scheme: ["http", "https"] }).optional().allow('').messages({
     "string.uri": "LinkedIn URL must be a valid URL",
   }),
-  githubUrl: Joi.string().uri().optional().allow('').messages({
+  githubUrl: Joi.string().trim().uri({ scheme: ["http", "https"] }).optional().allow('').messages({
     "string.uri": "GitHub URL must be a valid URL",
   }),
-  portfolioUrl: Joi.string().uri().optional().allow('').messages({
+  portfolioUrl: Joi.string().trim().uri({ scheme: ["http", "https"] }).optional().allow('').messages({
     "string.uri": "Portfolio URL must be a valid URL",
+  }),
+  leetcodeUrl: Joi.string().trim().uri({ scheme: ["http", "https"] }).optional().allow('').messages({
+    "string.uri": "LeetCode URL must be a valid URL",
   }),
   highestEducation: Joi.string().min(1).max(200).optional().messages({
     "string.min": "Highest education must be at least 1 character long",

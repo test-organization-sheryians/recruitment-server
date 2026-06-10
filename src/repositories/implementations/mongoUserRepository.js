@@ -293,7 +293,7 @@ class MongoUserRepository extends IUserRepository {
       return User.findOne({
         resetPasswordToken: token,
         resetPasswordExpires: { $gt: new Date() },
-      })
+      }).select("+password") // ✅ IMPORTANT
     } catch (error) {
       console.error("Error finding reset token:", error)
       throw new AppError("Failed to finding reset token", 500, error)
@@ -314,6 +314,30 @@ class MongoUserRepository extends IUserRepository {
       throw new AppError("Failed to clear reset token", 500, error)
     }
   }
+
+  async findUsersByIds(userIds) {
+  try {
+    return await User.aggregate([
+      {
+        $match: {
+          _id: {
+            $in: userIds.map((id) => new mongoose.Types.ObjectId(id)),
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          email: 1,
+          firstName: 1,
+        },
+      },
+    ]);
+  } catch (error) {
+    console.error("Error finding users by IDs:", error);
+    throw new AppError("Failed to fetch users", 500, error);
+  }
+}
 }
 
 export default MongoUserRepository;

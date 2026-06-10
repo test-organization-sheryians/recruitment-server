@@ -199,6 +199,15 @@ class MongoEnrollmentsRespository extends IEnrollment {
       throw new AppError("Unable to enroll users at the moment.", 500)
     }
   }
+
+  async updateEnrollmentStatus(id,status){
+     return TestEnrollments.findByIdAndUpdate(
+      id,
+   { status },
+    { new: true }
+     );
+  }
 }
+
 
 export default MongoEnrollmentsRespository;

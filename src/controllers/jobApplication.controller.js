@@ -5,8 +5,8 @@ import { AppError } from "../utils/errors.js";
 class JobApplicationController {
 
     applyForJob = asyncHandler(async (req, res, next) => {
-        const { jobId, message, resumeUrl } = req.body;
-        const candidateId = req.userId;
+        const { jobId, message, resumeUrl ,answers} = req.body;
+        const candidateId = req.userId;        
 
         if (!resumeUrl) throw new AppError("Resume URL is required", 400);
 
@@ -16,6 +16,7 @@ class JobApplicationController {
             candidateId,
             message,
             resumeUrl,
+            answers
         });
         res.status(201).json(response);
     });
@@ -114,6 +115,14 @@ class JobApplicationController {
     applicants: result.applicants,
   });
 });
+
+    getShortlistedCount = asyncHandler(async (req, res) => {
+        const result = await jobApplicationService.getShortlistedCounts();
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    });
 }
 
 export default new JobApplicationController();

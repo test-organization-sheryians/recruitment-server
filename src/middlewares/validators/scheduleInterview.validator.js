@@ -22,6 +22,12 @@ const updateInterviewSchema = Joi.object({
 
 })
 
+const rescheduleInterviewSchema = Joi.object({
+    interviewerEmail: Joi.string().email().required(),
+    meetingLink: Joi.string().uri().required(),
+    timing: Joi.date().iso().required(),
+})
+
 const validate = (schema) => (req, res, next) => {
   const { error } = schema.validate(req.body, {
     abortEarly: false,
@@ -43,3 +49,4 @@ const validate = (schema) => (req, res, next) => {
 
 export const createInterviewValidator = validate(createInterviewSchema);
 export const updateInterviewValidator = validate(updateInterviewSchema);
+export const rescheduleInterviewValidator = validate(rescheduleInterviewSchema);
