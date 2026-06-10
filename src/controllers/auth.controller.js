@@ -11,11 +11,13 @@ class AuthController {
 
   get cookieOptions() {
     const isProd = process.env.NODE_ENV === "production";
-    console.log(process.env.NODE_ENV)
-     console.log({ httpOnly: true,
+    console.log(process.env.NODE_ENV);
+    console.log({
+      httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
-      path: "/",})
+      path: "/",
+    });
     return {
       httpOnly: true,
       secure: isProd,
@@ -72,7 +74,7 @@ class AuthController {
     try {
       const { email, password } = req.body;
       const result = await this.userService.login({ email, password });
-      console.log(this.cookieOptions , "this is cookies options")
+      console.log(this.cookieOptions, "this is cookies options");
       res.cookie("token", result.token, {
         ...this.cookieOptions,
         maxAge: 60 * 60 * 1000,
@@ -101,9 +103,9 @@ class AuthController {
 
   updateUser = async (req, res, next) => {
     try {
-      const id = req.query.id ; 
+      const id = req.query.id;
       const userData = req.body;
-      console.log(id , userData , "this is from Update user")
+      console.log(id, userData, "this is from Update user");
       const user = await this.userService.updateUser(id, userData);
       res.status(200).json({ success: true, data: user });
     } catch (error) {
@@ -111,7 +113,6 @@ class AuthController {
     }
   };
 
-  
   logout = async (req, res, next) => {
     try {
       const token =
@@ -152,7 +153,7 @@ class AuthController {
       const result = await this.userService.resetPassword(
         userId,
         oldPassword,
-        newPassword
+        newPassword,
       );
 
       if (result) {

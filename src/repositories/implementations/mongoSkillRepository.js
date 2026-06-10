@@ -51,7 +51,7 @@ class MongoSkillRepository extends ISkillRepository {
       return await Skill.findByIdAndUpdate(
         id,
         { name: skillData.name.toLowerCase().trim() },
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       ).lean();
     } catch (error) {
       if (error.code === 11000) {
@@ -77,9 +77,7 @@ class MongoSkillRepository extends ISkillRepository {
     if (!query) {
       throw new AppError("Query parameter 'name' is required", 400);
     }
-    return Skill.find(
-      { name: { $regex: query, $options: "i" } }
-    );
+    return Skill.find({ name: { $regex: query, $options: "i" } });
   }
 }
 
