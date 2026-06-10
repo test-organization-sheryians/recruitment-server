@@ -26,7 +26,10 @@ import blogPostRoutes from "./routes/blogPost.routes.js";
 import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
+import adminProfileRoutes from "./routes/adminProfile.routes.js"
+import readerRoutes from "./routes/reader.routes.js"
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
+import productRoutes from "./routes/product.routes.js"
 
 import ViolationRoutes  from "./routes/testViolation.routes.js";
 import shareCandidate from "./routes/shareCandidate.routes.js";
@@ -77,6 +80,7 @@ app.use("/api", readerRoutes);
 
 
 app.use("/api/categories", categoryRoutes);
+app.use("/api/product",productRoutes)
 
 
 app.use(errorHandler);
