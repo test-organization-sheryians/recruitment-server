@@ -32,6 +32,8 @@ import ViolationRoutes  from "./routes/testViolation.routes.js";
 import shareCandidate from "./routes/shareCandidate.routes.js";
 import tokenRoutes from "./routes/token.route.js"
 import categoryRoutes from "./routes/category.routes.js";
+
+import  productRoutes  from "./routes/product.routes.js";
 const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
@@ -51,7 +53,7 @@ app.use("/api/tests", testRoutes);
 app.use("/api/enrollments", testEnrollmentRoutes);
 app.use("/api/test-attempts", testAttemptRoutes);
 app.use('/api/candidate-profile', candidateProfileRoutes);
-app.use("/api/admin-profile", adminProfileRoutes);
+// app.use("/api/admin-profile", adminProfileRoutes); har
 app.use('/api/aws' , awsRouter)
 app.use("/api/auth", resendMailRoutes);
 // app.use("/api/tests", deleteTestsRoutes);
@@ -73,10 +75,12 @@ app.use("/api/token",tokenRoutes)
 
 
 app.use("/api/blogs", blogPostRoutes);
-app.use("/api", readerRoutes);
+// app.use("/api", readerRoutes); har
 
 
 app.use("/api/categories", categoryRoutes);
+
+app.use("/api/products" ,  productRoutes )
 
 
 app.use(errorHandler);
