@@ -16,13 +16,13 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
+    "start": "node init && node server.js",
+    "dev": "node init && nodemon server.js",
     "worker": "node src/workers/emailWorker.js",
     "worker:dev": "nodemon src/workers/emailWorker.js",
-    "dev:all": "concurrently \"npm run dev\" \"npm run worker:dev\"",
-    "start:all": "concurrently \"npm run start\" \"npm run worker\" --names \"API,WORKER\" --prefix-colors \"blue,green\"",
-    "build": "echo \"No build step for backend\""
+    "dev:all": "node init && concurrently \"npm run dev\" \"npm run worker:dev\"",
+    "start:all": "node init && concurrently \"npm run start\" \"npm run worker\" --names \"API,WORKER\" --prefix-colors \"blue,green\"",
+    "build": "node init && echo \"No build step for backend\""
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.943.0",
