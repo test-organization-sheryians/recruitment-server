@@ -84,7 +84,7 @@ class ExperienceService {
       throw new AppError("Experience not found", 404);
     }
 
-    const candidate = await this.candidateRepository.getCandidatebyId(
+    const candidate = await this.candidateRepository.getCandidateById(
       experience.candidateId
     );
 

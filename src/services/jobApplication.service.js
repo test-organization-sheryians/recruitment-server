@@ -13,7 +13,7 @@ class JobApplicationService {
     this.jobRoleReop = new MongoJobRoleRepository();
   }
 
-  async applyForJob({ jobId, candidateId, message, resumeUrl }) {
+  async applyForJob({ jobId, candidateId, message, resumeUrl, answers }) {
     const candidateDetails = await this.candidateRepo.findProfileByUserId(
       candidateId
     );
@@ -31,11 +31,22 @@ class JobApplicationService {
     const exists = await this.jobAppRepo.findByUserAndJob(candidateId, jobId);
     if (exists) throw new AppError("Already applied for this job", 409);
 
+    let formattedAnswers;
+
+    if(Array.isArray(answers) && answers.length > 0){
+      formattedAnswers = answers.map((item)=>({
+        question:item?.question?.trim(),
+        answer:item?.answer?.trim()
+      }))
+      .filter((a)=>a.question && a.answer)
+    }
+
     const application = await this.jobAppRepo.createJobApplication({
       jobId,
       candidateId,
       message,
       resumeUrl,
+      ...(formattedAnswers && {answers:formattedAnswers})
     });
 
     // const candidateDetails = await this.candidateRepo.findProfileByUserId(

@@ -8,7 +8,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
 
 
   async createJobApplication(jobAppData) {
-    try {
+    try {      
       const jobApplication = new jobAppModel(jobAppData);
       const savedApplication = await jobApplication.save();
       return savedApplication;
@@ -267,6 +267,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           status: 1,
           createdAt: 1,
           appliedAt: 1,
+         // answers: 1,
           "candidateDetails.firstName": 1,
           "candidateDetails.lastName": 1,
           "candidateDetails.email": 1,
@@ -419,6 +420,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           createdAt: 1,
           appliedAt: 1,
           totalExperienceYears: 1,
+          answers: 1,
 
           "candidateDetails.firstName": 1,
           "candidateDetails.lastName": 1,

@@ -35,14 +35,14 @@ class AuthController {
 
       const tokens = await this.userService.refresh(refreshToken);
 
-      res.cookie("token", tokens.accessToken, {
+      res.cookie("token", tokens.token, {
         ...this.cookieOptions,
-        maxAge: 15 * 60 * 1000,
+        maxAge: 15* 60 * 1000, // 15 minutes
       });
 
       res.cookie("refreshToken", tokens.refreshToken, {
         ...this.cookieOptions,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
       res.status(200).json({ success: true });
@@ -58,14 +58,14 @@ class AuthController {
 
     res.cookie("token", result.token, {
   ...this.cookieOptions,
-  maxAge: 60 * 60 * 1000,   // 1 hour
+  maxAge: 15* 60 * 1000,  // 15 minutes
 
 });
 
 
       res.cookie("refreshToken", result.refreshToken, {
         ...this.cookieOptions,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
       res.status(201).json({ success: true, data: result });
@@ -82,16 +82,16 @@ class AuthController {
 
      res.cookie("token", result.token, {
   ...this.cookieOptions,
- maxAge: 60 * 60 * 1000,   // 1 hour
+ maxAge: 15* 60 * 1000,   // 15 minutes
 
 });
 
       res.cookie("refreshToken", result.refreshToken, {
         ...this.cookieOptions,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
-      res.status(200).json({ success: true, expiresIn: 3600 , data: result });
+      res.status(200).json({ success: true, expiresIn: 86400, data: result });
     } catch (error) {
       next(error);
     }
@@ -122,9 +122,7 @@ class AuthController {
   
   logout = async (req, res, next) => {
     try {
-      const token =
-        req.cookies?.token ||
-        req.header("Authorization")?.replace("Bearer ", "");
+      const token = req.cookies?.token;
 
       if (token) {
         const decoded = this.authService.verifyToken(token);

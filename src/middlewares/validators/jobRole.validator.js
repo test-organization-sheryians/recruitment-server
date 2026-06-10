@@ -29,6 +29,37 @@ const locationSchema = Joi.object({
     }),
 });
 
+const salarySchema = Joi.object({
+  min: Joi.number().min(0).required().messages({
+    "number.base": "Salary min must be a number",
+    "number.min": "Salary min must be 0 or greater",
+    "any.required": "Salary min is required",
+  }),
+  max: Joi.number()
+    .greater(Joi.ref("min"))
+    .required()
+    .messages({
+      "number.greater": "Salary max must be greater than min",
+      "any.required": "Salary max is required",
+    }),
+  currency: Joi.string()
+    .valid("INR", "USD", "EUR", "GBP")
+    .required()
+    .messages({
+      "any.only": "Currency must be INR, USD, EUR, or GBP",
+      "any.required": "Currency is required",
+    }),
+});
+
+const jobTypeSchema = Joi.string()
+  .valid("Remote", "Hybrid", "Full-Time", "Part-Time")
+  .required()
+  .messages({
+    "any.only":
+      "Job type must be Remote, Hybrid, Full-Time or Part-Time",
+    "any.required": "Job type is required",
+  });
+
 
 const createJobRoleSchema = Joi.object({
   title: Joi.string().min(3).max(100).required().messages({
@@ -36,9 +67,9 @@ const createJobRoleSchema = Joi.object({
     "string.max": "Title cannot exceed 100 characters",
     "any.required": "Title is required",
   }),
-  requiredExperience: Joi.string().min(1).max(50).required().messages({
-    "string.min": "Required experience must be specified",
-    "string.max": "Required experience cannot exceed 50 characters",
+  requiredExperience: Joi.number().min(0).required().messages({
+    "number.base": "Required experience must be a number",
+    "number.min": "Required experience cannot be negative",
     "any.required": "Required experience is required",
   }),
   category: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
@@ -64,15 +95,15 @@ const createJobRoleSchema = Joi.object({
     "array.max": "Cannot have more than 20 skills",
     "any.required": "Skills are required",
   }),
-  salary: Joi.object({
-    min: Joi.number().positive().required(),
-    max: Joi.number().positive().greater(Joi.ref("min")).required(),
-    currency: Joi.string().default("INR")
-  }).required(),
+  // salary: Joi.object({
+  //   min: Joi.number().positive().required(),
+  //   max: Joi.number().positive().greater(Joi.ref("min")).required(),
+  //   currency: Joi.string().default("INR")
+  // }).required(),
 
-  jobType: Joi.string()
-    .valid("Remote", "Full-Time", "Part-Time", "Hybrid")
-    .required(),  
+  // jobType: Joi.string()
+  //   .valid("Remote", "Full-Time", "Part-Time", "Hybrid")
+  //   .required(),
   expiry: Joi.date().greater('now').required().messages({
     "date.greater": "Expiry date must be in the future",
     "any.required": "Expiry date is required",
@@ -82,17 +113,34 @@ const createJobRoleSchema = Joi.object({
     "any.required": "Client ID is required",
   }),
   location: locationSchema.required(),
+
+  // ✅ ADD
+  jobType: jobTypeSchema.required(),
+  salary: salarySchema.required(),
 });
+
+const partialLocationSchema = Joi.object({
+  city: Joi.string().min(2).max(100),
+  state: Joi.string().min(2).max(100),
+  country: Joi.string().min(2).max(100),
+  pincode: Joi.string().pattern(/^[0-9]{4,10}$/).messages({
+    "string.pattern.base": "Pincode must be a valid numeric code",
+  }),
+}).min(1); // at least one field if location provided
 
 const updateJobRoleSchema = Joi.object({
   title: Joi.string().min(3).max(100).messages({
     "string.min": "Title must be at least 3 characters long",
     "string.max": "Title cannot exceed 100 characters",
   }),
-  requiredExperience: Joi.string().min(1).max(50).messages({
-    "string.min": "Required experience must be specified",
-    "string.max": "Required experience cannot exceed 50 characters",
-  }),
+  requiredExperience: Joi.number()
+    .min(0)
+    .max(50)
+    .messages({
+      "number.base": "Required experience must be a number",
+      "number.min": "Required experience must be at least 0",
+      "number.max": "Required experience cannot exceed 50",
+    }),
   category: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).messages({
     "string.pattern.base": "Category must be a valid ObjectId",
   }),
@@ -119,7 +167,12 @@ const updateJobRoleSchema = Joi.object({
     "string.pattern.base": "Client ID must be a valid ObjectId",
   }),
   location: locationSchema.required(),
+
+  // ✅ ADD
+  jobType: jobTypeSchema,
+  salary: salarySchema,
 });
+
 
 const filterJobRolesSchema = Joi.object({
   clientId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).messages({
@@ -149,22 +202,35 @@ const filterJobRolesSchema = Joi.object({
 });
 
 const validate = (schema) => (req, res, next) => {
-  const { error } = schema.validate(req.body, { abortEarly: false });
+  const { error } = schema.validate(req.body, {
+    abortEarly: false,
+    stripUnknown: true,
+  });
+
   if (error) {
+    const messages = error.details.map((d) => d.message);
+
     return next(
-      new AppError(error.details.map((d) => d.message).join(", "), 400)
+      new AppError(messages[0], 400, messages) // ✅ key change
     );
   }
+
   next();
 };
 
 const validateQuery = (schema) => (req, res, next) => {
-  const { error } = schema.validate(req.query, { abortEarly: false });
+  const { error } = schema.validate(req.query, {
+    abortEarly: false,
+  });
+
   if (error) {
+    const messages = error.details.map((d) => d.message);
+
     return next(
-      new AppError(error.details.map((d) => d.message).join(", "), 400)
+      new AppError(messages[0], 400, messages)
     );
   }
+
   next();
 };
 

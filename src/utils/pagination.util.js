@@ -1,4 +1,4 @@
-// Aggregation pagination utility using $facet to fetch data and count in one roundtrip
+
 export const paginateAggregation = async (model, pipeline = [], { page = 1, limit = 10 } = {}) => {
     if (!model || typeof model.aggregate !== "function") {
         throw new Error("A valid Mongoose model with an aggregate function is required");

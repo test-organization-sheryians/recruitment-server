@@ -1,91 +1,97 @@
 import mongoose from "mongoose";
 
+
 const locationSchema = new mongoose.Schema({
   city: String,
   state: String,
   country: String,
   pincode: String
-});
-
+})
 const jobRoleSchema = new mongoose.Schema(
   {
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true
+      index: true,
     },
     title: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     requiredExperience: {
-      type: String,
-      required: true,
-      trim: true
-    },
+  type: Number,
+  
+  required: true,
+  index: true,
+},
+
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "JobCategory",
       required: true,
-      index: true
+      index: true,
     },
     education: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     description: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     skills: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Skill",
-        index: true
-      }
+        index: true,
+      },
     ],
-    salary: {
-      min: {
-        type: Number,
-        required: true
-      },
-      max: {
-        type: Number,
-        required: true
-      },
-      currency: {
-        type: String,
-        default: "INR"
-      }
-    },
-    jobType: {
-      type: String,
-      enum: ["Remote", "Full-Time", "Part-Time", "Hybrid"],
-      required: true, 
-      index: true
-    },
     expiry: {
       type: Date,
       required: true,
-      index: true
+      index: true,
     },
     clientId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true
+      index: true,
     },
     location: {
       type: locationSchema,
-      required: true
-    }
+      required: true,
+    },
+    jobType: {
+  type: String,
+  enum: ["Remote", "Hybrid", "Full-Time", "Part-Time"],
+  required: true,
+  index: true,
+},
+salary: {
+  min: {
+    type: Number,
+    required: true,
+    index: true,
+  },
+  max: {
+    type: Number,
+    required: true,
+    index: true,
+  },
+  currency: {
+    type: String,
+    default: "INR",
+  },
+},
+
+
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

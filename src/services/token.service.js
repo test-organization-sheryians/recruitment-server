@@ -48,7 +48,7 @@ class TokenService {
     };
 
 
-    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "24h" });
     const refreshToken = jwt.sign({ id: user._id }, REFRESH_SECRET, {
       expiresIn: REFRESH_EXPIRES_IN,
     });

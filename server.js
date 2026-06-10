@@ -1,10 +1,15 @@
+import dns from "dns";
+dns.setServers(["8.8.8.8" ,"8.8.4.4"]);
+dns.setDefaultResultOrder("ipv4first");
+
 // server.js (or index.js — your main entry file)
 import app from "./src/app.js";
+
 import config from "./src/config/environment.js";
 import { connectRedis } from "./src/config/redis.js";
 import { connectDB } from "./src/config/database.js";
 import logger from "./src/utils/logger.js";
-
+import "./src/workers/emailWorker.js";
 // THIS LINE STARTS THE BULLMQ WORKER AUTOMATICALLY
 import "./src/workers/emailWorker.js";  // ← JUST THIS ONE LINE
 import jobApplicationModel from "./src/models/jobApplication.model.js";
@@ -41,3 +46,7 @@ async function startServer() {
 }
 
 startServer();
+
+
+
+

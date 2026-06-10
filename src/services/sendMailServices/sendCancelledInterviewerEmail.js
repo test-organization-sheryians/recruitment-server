@@ -1,81 +1,86 @@
-import axios from "axios"
+import axios from "axios";
+import { email_style, logoUrl } from "./constants.js";
 
-const BREVO_API_KEY = process.env.BREVO_API_KEY
-const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const BREVO_URL = "https://api.brevo.com/v3/smtp/email";
 
 export async function sendCancelledInterviewerEmail(data) {
   try {
     const payload = {
-  sender: { name: "Sheryians Recruitment", email: "hr@sheryians.com" },
-  to: [{ email: data.interviewer }],
-  subject: `Interview Cancelled: ${data.jobTitle}`,
+      sender: { name: "Sheryians Recruitment", email: "hr@sheryians.com" },
+      to: [{ email: data.interviewer }],
+      subject: `Interview Cancelled: ${data.jobTitle}`,
 
-  htmlContent: `
-  <div style="font-family: Inter, Arial, sans-serif; background:#ffffff; padding:40px;">
-    <div style="max-width:620px; margin:0 auto; color:#111827;">
+      htmlContent: `
+      ${email_style}
+<div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #f8fafc; padding: 40px 10px;">
+  <div style="max-width: 540px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;">
+    
+    <div style="background: #000000; padding: 32px 20px; text-align: center;">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: auto;">
+        <tr>
+          <td style="vertical-align: middle;">
+            <img src="${logoUrl}" alt="Sheryians Logo" 
+            class="logo-img"
+            style="max-height: 35px; width: auto; display: block; margin-right: 8px;" />
+          </td>
+          <td style="vertical-align: middle;">
+            <span style="color: #ffffff; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; line-height: 1;">Sheryians.</span>
+          </td>
+        </tr>
+      </table>
+    </div>
 
-      <p style="font-size:14px; color:#6b7280; margin-bottom:8px;">
-        Sheryians Recruitment
-      </p>
-
-      <h1 style="font-size:22px; font-weight:600; margin:0 0 20px;">
+    <div style="padding: 40px 32px;">
+      <h1 style="font-size: 24px; font-weight: 700; color: #1e293b; margin: 0 0 16px; letter-spacing: -0.5px;">
         Interview Cancelled
       </h1>
-
-      <p style="font-size:15px; line-height:1.7; color:#374151; margin-bottom:24px;">
+      
+      <p style="font-size: 15px; line-height: 1.6; color: #475569; margin: 0 0 24px;">
         Dear Interviewer,<br/><br/>
-        Please note that the following interview has been cancelled.
+        Please note that the following interview has been cancelled. 
         No further action is required from your side.
       </p>
 
-      <div style="
-        border-left:4px solid #b91c1c;
-        padding:16px 20px;
-        margin-bottom:32px;
-        background:#fef2f2;
-      ">
-        <p style="margin:0; font-size:13px; color:#6b7280;">
+      <div style="background: #fef2f2; border-radius: 8px; padding: 20px; border-left: 4px solid #b91c1c; margin-bottom: 24px;">
+        <p style="margin: 0; font-size: 13px; color: #991b1b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
           Interview Details
         </p>
-
-        <p style="margin:6px 0 0; font-size:14px;">
+        <p style="margin: 12px 0 0; font-size: 14px; color: #1e293b;">
           <strong>Candidate Name:</strong> ${data.candidateName}
         </p>
-        <p style="margin:4px 0; font-size:14px;">
+        <p style="margin: 4px 0; font-size: 14px; color: #1e293b;">
           <strong>Position:</strong> ${data.jobTitle}
         </p>
-        <p style="margin:4px 0; font-size:14px; font-weight:600; color:#b91c1c;">
+        <p style="margin: 8px 0 0; font-size: 15px; font-weight: 700; color: #b91c1c;">
           Status: Cancelled
         </p>
       </div>
 
-      <div style="
-        border-left:4px solid #6b7280;
-        background:#f9fafb;
-        padding:14px 18px;
-        margin:24px 0;
-      ">
-        <p style="margin:0; font-size:14px; color:#374151;">
-          If any updates or rescheduling are required, the recruitment team
-          will notify you accordingly.
+      <div style="background: #f1f5f9; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.5;">
+          If any updates or rescheduling are required, the recruitment team will notify you accordingly.
         </p>
       </div>
 
-      <hr style="border:none; border-top:1px solid #e5e7eb; margin:40px 0;" />
+      <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 32px 0;" />
 
-      <p style="font-size:13px; color:#6b7280; line-height:1.6;">
-        Best regards,<br/>
-        <strong style="color:#111827;">Sheryians Recruitment Team</strong><br/>
-        <span style="font-size:12px;">
-          This is an automated message. Please do not reply.
-        </span>
-      </p>
-
+      <div style="text-align: center;">
+        <p style="font-size: 13px; color: #64748b; margin: 0;">
+          Best regards,<br/>
+          <strong style="color: #1e293b;">Sheryians Recruitment Team</strong>
+        </p>
+        <p style="font-size: 11px; color: #cbd5e1; margin-top: 12px;">
+          This is an automated system message. Please do not reply directly to this email.
+        </p>
+      </div>
     </div>
-  </div>
-  `,
 
-  textContent: `
+  </div>
+</div>
+`,
+
+      textContent: `
 Dear Interviewer,
 
 The interview with ${data.candidateName} for the ${data.jobTitle} position
@@ -86,12 +91,16 @@ No further action is required from your side.
 Regards,
 Sheryians Recruitment Team
   `,
-}
+    };
 
-
-    return (await axios.post(BREVO_URL, payload, {
-      headers: { "api-key": BREVO_API_KEY, "Content-Type": "application/json" },
-    })).data;
+    return (
+      await axios.post(BREVO_URL, payload, {
+        headers: {
+          "api-key": BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+      })
+    ).data;
   } catch (err) {
     throw err;
   }
