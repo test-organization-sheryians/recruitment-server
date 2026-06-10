@@ -4,8 +4,6 @@ import logger from "../utils/logger.js";
 import Skill from "../models/skill.model.js";
 import jobcategory from "../models/jobCategory.model.js";
 import BlogPostModel from "../models/blogPost.model.js";
-import {emailQueue} from "../queues/emailQueue.js";
-import ReaderModel from "../models/Readers.model.js";
 
 
 
@@ -36,30 +34,13 @@ class BlogPostService {
         keywords: data.seo?.keywords ?? [],
         ogImage: data.seo?.ogImage ?? ""
       },
-      status: data.isPublished ? "published" : "draft",
       isPublished: data.isPublished ?? false,
       allowNewsletter: data.allowNewsletter ?? true,
-      publishedAt: data.status === "published" 
-      ? new Date() 
-      : null
+      publishedAt: data.isPublished ? new Date() : null
     };
     console.log("Blog Data to be created:", blogData);
 
-    const blog = await this.blogRepo.create(blogData);
-
-
-     //EMAIL QUEUE TRIGGER
-    if (blog.status === "published") {
-       await emailQueue.add("blog-published", {
-        title: blog.title,
-        slug: blog.slug,
-        category: blog.category,
-        technologies: blog.technologies
-
-       });
-    }
-
-    return blog;
+    return await this.blogRepo.create(blogData);
   }
 
 
@@ -68,19 +49,14 @@ class BlogPostService {
     let {
       limit = 10,
       skip = 0,
-      page = 1,
       category,
       technology,
       search,
-      isAdminRoute,
+      isPublished
     } = options;
 
 
     const query = {};
-
-   if (!isAdminRoute) {
-    query.status = "published";
-  }
 
     if (category) {
       query.category = category;
@@ -117,7 +93,13 @@ class BlogPostService {
         query.technologies = { $in: skillIds };
       }
     }
-     const [blogs, total] = await Promise.all([
+
+
+
+
+    if (isPublished !== undefined) query.isPublished = isPublished;
+
+    const [blogs, total] = await Promise.all([
       this.blogRepo.findPaginated(query, skip, limit),
       this.blogRepo.count(query)
     ]);
@@ -128,7 +110,6 @@ class BlogPostService {
         total,
         skip,
         limit,
-        page,
         hasNext: skip + limit < total,
         hasPrev: skip > 0
       }
@@ -154,17 +135,15 @@ class BlogPostService {
    return blogPost;
   }
 
-  
+ 
+
+  //top 4 most viewed blogs 
   async getTopViewedBlogs(){
     const blogs = await this.blogRepo.getTopViewedBlogs();
     if(!blogs){
       throw new AppError("Blog not found",404);
     }
     return blogs;
-  }
-
-  async getRecommendedBlogs(slug, limit = 3) {
-  return await this.blogRepo.getRecommendedBlogsBySlug(slug, limit);
   }
 
   async updateBlogPost(id, data) {
@@ -187,10 +166,8 @@ class BlogPostService {
       "subtitle",
       "readingTime",
       "category",
-      "technologies",
       "content",
-      "isPublished",
-      "status"
+      "isPublished"
     ];
 
     for (const field of flatFields) {
@@ -221,43 +198,16 @@ class BlogPostService {
     if (data.isPublished === false) {
       updates.publishedAt = null;
     }
-    if (data.status) {
-      updates.status = data.status;
-    }
 
     if (Object.keys(updates).length === 0) {
       throw new AppError("No valid fields provided", 400);
     }
 
-    const updatedBlog = await this.blogRepo.updateById(
+    return await this.blogRepo.updateById(
       id,
       { $set: updates }
     );
-
-    //EMAIL QUEUE TRIGGER
-
-  if (
-    existingBlog.status !== "published" && updatedBlog.status === "published") {
-      //console.log("ADDING BLOG EMAIL JOB...");
-
-    const readers = await ReaderModel.find().select("email");
-
-    for (const reader of readers) {
-      
-      await emailQueue.add("blog-published",
-        {
-          to: reader.email,
-          blogTitle: updatedBlog.title,
-          blogSlug: updatedBlog.slug
-        }
-        
-      );
-
-      
-}
- }
- return updatedBlog;
-}
+  }
 
 
   async deleteBlogPost(id) {

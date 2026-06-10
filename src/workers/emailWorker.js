@@ -1,19 +1,19 @@
 // src/workers/emailWorker.js
-import { Worker } from 'bullmq';
-import connection from '../config/config/bullmq-connection.js';
-import logger from '../utils/logger.js';
-import { sendWelcomeEmail } from '../services/sendMailServices/sendWelcomeEmail.js';
-import { sendVerificationEmail } from '../services/sendMailServices/sendVerificationEmail.js';
-import { sendEnrollEmail } from '../services/sendMailServices/sendEnrollEmail.js';
-import { sendScheduleInterviewEmail } from '../services/sendMailServices/sendScheduleInterviewEmail.js';
-import { sendScheduleInterviewerEmail } from '../services/sendMailServices/sendScheduleInterviewerEmail.js';
-import { sendRescheduledInterviewEmail } from '../services/sendMailServices/sendRescheduledInterviewEmail.js';
-import { sendRescheduledInterviewerEmail } from '../services/sendMailServices/sendRescheduledInterviewerEmail.js';
-import { sendResetPasswordEmail } from '../services/sendMailServices/sendResetPasswordEmail.js';
-import { sendApplicationStatusUpdateEmail } from '../services/sendMailServices/sendApplicationStatusUpdateEmail.js';
-import { sendCancelledInterviewEmail } from '../services/sendMailServices/sendCancelledInterviewEmail.js';
-import { sendCancelledInterviewerEmail } from '../services/sendMailServices/sendCancelledInterviewerEmail.js';
-
+import { Worker } from "bullmq";
+import connection from "../config/config/bullmq-connection.js";
+import logger from "../utils/logger.js";
+import { sendWelcomeEmail } from "../services/sendMailServices/sendWelcomeEmail.js";
+import { sendVerificationEmail } from "../services/sendMailServices/sendVerificationEmail.js";
+import { sendEnrollEmail } from "../services/sendMailServices/sendEnrollEmail.js";
+import { sendScheduleInterviewEmail } from "../services/sendMailServices/sendScheduleInterviewEmail.js";
+import { sendScheduleInterviewerEmail } from "../services/sendMailServices/sendScheduleInterviewerEmail.js";
+import { sendRescheduledInterviewEmail } from "../services/sendMailServices/sendRescheduledInterviewEmail.js";
+import { sendRescheduledInterviewerEmail } from "../services/sendMailServices/sendRescheduledInterviewerEmail.js";
+import { sendResetPasswordEmail } from "../services/sendMailServices/sendResetPasswordEmail.js";
+import { sendApplicationStatusUpdateEmail } from "../services/sendMailServices/sendApplicationStatusUpdateEmail.js";
+import { sendCancelledInterviewEmail } from "../services/sendMailServices/sendCancelledInterviewEmail.js";
+import { sendCancelledInterviewerEmail } from "../services/sendMailServices/sendCancelledInterviewerEmail.js";
+import { sendBlastEmail } from "../services/sendMailServices/sendBlastEmail.js";
 
 // NO QueueScheduler needed in BullMQ v5+
 // BullMQ automatically handles delayed jobs, retries, etc. when Worker is active
@@ -46,10 +46,9 @@ const worker = new Worker(
         await sendCancelledInterviewEmail(job.data);
       } else if (job.name === "cancel-interview-interviewer") {
         await sendCancelledInterviewerEmail(job.data);
-      } 
-
-      
-      else {
+      } else if (job.name === "blast-mail") {
+        await sendBlastEmail(job.data);
+      } else {
         logger.warn(`Unknown job type: ${job.name}`);
       }
     } catch (error) {
@@ -60,7 +59,7 @@ const worker = new Worker(
   {
     connection,
     concurrency: 5, // Process up to 5 emails concurrently
-  }
+  },
 );
 
 // Worker event listeners

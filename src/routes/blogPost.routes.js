@@ -23,15 +23,6 @@ router.get(
   blogPostController.getBlogPosts
 );
 
-router.get(
-  "/admin",
-  authenticateJWT,
-  authorizeRoles("admin"),
-  validateRequest(blogListQuerySchema, "query"),
-  blogPostController.getBlogPosts
-);
-
-
 router.get("/highest-views",blogPostController.getTopViewedBlogs);
 
 router.get("/slug/:slug", blogPostController.getBlogPostBySlug);
@@ -39,7 +30,7 @@ router.get("/slug/:slug", blogPostController.getBlogPostBySlug);
 
 router.get("/:id", blogPostController.getBlogPostById);
 
-router.get("/:slug/recommended",blogPostController.getRecommendedBlogs);
+
 
 
 //admin routes

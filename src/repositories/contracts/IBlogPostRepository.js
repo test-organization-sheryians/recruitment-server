@@ -27,10 +27,6 @@ class BlogPostRepository {
     throw new Error("Method not implemented");
   }
 
-  async getRecommendedBlogsBySlug(slug, limit) {
-    throw new Error("Method not implemented");
-  }
-
   async updateById(id, data) {
     throw new Error('Method not implemented.');
   }
