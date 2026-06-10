@@ -1,4 +1,5 @@
 import redis from "redis";
+import { createClient } from "redis";
 import config from "./environment.js";
 import logger from "../utils/logger.js";
 
