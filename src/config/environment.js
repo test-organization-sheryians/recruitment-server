@@ -11,7 +11,7 @@ export default {
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || "http://localhost:3000",
   NODE_ENV: process.env.NODE_ENV || "development",
   REFRESH_SECRET: process.env.REFRESH_SECRET,
-  REFRESH_EXPIRES_IN: process.env.REFRESH_EXPIRES_IN,
+  REFRESH_EXPIRES_IN: process.env.REFRESH_EXPIRES_IN || "7d",
   GROQ_API_KEY: process.env.GROQ_API_KEY,
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
   NODE_ENV: process.env.NODE_ENV,

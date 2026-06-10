@@ -1,6 +1,6 @@
 import CandidateProfileService from "../services/candidateProfile.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-
+ import axios from "axios";
 class CandidateProfileController {
   constructor() {
     this.candidateProfileService = new CandidateProfileService();
@@ -35,14 +35,27 @@ class CandidateProfileController {
     });
   });
 
+  getProfileById = asyncHandler(async (req, res) => {
+   
+    
+    const profile = await this.candidateProfileService.getProfileByUserId(
+      req.params.Id
+    );
+
+    res.status(200).json({
+      success: true,
+      data: profile,
+    });
+  });
+
   updateProfile = asyncHandler(async (req, res) => {
     const profileData = req.body;
-
+    console.log(profileData);
+    
     const profile = await this.candidateProfileService.updateProfile(
       req.userId,
       profileData
     );
-
     res.status(200).json({
       success: true,
       data: profile,
@@ -132,6 +145,50 @@ class CandidateProfileController {
       message: "Availability updated successfully",
     });
   });
+
+ 
+
+ getLeetcodeGraph = async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    const response = await axios.post(
+      "https://leetcode.com/graphql",
+      {
+        query: `
+          query getUserProfile($username: String!) {
+            matchedUser(username: $username) {
+              username
+              profile {
+                realName
+                ranking
+                reputation
+                userAvatar
+              }
+              submitStats {
+                acSubmissionNum {
+                  difficulty
+                  count
+                }
+              }
+            }
+          }
+        `,
+        variables: { username },
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Referer: "https://leetcode.com",
+        },
+      }
+    );
+
+    res.json(response.data.data.matchedUser);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch LeetCode data" });
+  }
+};
 }
 
 export default CandidateProfileController;

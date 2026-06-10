@@ -4,6 +4,7 @@ import { authenticateJWT } from "../middlewares/auth.middleware.js";
 import validateRequest from "../middlewares/validators/validateRequest.js";
 import { testAttemptSchema } from "../middlewares/validators/test.validator.js";
 import { checkEnrollment } from "../middlewares/checkEnrollment.middleware.js";
+import { authorize } from "../middlewares/role.middleware.js";
 
 const router = express.Router();
 
@@ -33,6 +34,9 @@ router.get(
   authenticateJWT,
   testAttemptsController.getCandidateAttempts
 );
+
+router.patch("/result/:testId",authenticateJWT,authorize("admin"),testAttemptsController.publishTestResults);
+
 
 
 export default router;

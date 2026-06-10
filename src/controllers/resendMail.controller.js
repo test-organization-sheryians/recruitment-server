@@ -3,7 +3,7 @@ import { resendVerificationEmailService } from "../services/resendMail.service.j
 
 export const resendVerificationEmailController = async (req, res) => {
   try {
-    const token = req.cookies?.access;
+    const token = req.cookies?.token;
 
     if (!token) {
       return res.status(401).json({

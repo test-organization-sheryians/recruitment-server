@@ -16,6 +16,16 @@ router.get(
 );
 
 
+
+router.delete(
+  "/:testId",
+  authenticateJWT,
+  testController.deleteTest.bind(testController)
+);
+
+
+
+
 router.get("/:testId",
   testController.getTest.bind(testController));
 

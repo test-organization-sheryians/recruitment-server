@@ -8,7 +8,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
 
 
   async createJobApplication(jobAppData) {
-    try {
+    try {      
       const jobApplication = new jobAppModel(jobAppData);
       const savedApplication = await jobApplication.save();
       return savedApplication;
@@ -267,6 +267,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           status: 1,
           createdAt: 1,
           appliedAt: 1,
+         // answers: 1,
           "candidateDetails.firstName": 1,
           "candidateDetails.lastName": 1,
           "candidateDetails.email": 1,
@@ -413,11 +414,13 @@ class MongoApplicationRespository extends IJobApplicationRepository {
       {
         $project: {
           _id: 1,
+          candidateId: 1, 
           resumeUrl: 1,
           status: 1,
           createdAt: 1,
           appliedAt: 1,
           totalExperienceYears: 1,
+          answers: 1,
 
           "candidateDetails.firstName": 1,
           "candidateDetails.lastName": 1,
@@ -441,6 +444,16 @@ class MongoApplicationRespository extends IJobApplicationRepository {
     throw new AppError("Failed to fetch applicants by job id", 500);
   }
 }
+
+  // Minimal counts used by admin KPIs
+  async countByStatus(status) {
+    try {
+      return await jobAppModel.countDocuments({ status });
+    } catch (error) {
+      console.error(error);
+      throw new AppError("Failed to count applications by status", 500);
+    }
+  }
 }
 
 export default MongoApplicationRespository;

@@ -1,6 +1,15 @@
 import mongoose from "mongoose";
+import validator from "validator";
 
 const { Schema } = mongoose;
+
+const isValidSocialUrl = (value) => {
+  if (!value || value.trim() === "") return true;
+  return validator.isURL(value.trim(), {
+    protocols: ["http", "https"],
+    require_protocol: true,
+  });
+};
 
 const CandidateProfileSchema = new Schema(
   {
@@ -21,10 +30,39 @@ const CandidateProfileSchema = new Schema(
       enum: ["immediate", "1_week", "2_weeks", "1_month", "not_looking"],
       default: "not_looking",
     },
-    linkedinUrl: String,
-    githubUrl: String,
-    portfolioUrl: String,
-
+    linkedinUrl: {
+      type: String,
+      trim: true,
+      validate: {
+        validator: isValidSocialUrl,
+        message: "LinkedIn URL must be a valid URL",
+      },
+    },
+    githubUrl: {
+      type: String,
+      trim: true,
+      validate: {
+        validator: isValidSocialUrl,
+        message: "GitHub URL must be a valid URL",
+      },
+    },
+    portfolioUrl: {
+      type: String,
+      trim: true,
+      validate: {
+        validator: isValidSocialUrl,
+        message: "Portfolio URL must be a valid URL",
+      },
+    },
+    leetcodeUrl: {
+      type: String,
+      trim: true,
+      validate: {
+        validator: isValidSocialUrl,
+        message: "LeetCode URL must be a valid URL",
+      },
+    },
+    
     highestEducation: { type: String },
     resumeFile: { type: String },
     resumeScore: { type: Number },

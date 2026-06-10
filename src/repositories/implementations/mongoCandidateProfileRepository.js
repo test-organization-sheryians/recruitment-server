@@ -4,11 +4,17 @@ import { CandidateProfile } from "../../models/candidateProfile.model.js";
 import { AppError } from "../../utils/errors.js";
 
 class MongoCandidateProfileRepository extends ICandidateProfileRepository {
-  _getProfileAggregationPipeline(userId) {
-    return [
+  _getProfileAggregationPipeline(userIds) {
+
+
+    const matchCondition = Array.isArray(userIds)
+    ? {userId : { $in: userIds.map(id => new mongoose.Types.ObjectId(id))}}
+    : { userId: new mongoose.Types.ObjectId(userIds) };
+
+    const pipeline = [
       // 1. Find the candidate profile by userId
       {
-        $match: { userId: new mongoose.Types.ObjectId(userId) },
+        $match: matchCondition,
       },
 
       // 2. Populate basic user info
@@ -63,11 +69,27 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
           linkedinUrl: 1,
           githubUrl: 1,
           portfolioUrl: 1,
+          leetcodeUrl:1,
           highestEducation: 1,
           resumeFile: 1,
           resumeScore: 1,
           createdAt: 1,
           updatedAt: 1,
+
+           contactInfo: {
+              phone: { $ifNull: ["$contactInfo.phone", "$user.phoneNumber", ""] },
+              address: { $ifNull: ["$contactInfo.address", "$user.address", ""] }
+            },
+
+
+          socialLinks:{
+            linkedin :{  $ifNull: ["$linkedinUrl", ""] },
+            github :{ $ifNull: ["$githubUrl", ""] },
+            portfolio :{ $ifNull: ["$portfolioUrl", ""] },
+            twitter: { $ifNull: ["$twitterUrl", ""] },
+           
+
+          },
 
           // User info
           user: {
@@ -75,6 +97,8 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
             firstName: "$user.firstName",
             lastName: "$user.lastName",
             email: "$user.email",
+            phoneNumber: "$user.phoneNumber",
+              address: "$user.address",
             // add avatar, role, etc. if needed
           },
 
@@ -110,9 +134,14 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
         },
       },
 
-      { $limit: 1 },
+      
     ];
+
+    if( !Array.isArray(userIds)){
+      pipeline.push({ $limit: 1 }) // We only want one profile if userIds is a single ID
   }
+    return pipeline;
+}
 
   async createProfile(profileData) {
     try {
@@ -139,7 +168,7 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
       return await CandidateProfile.findByIdAndUpdate(
         id,
         { $set: profileData },
-        { new: true }
+        { new: true, runValidators: true, context: "query" }
       );
     } catch (error) {
       throw new AppError(`Failed to update profile: ${error.message}`, 500);
@@ -240,7 +269,7 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
       );
     }
   }
-  async getCandidatebyId(Id){
+  async getCandidateById(Id){
     if(!Id) throw new AppError("Candidate Id not found",404)
 
     const candidate = await CandidateProfile.findById(Id);

@@ -6,8 +6,7 @@ const authService = new AuthService();
 
 export const authenticateJWT = async (req, res, next) => {
   try {
-    const token =
-      req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+    const token = req.cookies?.token;
     if (!token) {
       throw new AppError("Access denied. No token provided.", 401);
     }
@@ -20,7 +19,6 @@ export const authenticateJWT = async (req, res, next) => {
     }
 
     const decoded = authService.verifyToken(token);
-    console.log(decoded);
     if (!decoded.isVerified || decoded.isVerified === false) {
       throw new AppError("User is not verified", 401);
     }
@@ -38,4 +36,11 @@ export const authenticateJWT = async (req, res, next) => {
     console.log(error);
     next(new AppError(error || "Invalid or expired token.", 401));
   }
+
+
 };
+
+
+
+
+export default authenticateJWT;

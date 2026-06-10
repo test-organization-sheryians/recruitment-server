@@ -18,6 +18,9 @@ class IScheduleInterview {
     async deleteInterview(id){
         throw new Error('Method not implemented');
     }
+    async rescheduleInterview(id, data){
+        throw new Error('Method not implemented');
+    }
 }
 
 export default IScheduleInterview;

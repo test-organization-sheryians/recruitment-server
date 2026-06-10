@@ -61,9 +61,32 @@ class MongoUserRepository extends IUserRepository {
   }
 
   // New method from dev branch: Get all users with role info
-  async findAllUsers(page = 1, limit = 10) {
+  async findAllUsers(page = 1, limit = 10, search = "") {
     try {
       const pipeline = [
+        // 🔍 SEARCH FILTER (must be first)
+        ...(search
+          ? [
+            {
+              $match: {
+                $or: [
+                  { firstName: { $regex: search, $options: "i" } },
+                  { lastName: { $regex: search, $options: "i" } },
+                  {
+                    $expr: {
+                      $regexMatch: {
+                        input: { $concat: ["$firstName", " ", "$lastName"] },
+                        regex: search,
+                        options: "i",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ]
+          : []),
+        // ROLE LOOKUP
         {
           $lookup: {
             from: "roles",
@@ -78,6 +101,7 @@ class MongoUserRepository extends IUserRepository {
             preserveNullAndEmptyArrays: true,
           },
         },
+        // PROJECT FIELDS
         {
           $project: {
             _id: 1,
@@ -94,13 +118,15 @@ class MongoUserRepository extends IUserRepository {
             },
           },
         },
-        { $sort: { createdAt: -1 } }
+        // 🔃 SORT
+        { $sort: { createdAt: -1 } },
       ];
       return await paginateAggregation(User, pipeline, { page, limit });
     } catch (error) {
       throw new AppError("Failed to fetch all users with roles", 500, error);
     }
   }
+
 
   // Improved findUserById (combining best from both branches)
   async findUserById(id) {
@@ -267,7 +293,7 @@ class MongoUserRepository extends IUserRepository {
       return User.findOne({
         resetPasswordToken: token,
         resetPasswordExpires: { $gt: new Date() },
-      })
+      }).select("+password") // ✅ IMPORTANT
     } catch (error) {
       console.error("Error finding reset token:", error)
       throw new AppError("Failed to finding reset token", 500, error)
@@ -288,6 +314,30 @@ class MongoUserRepository extends IUserRepository {
       throw new AppError("Failed to clear reset token", 500, error)
     }
   }
+
+  async findUsersByIds(userIds) {
+  try {
+    return await User.aggregate([
+      {
+        $match: {
+          _id: {
+            $in: userIds.map((id) => new mongoose.Types.ObjectId(id)),
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          email: 1,
+          firstName: 1,
+        },
+      },
+    ]);
+  } catch (error) {
+    console.error("Error finding users by IDs:", error);
+    throw new AppError("Failed to fetch users", 500, error);
+  }
+}
 }
 
 export default MongoUserRepository;

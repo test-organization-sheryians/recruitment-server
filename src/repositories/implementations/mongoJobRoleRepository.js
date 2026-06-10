@@ -146,6 +146,14 @@ class MongoJobRoleRepository extends IJobRoleRepository {
           }
         },
         {
+            $lookup: {
+              from: "jobapplicationquestions",
+              localField: "_id",  
+              foreignField: "jobId",
+              as: "questions"
+            }
+        }, 
+        {
           $addFields: {
              applicantsCount: { $size: "$applications" },
             applied: {
@@ -218,18 +226,42 @@ class MongoJobRoleRepository extends IJobRoleRepository {
 
   async updateJobRole(id, jobRoleData) {
     try {
-      return await JobRole.findByIdAndUpdate(id, jobRoleData, {
-        new: true,
-        runValidators: true
-      });
+      const updatedJobRole = await JobRole.findByIdAndUpdate(
+        id,
+        jobRoleData,
+        { new: true, runValidators: true }
+      ).populate([
+        {
+          path: "category",
+          select: "name"
+        },
+        {
+          path: "skills",
+          select: "name"
+        },
+        {
+          path: "createdBy",
+          select: "name email"
+        },
+        {
+          path: "clientId",
+          select: "name email company"
+        }
+      ]);
+
+      if (!updatedJobRole) {
+        throw new AppError("Job role not found", 404);
+      }
+
+      return updatedJobRole;
     } catch (error) {
       if (error.code === 11000) {
         throw new AppError("Job role with this title already exists for this client", 409);
       }
-      throw new AppError("Failed to update job role", 500);
+      throw error instanceof AppError ? error : new AppError("Failed to update job role", 500);
     }
   }
-
+  
   async deleteJobRole(id) {
     try {
       return await JobRole.findByIdAndDelete(id);
@@ -269,93 +301,226 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     }
   }
 
-  async findJobRolesByCategory(categoryId,page,limit,userId) {
-    try {
-      const pipeline = [
-        { $match: { category: new mongoose.Types.ObjectId(categoryId) } },
-        {
-        $lookup: {
-          from: "jobapplications",
-          localField: "_id",
-          foreignField: "jobId",
-          as: "applications"
-        }
-      },
+async findJobRolesByCategory(categoryId, page, limit, userId) {
+  const now = new Date();
 
-      {
-        $addFields: {
-          applied: {
-            $cond: {
-              if: userId
-                ? {
-                    $in: [
-                      new mongoose.Types.ObjectId(userId),
-                      "$applications.candidateId"
-                    ]
-                  }
-                : false,
-              then: true,
-              else: false
-            }
-          }
-        }
+  const pipeline = [
+    {
+      $match: {
+        category: new mongoose.Types.ObjectId(categoryId),
+        $or: [
+          { expiry: { $exists: false } },
+          { expiry: { $gte: now } },
+        ],
       },
-        {
-          $lookup: {
-            from: "users",
-            localField: "clientId",
-            foreignField: "_id",
-            as: "client",
-            pipeline: [{ $project: { name: 1, email: 1, company: 1 } }]
-          }
-        },
-        {
-          $lookup: {
-            from: "skills",
-            localField: "skills",
-            foreignField: "_id",
-            as: "skills"
-          }
-        },{
-        $project: {
-          applications: 0
-        }
+    },
+    {
+      $lookup: {
+        from: "jobapplications",
+        localField: "_id",
+        foreignField: "jobId",
+        as: "applications",
       },
-        {
-          $unwind: { path: "$client", preserveNullAndEmptyArrays: true }
+    },
+    {
+      $addFields: {
+        applied: {
+          $cond: {
+            if: userId
+              ? {
+                  $in: [
+                    new mongoose.Types.ObjectId(userId),
+                    "$applications.candidateId",
+                  ],
+                }
+              : false,
+            then: true,
+            else: false,
+          },
         },
-        { $sort: { createdAt: -1 } }
-      ];
-      return await paginateAggregation(JobRole, pipeline, { page, limit });
-    } catch (error) {
-      throw new AppError("Failed to fetch category job roles", 500);
-    }
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "clientId",
+        foreignField: "_id",
+        as: "client",
+        pipeline: [{ $project: { name: 1, email: 1, company: 1 } }],
+      },
+    },
+    {
+      $lookup: {
+        from: "skills",
+        localField: "skills",
+        foreignField: "_id",
+        as: "skills",
+      },
+    },
+    {
+      $project: {
+        applications: 0,
+      },
+    },
+    { $unwind: { path: "$client", preserveNullAndEmptyArrays: true } },
+    { $sort: { createdAt: -1 } },
+  ];
+
+  return await paginateAggregation(JobRole, pipeline, { page, limit });
+}
+
+
+
+async findJobRolesBySearch(
+  {
+  q,
+  location,
+  jobType,
+  requiredExperience,
+  minSalary,
+  maxSalary,
+  category,
+  page,
+  limit,
+  userId
   }
+) 
+{
 
-
-
-async findJobRolesBySearch(q, location, page, limit, userId) {
+  console.log({
+  q,
+  location,
+  jobType,
+  requiredExperience,
+  minSalary,
+  maxSalary,
+  category,
+  page,
+  limit,
+});
 
   try {
+    console.log("EXPERIENCE FILTER:", requiredExperience);
     const pipeline = [];
-    const matchStage = {};
+    const now = new Date();
+    const matchStage = { $and: [] };
 
+
+
+    // Active jobs
+    matchStage.$and.push({
+      $or: [
+        { expiry: { $exists: false } },
+        { expiry: { $gte: now } },
+      ],
+    });
+
+    // Keyword
     if (q) {
-      matchStage.title = { $regex: q, $options: "i" };
+      matchStage.$and.push({
+        title: { $regex: q, $options: "i" },
+      });
     }
 
+    // Location
     if (location) {
-      matchStage.$or = [
-        { "location.city": { $regex: location, $options: "i" } },
-        { "location.state": { $regex: location, $options: "i" } },
-        { "location.country": { $regex: location, $options: "i" } },
-      ];
+      matchStage.$and.push({
+        $or: [
+          { "location.city": { $regex: location, $options: "i" } },
+          { "location.state": { $regex: location, $options: "i" } },
+          { "location.country": { $regex: location, $options: "i" } },
+        ],
+      });
     }
 
-    if (Object.keys(matchStage).length > 0) {
-      pipeline.push({ $match: matchStage });
+    // Job type
+    if (jobType && jobType.length > 0) {
+      const jobTypeArray = Array.isArray(jobType)
+        ? jobType
+        : jobType.split(",");
+
+      const filteredJobType = jobTypeArray
+        .map(j => j.toLowerCase().replace("-", "").trim())
+        .filter(Boolean);
+
+      if (filteredJobType.length > 0) {
+        matchStage.$and.push({
+          $expr: {
+            $in: [
+              {
+                $replaceAll: {
+                  input: { $toLower: "$jobType" },
+                  find: "-",
+                  replacement: ""
+                }
+              },
+              filteredJobType
+            ]
+          }
+        });
+      }
     }
 
+    // Experience
+// Experience (STRICT matching)
+// Experience
+if (Array.isArray(requiredExperience) && requiredExperience.length > 0) {
+  console.log("EXPERIENCE FILTER:", requiredExperience);
+
+  const ranges = [];
+
+  requiredExperience.forEach((exp) => {
+    switch (exp) {
+      case "Entry":
+        ranges.push({ requiredExperience: { $lte: 1 } });
+        break;
+
+      case "Mid":
+        ranges.push({ requiredExperience: { $gte: 2, $lte: 4 } });
+        break;
+
+      case "Senior":
+        ranges.push({ requiredExperience: { $gte: 5 } });
+        break;
+    }
+  });
+
+  if (ranges.length > 0) {
+    matchStage.$and.push({ $or: ranges });
+  }
+}
+
+
+    // Salary
+   // Salary (FIXED)
+// ✅ Salary filter (0–99 lakh)
+if (typeof minSalary === "number" && typeof maxSalary === "number") {
+  const upperLimit =
+    maxSalary === 99 ? Number.MAX_SAFE_INTEGER : maxSalary;
+
+ matchStage.$and.push({
+  salary: { $exists: true },
+  "salary.min": { $gte: minSalary },
+  "salary.max": {
+    $lte: maxSalary === 99 ? Number.MAX_SAFE_INTEGER : maxSalary,
+  },
+});
+
+}
+
+// Category
+if (category) {
+  matchStage.$and.push({
+    category: new mongoose.Types.ObjectId(category),
+  });
+}
+
+
+
+
+    pipeline.push({ $match: matchStage });
+
+    // Applications
     pipeline.push(
       {
         $lookup: {
@@ -382,46 +547,75 @@ async findJobRolesBySearch(q, location, page, limit, userId) {
             },
           },
         },
-      },
-      {
-        $project: {
-          applications: 0,
-        },
       }
     );
 
-    // Lookups
+    // Client
     pipeline.push(
       {
         $lookup: {
-          from: "skills",
-          localField: "skills",
+          from: "users",
+          localField: "clientId",
           foreignField: "_id",
-          as: "skills",
+          as: "client",
+          pipeline: [{ $project: { company: 1, name: 1, email: 1 } }],
         },
       },
-      {
-        $lookup: {
-          from: "categories",
-          localField: "category",
-          foreignField: "_id",
-          as: "category",
-        },
-      },
-      {
-        $unwind: {
-          path: "$category",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      { $sort: { createdAt: -1 } }
+      { $unwind: { path: "$client", preserveNullAndEmptyArrays: true } }
     );
+
+    // Category (MUST be before project)
+    pipeline.push({
+      $lookup: {
+        from: "jobcategories",
+        localField: "category",
+        foreignField: "_id",
+        as: "category",
+      },
+    });
+
+    // Skills
+    pipeline.push({
+      $lookup: {
+        from: "skills",
+        localField: "skills",
+        foreignField: "_id",
+        as: "skills",
+      },
+    });
+
+    // Final projection
+    pipeline.push({
+      $project: {
+        _id: 1,
+        title: 1,
+        description: 1,
+        jobType: 1,
+        requiredExperience: 1,
+        location: 1,
+        salary: 1,
+        skills: 1,
+        category: 1,
+        createdBy: 1,
+        client: 1,
+        expiry: 1,
+        createdAt: 1,
+        applied: 1,
+      },
+    });
+
+    pipeline.push({ $sort: { createdAt: -1 } });
+
+    console.log("JOB SEARCH MATCH STAGE ↓");
+    console.log(JSON.stringify(matchStage, null, 2));
 
     return await paginateAggregation(JobRole, pipeline, { page, limit });
   } catch (error) {
     throw new AppError("Failed to fetch jobs.", 500);
   }
 }
+
+
 
 
 }

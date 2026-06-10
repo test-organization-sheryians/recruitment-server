@@ -62,6 +62,13 @@ router.get(
   jobRoleController.getJobRolesByClient
 );
 
+// Explore by Category → job count
+router.get(
+  "/category/job-count",
+  authenticateJWT,
+  jobRoleController.getJobCountByCategory
+);
+
 router.get(
   "/category/:categoryId",authenticateJWT,
   jobRoleController.getJobRolesByCategory

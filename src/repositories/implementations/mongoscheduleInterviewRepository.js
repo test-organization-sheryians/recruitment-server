@@ -57,6 +57,25 @@ export default class MongoScheduleInterviewRepository {
       throw new AppError("Interview not found", 404);
     }
   }
+  async rescheduleInterview(id, data) {
+  const interview = await ScheduledInterview.findByIdAndUpdate(
+    id,
+    {
+      interviewerEmail: data.interviewerEmail,
+      meetingLink: data.meetingLink,
+      timing: data.timing,
+      status: "Rescheduled",
+    },
+    { new: true }
+  );
+
+  if (!interview) {
+    throw new AppError("Interview not found", 404);
+  }
+
+  return interview;
+}
+
 }
 
 

@@ -44,6 +44,14 @@ export const applyForJobSchema = Joi.object({
         .messages({
             'string.max': 'Message must not exceed 500 characters.'
         }),
+        answers: Joi.array()
+    .items(
+      Joi.object({
+        question: Joi.string().required(),
+        answer: Joi.string().required(),
+      })
+    )
+    .optional(),
 });
 
 // ----------------------------------------------------------------------
