@@ -21,6 +21,8 @@ import testEnrollmentRoutes from "./routes/TestEnrollment.routes.js";
 import testAttemptRoutes from "./routes/testAttempts.routes.js";
 import awsRouter from './routes/aws.route.js'
 import resendMailRoutes from "./routes/resendMail.routes.js";
+import { sendWelcomeEmail } from "./services/sendMail.js";
+import projectRoutes from "./routes/project.routes.js";
 import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
 import blogPostRoutes from "./routes/blogPost.routes.js";
 import savedJobRoutes from "./routes/savedJob.routes.js";
@@ -28,6 +30,7 @@ import passwordRoutes from "./routes/password.routes.js";
 import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
 
+import ViolationRoutes from "./routes/testViolation.routes.js";
 import adminProfileRoutes from "./routes/adminProfile.routes.js";
 
 import ViolationRoutes  from "./routes/testViolation.routes.js";
@@ -54,8 +57,10 @@ app.use("/api/enrollments", testEnrollmentRoutes);
 app.use("/api/test-attempts", testAttemptRoutes);
 app.use('/api/candidate-profile', candidateProfileRoutes);
 app.use("/api/admin-profile", adminProfileRoutes);
-app.use('/api/aws' , awsRouter)
+app.use('/api/aws', awsRouter)
 app.use("/api/auth", resendMailRoutes);
+app.use("/api/projects", projectRoutes);
+// await sendWelcomeEmail({
 // app.use("/api/tests", deleteTestsRoutes);
 app.use("/api/interviews", ScheduleInterviewRoutes);
 //   to: "agr.rbih@gmail.com",
@@ -66,11 +71,11 @@ app.use("/api/interviews", ScheduleInterviewRoutes);
 
 app.use("/api/saved-jobs", savedJobRoutes);
 app.use("/api/password", passwordRoutes);
-app.use("/api/job-questions",jobApplicationQuesition)
+app.use("/api/job-questions", jobApplicationQuesition)
 
 app.use('/api/ai/', ViolationRoutes)
 app.use('/api/share', shareCandidate);
-app.use("/api/token",tokenRoutes)
+app.use("/api/token", tokenRoutes)
 
 
 
