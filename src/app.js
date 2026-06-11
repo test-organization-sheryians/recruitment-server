@@ -11,6 +11,7 @@ import errorHandler from "./middlewares/errorHandler.middleware.js";
 import cookieParser from "cookie-parser";
 import jobCategoryRoutes from "./routes/jobCategory.routes.js";
 import expereniceRoutes from "./routes/experience.routes.js";
+import productRoutes from "./routes/product.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
 import { corsOptions } from "./config/corsOptions.js";
 import jobapply from "./routes/jobApplication.routes.js";
@@ -44,6 +45,7 @@ app.use("/api/test-attempts", testAttemptRoutes);
 app.use('/api/candidate-profile', candidateProfileRoutes);
 app.use('/api/aws' , awsRouter)
 app.use("/api/auth", resendMailRoutes);
+app.use("/api/products", productRoutes);
 // await sendWelcomeEmail({
 //   to: "agr.rbih@gmail.com",
 //   name: "Rohan",
