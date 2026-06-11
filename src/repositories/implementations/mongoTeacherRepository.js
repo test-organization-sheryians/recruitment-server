@@ -58,6 +58,14 @@ class MongoTeacherRepository extends IteacherRepository {
             throw new AppError("Failed to delete teacher", 500);
         }
     }
+
+    async getAllTeachers() {
+        try {
+            return await Teacher.find().lean();
+        } catch (error) {
+            throw new AppError("Failed to retrieve teachers", 500);
+        }
+    }
 }
 
 export default MongoTeacherRepository;

@@ -39,6 +39,15 @@ class TeacherController {
             next(error);
         }   
     }
+
+    async getAllTeachers(req, res, next) {
+        try {
+            const teachers = await teacherService.getAllTeachers();
+            res.status(200).json({ success: true, data: teachers });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export default new TeacherController();
