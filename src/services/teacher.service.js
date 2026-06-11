@@ -24,6 +24,10 @@ class TeacherService {
     async deleteTeacher(id) {
         return await this.teacherRepository.deleteTeacher(id);
     }
+
+    async getAllTeachers() {
+        return await this.teacherRepository.getAllTeachers();
+    }
 }
 
 export default TeacherService;
