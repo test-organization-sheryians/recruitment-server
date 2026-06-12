@@ -19,6 +19,11 @@ router.post("/refresh", authController.refreshTokenController);
 router.post("/update" , authController.updateUser) ; 
 router.post("/logout", authController.logout);
 
+router.patch(
+  "/verify-user/:id",
+  authController.verifyUser
+);
+
 router.put(
   "/reset-password",
   authenticateJWT,

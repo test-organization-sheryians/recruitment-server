@@ -363,6 +363,39 @@ class UserService {
 
     return true;
   }
+   
+   async verifyUser(id) {
+  const user = await this.userRepository.findUserById(id);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  if (user.isVerified) {
+    return user;
+  }
+
+  const updatedUser = await this.userRepository.updateUser(id, {
+    isVerified: true,
+  });
+
+  const safeUser = this._getSafeUserPayload(updatedUser);
+
+  await this.cacheRepository.set(
+    `user:id:${id}`,
+    JSON.stringify(safeUser),
+    3600
+  );
+
+  await this.cacheRepository.set(
+    `user:email:${updatedUser.email}`,
+    JSON.stringify(safeUser),
+    3600
+  );
+
+  return safeUser;
+}
+
 
   async findUser (query){ 
      const users =  await this.userRepository.findUser(query); 
@@ -408,8 +441,6 @@ async updateUserRole(userId, newRoleId) {
 
   return safeUser;
 }
-
-
 
 
 }

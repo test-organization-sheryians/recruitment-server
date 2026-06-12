@@ -8,19 +8,28 @@ export const authenticateJWT = async (req, res, next) => {
   try {
     const token =
       req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+
+       console.log("TOKEN =>", token);
+
+
     if (!token) {
       throw new AppError("Access denied. No token provided.", 401);
     }
-    
-    
+
+
     const isBlacklisted = await redisClient.get(`bl_${token}`);
 
     if (isBlacklisted) {
       throw new AppError("Token has been logged out.", 401);
     }
 
+    // const decoded = authService.verifyToken(token);
+    // console.log(decoded);
+
+   
     const decoded = authService.verifyToken(token);
-    console.log(decoded);
+
+    console.log("DECODED =>", decoded);
 
     if (!decoded.isVerified || decoded.isVerified === false) {
       throw new AppError("User is not verified", 401);

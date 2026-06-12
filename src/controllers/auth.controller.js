@@ -138,6 +138,22 @@ class AuthController {
     }
   };
 
+  verifyUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const user = await this.userService.verifyUser(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Email verified successfully",
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
   resetPassword = async (req, res, next) => {
     try {
       const { oldPassword, newPassword } = req.body;

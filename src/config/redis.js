@@ -20,6 +20,9 @@ client.on("connect", () => {
   logger.info("✅ Redis connected successfully");
 });
 
+console.log(process.env.REDIS_HOST);
+console.log(process.env.REDIS_PORT);
+
 export async function connectRedis() {
   try {
     await client.connect();
