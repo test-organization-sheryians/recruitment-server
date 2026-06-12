@@ -27,6 +27,9 @@ import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
+import feedbackRoutes from "./routes/feedback.routes.js";
+import adminProfileRoutes from './routes/adminProfile.routes.js';
+import readerRoutes from './routes/reader.routes.js'
 
 import adminProfileRoutes from "./routes/adminProfile.routes.js";
 
@@ -64,6 +67,7 @@ app.use("/api/interviews", ScheduleInterviewRoutes);
 //   appliedAt: new Date()
 // });
 
+app.use("/api/feedback", feedbackRoutes);
 app.use("/api/saved-jobs", savedJobRoutes);
 app.use("/api/password", passwordRoutes);
 app.use("/api/job-questions",jobApplicationQuesition)
