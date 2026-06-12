@@ -26,6 +26,9 @@ import blogPostRoutes from "./routes/blogPost.routes.js";
 import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
+import adminProfileRoutes from "../src/routes/adminProfile.routes.js"
+import readerRoutes from "../src/routes/reader.routes.js"
+import productRoutes from "../src/routes/product.routes.js"
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
 
 import adminProfileRoutes from "./routes/adminProfile.routes.js";
@@ -56,6 +59,7 @@ app.use('/api/candidate-profile', candidateProfileRoutes);
 app.use("/api/admin-profile", adminProfileRoutes);
 app.use('/api/aws' , awsRouter)
 app.use("/api/auth", resendMailRoutes);
+app.use("/api/product",productRoutes);
 // app.use("/api/tests", deleteTestsRoutes);
 app.use("/api/interviews", ScheduleInterviewRoutes);
 //   to: "agr.rbih@gmail.com",
