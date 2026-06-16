@@ -26,7 +26,10 @@ import blogPostRoutes from "./routes/blogPost.routes.js";
 import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
+import adminProfileRoutes from "./routes/adminProfile.routes.js"
+import readerRoutes from "./routes/reader.routes.js"
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
+import prodRoutes from "../src/routes/prod.routes.js"
 
 import adminProfileRoutes from "./routes/adminProfile.routes.js";
 
@@ -39,6 +42,8 @@ app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
+app.use("/api/prod", prodRoutes)
+
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/roles", roleRoutes);
