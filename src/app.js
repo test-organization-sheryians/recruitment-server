@@ -25,6 +25,9 @@ import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
 import blogPostRoutes from "./routes/blogPost.routes.js";
 import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
+import adminProfileRoutes from "./routes/adminProfile.routes.js";
+import readerRoutes from "./routes/reader.routes.js";
+import productRoutes from "./routes/product.route.js";
 import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
 
@@ -78,6 +81,8 @@ app.use("/api/blogs", blogPostRoutes);
 
 
 app.use("/api/categories", categoryRoutes);
+
+app.use('/api/products', productRoutes)
 
 
 app.use(errorHandler);
