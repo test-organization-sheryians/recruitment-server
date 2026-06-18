@@ -26,6 +26,8 @@ import blogPostRoutes from "./routes/blogPost.routes.js";
 import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
+//myroute of product
+import productRoute from "./routes/product.routes.js"
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
 
 import adminProfileRoutes from "./routes/adminProfile.routes.js";
@@ -79,6 +81,8 @@ app.use("/api/blogs", blogPostRoutes);
 
 app.use("/api/categories", categoryRoutes);
 
+//Product route
+app.use("/api/products",productRoute)
 
 app.use(errorHandler);
 export default app;
