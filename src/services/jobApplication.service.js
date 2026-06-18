@@ -3,6 +3,7 @@ import { AppError } from "../utils/errors.js";
 import MongoApplicationRespository from "../repositories/implementations/mongoJobApplication.js";
 import MongoCandidateProfileRepository from "../repositories/implementations/mongoCandidateProfileRepository.js";
 import MongoJobRoleRepository from "../repositories/implementations/mongoJobRoleRepository.js";
+import ScheduledInterview from "../models/scheduleInterview.model.js";
 import logger from "../utils/logger.js";
 import { emailQueue } from "../queues/emailQueue.js";
 
@@ -165,6 +166,33 @@ class JobApplicationService {
         removeOnComplete: true,
       }
     );
+  }
+
+  // 4️⃣ If status marks interview as completed, cancel scheduled interviews
+  const shouldMarkInterviewCompleted = ["hired", "rejected"].includes(
+    (status || "").toString().toLowerCase()
+  );
+
+  if (shouldMarkInterviewCompleted && Array.isArray(applications) && applications.length > 0) {
+    try {
+      const candidateIds = applications
+        .map((a) => a.candidate?._id)
+        .filter(Boolean);
+      const jobIds = applications.map((a) => a.job?._id).filter(Boolean);
+
+      if (candidateIds.length && jobIds.length) {
+        await ScheduledInterview.updateMany(
+          {
+            candidateId: { $in: candidateIds },
+            jobId: { $in: jobIds },
+            status: "Scheduled",
+          },
+          { $set: { status: "Cancelled" } }
+        );
+      }
+    } catch (err) {
+      logger.warn("Failed to cancel scheduled interviews in bulk update", { error: err.message });
+    }
   }
 
   return updateResult;

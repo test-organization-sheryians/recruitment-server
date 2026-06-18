@@ -64,7 +64,10 @@ export default class MongoScheduleInterviewRepository {
       interviewerEmail: data.interviewerEmail,
       meetingLink: data.meetingLink,
       timing: data.timing,
-      status: "Rescheduled",
+      // Keep status as Scheduled; only mark isRescheduled for UI
+      // Allow caller to pass status explicitly if desired, but default to preserving current status
+      status: data.status || "Scheduled",
+      isRescheduled: data.isRescheduled === undefined ? true : data.isRescheduled,
     },
     { new: true }
   );

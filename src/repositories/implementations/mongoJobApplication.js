@@ -1,4 +1,5 @@
 import jobAppModel from "../../models/jobApplication.model.js";
+import ScheduledInterview from "../../models/scheduleInterview.model.js";
 import { AppError } from "../../utils/errors.js";
 import IJobApplicationRepository from "../contracts/IJobApplicationRepository.js";
 import mongoose from "mongoose";
@@ -82,13 +83,39 @@ class MongoApplicationRespository extends IJobApplicationRepository {
 
   async updateApplicationStatus(applicationId, status) {
     try {
+      // Fetch existing application to get candidateId and jobId
+      const application = await jobAppModel.findById(applicationId).lean();
+      if (!application) throw new AppError("Application not found", 404);
+
+      const shouldMarkInterviewCompleted =
+        ["hired", "rejected"].includes((status || "").toString().toLowerCase());
+
+      const updatePayload = { status };
+      if (shouldMarkInterviewCompleted) updatePayload.interviewCompleted = true;
+
       const updated = await jobAppModel.findByIdAndUpdate(
         applicationId,
-        { status },
+        { $set: updatePayload },
         { new: true, runValidators: true }
       );
 
-      if (!updated) throw new AppError("Application not found", 404);
+      // If candidate was moved to hired/rejected, cancel any scheduled interviews for this candidate+job
+      if (shouldMarkInterviewCompleted) {
+        try {
+          await ScheduledInterview.updateMany(
+            {
+              candidateId: application.candidateId,
+              jobId: application.jobId,
+              status: "Scheduled",
+            },
+            { $set: { status: "Cancelled" } }
+          );
+        } catch (err) {
+          // Log and continue — don't block status update
+          console.error("Failed to cancel scheduled interviews:", err);
+        }
+      }
+
       return updated;
     } catch (error) {
       throw new AppError("Failed to update application status", 500);
@@ -106,10 +133,16 @@ class MongoApplicationRespository extends IJobApplicationRepository {
         }
         return new mongoose.Types.ObjectId(id);
       });
+      const shouldMarkInterviewCompleted = ["hired","rejected"].includes((status||"").toString().toLowerCase());
+
+      const update = shouldMarkInterviewCompleted
+        ? { $set: { status, interviewCompleted: true } }
+        : { $set: { status } };
+
       const result = await jobAppModel.updateMany(
-        {_id:{$in: ObjectIds}, status:{$ne: status}},
-        {$set: {status}},
-        {runValidators: true}
+        { _id: { $in: ObjectIds }, status: { $ne: status } },
+        update,
+        { runValidators: true }
       );
       if(result.matchedCount===0){
         throw new AppError("No application found for given IDs", 404)
@@ -161,9 +194,11 @@ class MongoApplicationRespository extends IJobApplicationRepository {
         $project: {
           _id: 1,
           status: 1,
+          "candidate._id": 1,
           "candidate.firstName": 1,
           "candidate.lastName": 1,
           "candidate.email": 1,
+          "job._id": 1,
           "job.title": 1,
         },
       },
@@ -210,6 +245,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           resumeUrl: 1,
           coverletter: 1,
           status: 1,
+          interviewCompleted: 1,
           createdAt: 1,
           "candidateDetails.firstName": 1,
           "candidateDetails.lastName": 1,
@@ -265,6 +301,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           resumeUrl: 1,
           coverletter: 1,
           status: 1,
+          interviewCompleted: 1,
           createdAt: 1,
           appliedAt: 1,
          // answers: 1,
@@ -309,6 +346,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           _id: 1,               // applicationId
           jobId: "$job._id",    // ✅🔥 MAIN FIX
           status: 1,
+          interviewCompleted: 1,
           createdAt: 1,
           jobTitle: "$job.title",
           location: "$job.location",
