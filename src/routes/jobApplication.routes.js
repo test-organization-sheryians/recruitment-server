@@ -61,4 +61,10 @@ router.get(
 
 router.get("/my-applications", authenticateJWT, jobApplicationController.getCandidateAllApplications);
 
+router.post(
+  "/withdraw",
+  authenticateJWT,
+  jobApplicationController.withdrawApplication
+);
+
 export default router;

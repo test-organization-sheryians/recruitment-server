@@ -139,6 +139,21 @@ class JobApplicationService {
     return { shortlistedApplications };
   }
 
+  async withdrawApplication({ jobId, candidateId }) {
+    const application = await this.jobAppRepo.findByUserAndJob(candidateId, jobId);
+    if (!application) {
+      throw new AppError("No application found for this job", 404);
+    }
+
+    const deletedApplication = await this.jobAppRepo.deleteApplication(candidateId, jobId);
+
+    return {
+      success: true,
+      message: "Application withdrawn successfully!",
+      application: deletedApplication,
+    };
+  }
+
    async bulkUpdateApplicationStatus(applicationIds, status) {
   // 1️⃣ Fetch applicants for mail
   const applications =

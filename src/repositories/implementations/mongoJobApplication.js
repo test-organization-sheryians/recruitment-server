@@ -454,6 +454,24 @@ class MongoApplicationRespository extends IJobApplicationRepository {
       throw new AppError("Failed to count applications by status", 500);
     }
   }
+
+  async deleteApplication(candidateId, jobId) {
+    try {
+      const deletedApplication = await jobAppModel.findOneAndDelete({
+        candidateId: new mongoose.Types.ObjectId(candidateId),
+        jobId: new mongoose.Types.ObjectId(jobId),
+      });
+      
+      if (!deletedApplication) {
+        throw new AppError("Application not found", 404);
+      }
+      
+      return deletedApplication;
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError("Failed to delete application", 500);
+    }
+  }
 }
 
 export default MongoApplicationRespository;

@@ -123,6 +123,17 @@ class JobApplicationController {
             data: result,
         });
     });
+
+    withdrawApplication = asyncHandler(async (req, res) => {
+        const { jobId } = req.body;
+        const candidateId = req.userId;
+
+        const response = await jobApplicationService.withdrawApplication({
+            jobId,
+            candidateId,
+        });
+        res.status(200).json(response);
+    });
 }
 
 export default new JobApplicationController();
