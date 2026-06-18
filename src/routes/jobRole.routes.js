@@ -8,12 +8,20 @@ import {
   updateJobRoleValidator,
   filterJobRolesValidator
 } from "../middlewares/validators/jobRole.validator.js";
+import jobSearchController from "../controllers/jobSearch.controller.js";
+import locationSearchController from "../controllers/locationSearch.controller.js";
 
 const router = express.Router();
 
 
 // job search 
-router.get("/search",authenticateJWT,jobRoleController.searchJobsJobRoles)
+router.get("/search",authenticateJWT,jobRoleController.searchJobsJobRoles);
+
+// Typeahead title suggestions (new) — public, no auth needed
+router.get("/suggestions", jobSearchController.search);
+
+// Location typeahead suggestions (public, no auth)
+router.get("/location-suggestions", locationSearchController.search);
 
 
 
@@ -83,5 +91,7 @@ router.get(
   "/status/expired",
   jobRoleController.getExpiredJobRoles
 ); // it won't work , as response is not what we expect  ,there is some missing error handling case/edge cases to handle , while fetching expired roles
+
+
 
 export default router;
