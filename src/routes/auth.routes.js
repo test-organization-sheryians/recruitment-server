@@ -6,24 +6,25 @@ import {
   resetPasswordValidator,
 } from "../middlewares/validators/auth.validator.js";
 import { authenticateJWT } from "../middlewares/auth.middleware.js";
+import { verifyRefreshToken } from "../middlewares/refreshToken.middleware.js";
 
 const router = express.Router();
 
-router.post("/register",
-   registerValidator, 
-   authController.register);
-router.post("/login",
-   loginValidator, 
-   authController.login);
-router.post("/refresh", authController.refreshTokenController);
-router.post("/update" , authController.updateUser) ; 
+router.post("/register", registerValidator, authController.register);
+router.post("/login", loginValidator, authController.login);
+router.post(
+  "/refresh",
+  verifyRefreshToken,
+  authController.refreshTokenController,
+);
+router.post("/update", authController.updateUser);
 router.post("/logout", authController.logout);
 
 router.put(
   "/reset-password",
   authenticateJWT,
   resetPasswordValidator,
-  authController.resetPassword
+  authController.resetPassword,
 );
 
 export default router;

@@ -17,50 +17,46 @@ class UserController {
   }
 
   async getMe(req, res, next) {
-  try {
-    const userId = req.userId;
+    try {
+      const userId = req.userId;
 
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+      }
+
+      const user = await this.userService.getUser(userId);
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      console.log("User role in getMe:", user.role);
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          id: user.id || user._id,
+          email: user.email,
+
+          // 🔥 FIX: safe role handling
+          role: user.role?.name || null,
+
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phoneNumber: user.phoneNumber,
+        },
       });
+    } catch (err) {
+      console.log("GET ME ERROR:", err);
+      next(err);
     }
-
-    const user = await this.userService.getUser(userId);
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        id: user.id || user._id,
-        email: user.email,
-
-        // 🔥 FIX: safe role handling
-        role: user.role
-          ? {
-              _id: user.role._id,
-              name: user.role.name,
-              description: user.role.description,
-            }
-          : null,
-
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phoneNumber: user.phoneNumber,
-      },
-    });
-  } catch (err) {
-    console.log("GET ME ERROR:", err);
-    next(err);
   }
-}
 
   async updateMe(req, res, next) {
     try {
@@ -72,7 +68,7 @@ class UserController {
         data: {
           id: updated.id || updated._id,
           email: updated.email,
-          role: updated.role,
+          role: updated.role?.name,
           firstName: updated.firstName || updated.name?.firstName,
           lastName: updated.lastName || updated.name?.lastName,
           phoneNumber: updated.phoneNumber,
@@ -113,8 +109,8 @@ class UserController {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
-       const search = req.query.search || ""; // search by name
-      const result = await this.userService.getAllUsers(page, limit,search);
+      const search = req.query.search || ""; // search by name
+      const result = await this.userService.getAllUsers(page, limit, search);
 
       return res.status(200).json({
         success: true,
@@ -160,7 +156,7 @@ class UserController {
       if (!roleId) {
         return res.status(400).json({
           success: false,
-          message: "Role is required"
+          message: "Role is required",
         });
       }
 
@@ -169,7 +165,7 @@ class UserController {
       if (!updatedUser) {
         return res.status(404).json({
           success: false,
-          message: "User not found"
+          message: "User not found",
         });
       }
 
@@ -196,40 +192,37 @@ class UserController {
   }
 
   async blastUsers(req, res, next) {
-  try {
-    const { userIds, subject, message } = req.body;
+    try {
+      const { userIds, subject, message } = req.body;
 
-    if (!userIds || userIds.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "No users selected",
+      if (!userIds || userIds.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "No users selected",
+        });
+      }
+
+      if (!subject || !message) {
+        return res.status(400).json({
+          success: false,
+          message: "Subject and message are required",
+        });
+      }
+
+      const result = await this.userService.blastUsers({
+        userIds,
+        subject,
+        message,
       });
-    }
 
-    if (!subject || !message) {
-      return res.status(400).json({
-        success: false,
-        message: "Subject and message are required",
+      return res.status(200).json({
+        success: true,
+        message: result.message,
       });
+    } catch (error) {
+      next(error);
     }
-
-    const result = await this.userService.blastUsers({
-      userIds,
-      subject,
-      message,
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: result.message,
-    });
-  } catch (error) {
-    next(error);
   }
 }
-
-}
-
-
 
 export default new UserController();

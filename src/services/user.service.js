@@ -233,18 +233,29 @@ class UserService {
   }
 
   async refresh(refreshToken) {
-    if (!refreshToken) throw new AppError("Unauthorized", 401);
+    if (!refreshToken) {
+      throw new AppError("Refresh token is missing. Please login again.", 401);
+    }
 
     let payload;
     try {
       payload = jwt.verify(refreshToken, REFRESH_SECRET);
     } catch (err) {
-      throw new AppError("Invalid refresh token", 401);
+      if (err.name === "TokenExpiredError") {
+        throw new AppError(
+          "Refresh token has expired. Please login again.",
+          401,
+        );
+      }
+      throw new AppError("Invalid refresh token. Please login again.", 401);
     }
 
     const stored = await this.cacheRepository.get(`refresh:${payload.id}`);
     if (!stored || stored !== refreshToken) {
-      throw new AppError("Invalid refresh token", 401);
+      throw new AppError(
+        "Refresh token is invalid or has been revoked. Please login again.",
+        401,
+      );
     }
 
     const user = await this.userRepository.findUserById(payload.id);
@@ -410,62 +421,60 @@ class UserService {
     return safeUser;
   }
 
-
   //bast
   async blastUsers({ userIds, subject, message }) {
-  if (!userIds || userIds.length === 0) {
-    throw new AppError("No users selected", 400);
-  }
+    if (!userIds || userIds.length === 0) {
+      throw new AppError("No users selected", 400);
+    }
 
-  // 1️⃣ Fetch users from DB
-  const users = await this.userRepository.findUsersByIds(userIds);
+    // 1️⃣ Fetch users from DB
+    const users = await this.userRepository.findUsersByIds(userIds);
 
-  if (!users || users.length === 0) {
-    throw new AppError("No users found", 404);
-  }
+    if (!users || users.length === 0) {
+      throw new AppError("No users found", 404);
+    }
 
-  let successCount = 0;
+    let successCount = 0;
 
-  // 2️⃣ Queue emails (SAME as register 🔥)
-  try {
-    await Promise.all(
-      users.map(async (user) => {
-        if (!user.email) return;
+    // 2️⃣ Queue emails (SAME as register 🔥)
+    try {
+      await Promise.all(
+        users.map(async (user) => {
+          if (!user.email) return;
 
-        await emailQueue.add(
-          "blast-mail",
-          {
-            email: user.email,
-            name: user.firstName,
-            subject,
-            message,
-          },
-          {
-            attempts: 3,
-            backoff: {
-              type: "exponential",
-              delay: 5000,
+          await emailQueue.add(
+            "blast-mail",
+            {
+              email: user.email,
+              name: user.firstName,
+              subject,
+              message,
             },
-            removeOnComplete: true,
-            removeOnFail: false,
-          }
-        );
+            {
+              attempts: 3,
+              backoff: {
+                type: "exponential",
+                delay: 5000,
+              },
+              removeOnComplete: true,
+              removeOnFail: false,
+            },
+          );
 
-        successCount++;
-      })
-    );
+          successCount++;
+        }),
+      );
 
-    logger.info(`Blast queued for ${successCount} users`);
+      logger.info(`Blast queued for ${successCount} users`);
 
-    return {
-      message: `Blast queued for ${successCount} users.`,
-    };
-  } catch (error) {
-    logger.error("Blast queue failed", error);
-    throw new AppError("Failed to queue blast emails", 500);
+      return {
+        message: `Blast queued for ${successCount} users.`,
+      };
+    } catch (error) {
+      logger.error("Blast queue failed", error);
+      throw new AppError("Failed to queue blast emails", 500);
+    }
   }
-}
-
 }
 
 export default UserService;
