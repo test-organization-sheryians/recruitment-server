@@ -30,6 +30,14 @@ router.patch(
   bulkUpdateJobStatus,
   jobApplicationController.bulkUpdateApplicationStatus
 )
+// Backwards-compatible fallback: accept POST for bulk-update as some clients may still POST
+router.post(
+  "/bulk-update",
+  authenticateJWT,
+  authorize("admin"),
+  bulkUpdateJobStatus,
+  jobApplicationController.bulkUpdateApplicationStatus
+)
 
 router.patch(
   "/:status",

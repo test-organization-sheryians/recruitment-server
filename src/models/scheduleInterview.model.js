@@ -36,6 +36,11 @@ const scheduleSchema = new mongoose.Schema(
         enum: ["Scheduled", "Rescheduled", "Cancelled" ],
         default: "Scheduled"
     }
+    ,
+    isRescheduled: {
+      type: Boolean,
+      default: false,
+    }
 } , {
          timestamps: true
 }

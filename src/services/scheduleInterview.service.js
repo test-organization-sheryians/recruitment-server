@@ -223,7 +223,9 @@ async rescheduleInterview(interviewId, data) {
       interviewerEmail: data.interviewerEmail,
       meetingLink: data.meetingLink,
       timing: data.timing,
-      status: "Rescheduled",
+      // keep interview status as Scheduled; add isRescheduled flag for UI only
+      status: data.status || "Scheduled",
+      isRescheduled: true,
     }
   );
 }

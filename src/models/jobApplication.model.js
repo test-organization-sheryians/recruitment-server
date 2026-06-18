@@ -45,6 +45,10 @@ const jobApplicationSchema = new mongoose.Schema(
       ],
       default: "applied",
     },
+    interviewCompleted: {
+      type: Boolean,
+      default: false,
+    },
     appliedAt: {
       type: Date,
       default: Date.now,
