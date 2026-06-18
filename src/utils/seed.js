@@ -1,4 +1,8 @@
 // src/utils/seed.js
+import dns from "dns";
+dns.setServers(["8.8.8.8" ,"8.8.4.4"]);
+dns.setDefaultResultOrder("ipv4first");
+
 import mongoose from "mongoose";
 import Role from "../models/role.model.js";
 import Permission from "../models/permission.model.js";
@@ -66,21 +70,24 @@ export const seedDatabase = async () => {
         password: await bcrypt.hash("admin123", 10),
         firstName: "Admin",
         lastName: "User",
-        roleId: roleMap.admin
+        roleId: roleMap.admin,
+        isVerified: true
       },
       {
         email: "client@example.com",
         password: await bcrypt.hash("client123", 10),
         firstName: "Client",
         lastName: "User",
-        roleId: roleMap.client
+        roleId: roleMap.client,
+        isVerified: true
       },
       {
         email: "candidate@example.com",
         password: await bcrypt.hash("candidate123", 10),
         firstName: "Candidate",
         lastName: "User",
-        roleId: roleMap.candidate
+        roleId: roleMap.candidate,
+        isVerified: true
       }
     ];
 

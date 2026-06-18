@@ -34,6 +34,9 @@ import ViolationRoutes  from "./routes/testViolation.routes.js";
 import shareCandidate from "./routes/shareCandidate.routes.js";
 import tokenRoutes from "./routes/token.route.js"
 import categoryRoutes from "./routes/category.routes.js";
+import adminProfileRoutes from "./routes/adminProfile.routes.js";
+import readerRoutes from "./routes/reader.routes.js";
+import jobPostRoutes from "./routes/jobPost.routes.js";
 const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
@@ -78,6 +81,7 @@ app.use("/api/blogs", blogPostRoutes);
 
 
 app.use("/api/categories", categoryRoutes);
+app.use("/api/job-posts", jobPostRoutes);
 
 
 app.use(errorHandler);
